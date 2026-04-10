@@ -370,3 +370,9 @@ function showNotif(icon,title,msg){
 }
 
 renderHomeFeatured();
+window.showPage = showPage;
+window.addToCart = addToCart;
+window.quickAddToCart = quickAddToCart;
+window.updateQty = updateQty;
+window.removeFromCart = removeFromCart;
+window.submitOrder = submitOrder;
