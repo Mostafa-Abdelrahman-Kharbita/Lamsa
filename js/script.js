@@ -107,19 +107,29 @@ function showPage(name) {
       return;
     }
   }
+
   document
     .querySelectorAll(".page")
     .forEach((p) => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
+
   document
     .querySelectorAll(".nav-links a")
     .forEach((a) => a.classList.remove("active-link"));
+
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
+
   window.scrollTo({ top: 0, behavior: "smooth" });
+
   if (name === "catalog") loadProductsFromFirebase();
   if (name === "order") populateProductDropdown();
-  if (name === "admin") renderAdmin();
+
+  if (name === "admin") {
+    loadProductsFromFirebase(); // 👈 الحل هنا
+    renderAdmin();
+  }
+
   if (name === "home") renderHomeFeatured();
 }
 
