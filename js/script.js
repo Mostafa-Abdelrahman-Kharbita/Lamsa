@@ -377,17 +377,34 @@ function showNotif(icon,title,msg){
 }
 
 renderHomeFeatured();
+// ===== MAKE EVERYTHING GLOBAL =====
 window.showPage = showPage;
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+
+window.loadProductsFromFirebase = loadProductsFromFirebase;
+window.renderCatalog = renderCatalog;
+window.renderHomeFeatured = renderHomeFeatured;
+
+window.filterProducts = filterProducts;
+
 window.addToCart = addToCart;
 window.quickAddToCart = quickAddToCart;
 window.updateQty = updateQty;
 window.removeFromCart = removeFromCart;
+
 window.submitOrder = submitOrder;
-window.doLogin = doLogin;
-window.doLogout = doLogout;
-window.filterProducts = filterProducts;
+window.populateProductDropdown = populateProductDropdown;
+
 window.showAdminSection = showAdminSection;
+window.renderAdmin = renderAdmin;
+
 window.updateOrderStatus = updateOrderStatus;
 window.viewDetail = viewDetail;
+
 window.saveProduct = saveProduct;
 window.removeCustomProduct = removeCustomProduct;
+
+window.handleFileUpload = handleFileUpload;
+
+window.showNotif = showNotif;
