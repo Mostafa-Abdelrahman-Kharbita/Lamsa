@@ -1,14 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const PRODUCTS = [
-  {id:1,name:'ثريا أورورا الكريستالية',cat:'chandelier',price:85000,oldPrice:null,badge:'الأكثر مبيعاً',emoji:'🔆',material:'كريستال بوهيمي ونحاس',dims:'عرض ١٢٠ × ارتفاع ٩٠ سم'},
-  {id:2,name:'مجموعة معلقات سيروكو',cat:'pendant',price:24500,oldPrice:29000,badge:'خصم',emoji:'💡',material:'زجاج مدخن وستيل',dims:'عرض ٦٠ × ارتفاع ٤٠ سم'},
-  {id:3,name:'إضاءة جدار ميريديان',cat:'wall',price:8900,oldPrice:null,badge:null,emoji:'🕯️',material:'برونز مكفأ',dims:'عرض ٢٢ × ارتفاع ٣٥ سم'},
-  {id:4,name:'تورشير أطلس',cat:'floor',price:18500,oldPrice:null,badge:'جديد',emoji:'🪔',material:'رخام وذهبي مطفي',dims:'ارتفاع ١٧٥ سم'},
-  {id:5,name:'فانوس صحراء',cat:'outdoor',price:12000,oldPrice:null,badge:null,emoji:'🏮',material:'حديد مطاوع وزجاج',dims:'ارتفاع ٥٥ سم'},
-  {id:6,name:'مصباح طاولة سيليست',cat:'table',price:6500,oldPrice:7800,badge:'خصم',emoji:'🌟',material:'بورسلان ونحاس عتيق',dims:'عرض ٢٨ × ارتفاع ٤٢ سم'},
-  {id:7,name:'معلقة نيبيولا الخطية',cat:'pendant',price:32000,oldPrice:null,badge:'جديد',emoji:'✨',material:'نيكل مصقول وكريستال',dims:'طول ١٨٠ × ارتفاع ٢٠ سم'},
-  {id:8,name:'ثريا الواحة',cat:'chandelier',price:145000,oldPrice:null,badge:null,emoji:'⭐',material:'نحاس مطلي ذهب عيار ٢٤',dims:'عرض ٢٠٠ × ارتفاع ١٥٠ سم'},
-];
+const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "lamsa-18d05.firebaseapp.com",
+  projectId: "lamsa-18d05",
+  storageBucket: "lamsa-18d05.firebasestorage.app",
+  messagingSenderId: "586887849221",
+  appId: "1:5868..."
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+// const PRODUCTS = [
+//   {id:1,name:'ثريا أورورا الكريستالية',cat:'chandelier',price:85000,oldPrice:null,badge:'الأكثر مبيعاً',emoji:'🔆',material:'كريستال بوهيمي ونحاس',dims:'عرض ١٢٠ × ارتفاع ٩٠ سم'},
+//   {id:2,name:'مجموعة معلقات سيروكو',cat:'pendant',price:24500,oldPrice:29000,badge:'خصم',emoji:'💡',material:'زجاج مدخن وستيل',dims:'عرض ٦٠ × ارتفاع ٤٠ سم'},
+//   {id:3,name:'إضاءة جدار ميريديان',cat:'wall',price:8900,oldPrice:null,badge:null,emoji:'🕯️',material:'برونز مكفأ',dims:'عرض ٢٢ × ارتفاع ٣٥ سم'},
+//   {id:4,name:'تورشير أطلس',cat:'floor',price:18500,oldPrice:null,badge:'جديد',emoji:'🪔',material:'رخام وذهبي مطفي',dims:'ارتفاع ١٧٥ سم'},
+//   {id:5,name:'فانوس صحراء',cat:'outdoor',price:12000,oldPrice:null,badge:null,emoji:'🏮',material:'حديد مطاوع وزجاج',dims:'ارتفاع ٥٥ سم'},
+//   {id:6,name:'مصباح طاولة سيليست',cat:'table',price:6500,oldPrice:7800,badge:'خصم',emoji:'🌟',material:'بورسلان ونحاس عتيق',dims:'عرض ٢٨ × ارتفاع ٤٢ سم'},
+//   {id:7,name:'معلقة نيبيولا الخطية',cat:'pendant',price:32000,oldPrice:null,badge:'جديد',emoji:'✨',material:'نيكل مصقول وكريستال',dims:'طول ١٨٠ × ارتفاع ٢٠ سم'},
+//   {id:8,name:'ثريا الواحة',cat:'chandelier',price:145000,oldPrice:null,badge:null,emoji:'⭐',material:'نحاس مطلي ذهب عيار ٢٤',dims:'عرض ٢٠٠ × ارتفاع ١٥٠ سم'},
+// ];
 
 let cart=[], customProducts=[];
 let orders=[
@@ -22,6 +35,20 @@ let orders=[
 const ADMIN_USER='admin', ADMIN_PASS='luminos2024';
 let isLoggedIn=false;
 
+async function loadProductsFromFirebase() {
+  const snapshot = await getDocs(collection(db, "Product"));
+
+  const products = [];
+
+  snapshot.forEach(doc => {
+    products.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  renderCatalog(products);
+}
 function showPage(name){
   if(name==='admin'){
     if(!isLoggedIn){showPage('admin-login');return;}
@@ -32,7 +59,7 @@ function showPage(name){
   const el=document.getElementById('nav-'+name);
   if(el)el.classList.add('active-link');
   window.scrollTo({top:0,behavior:'smooth'});
-  if(name==='catalog')renderCatalog(getAllProducts());
+  if(name==='catalog')loadProductsFromFirebase();
   if(name==='order')populateProductDropdown();
   if(name==='admin')renderAdmin();
   if(name==='home')renderHomeFeatured();
@@ -61,7 +88,7 @@ function doLogout(){
   showNotif('✦','تم تسجيل الخروج','وداعاً! تم تسجيل خروجك بأمان.');
 }
 
-function getAllProducts(){return [...PRODUCTS,...customProducts];}
+function getAllProducts(){return [...customProducts];}
 
 function productHTML(p){
   return`<div class="product-card">
