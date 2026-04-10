@@ -435,7 +435,7 @@ function renderAdminProductList() {
   const el = document.getElementById("admin-product-list");
   if (!el) return;
 
-  const products = getAllProducts();
+  const products = firebaseProducts;
 
   el.innerHTML = products.length
     ? products
