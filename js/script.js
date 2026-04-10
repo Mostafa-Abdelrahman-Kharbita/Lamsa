@@ -12,16 +12,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// const PRODUCTS = [
-//   {id:1,name:'ثريا أورورا الكريستالية',cat:'chandelier',price:85000,oldPrice:null,badge:'الأكثر مبيعاً',emoji:'🔆',material:'كريستال بوهيمي ونحاس',dims:'عرض ١٢٠ × ارتفاع ٩٠ سم'},
-//   {id:2,name:'مجموعة معلقات سيروكو',cat:'pendant',price:24500,oldPrice:29000,badge:'خصم',emoji:'💡',material:'زجاج مدخن وستيل',dims:'عرض ٦٠ × ارتفاع ٤٠ سم'},
-//   {id:3,name:'إضاءة جدار ميريديان',cat:'wall',price:8900,oldPrice:null,badge:null,emoji:'🕯️',material:'برونز مكفأ',dims:'عرض ٢٢ × ارتفاع ٣٥ سم'},
-//   {id:4,name:'تورشير أطلس',cat:'floor',price:18500,oldPrice:null,badge:'جديد',emoji:'🪔',material:'رخام وذهبي مطفي',dims:'ارتفاع ١٧٥ سم'},
-//   {id:5,name:'فانوس صحراء',cat:'outdoor',price:12000,oldPrice:null,badge:null,emoji:'🏮',material:'حديد مطاوع وزجاج',dims:'ارتفاع ٥٥ سم'},
-//   {id:6,name:'مصباح طاولة سيليست',cat:'table',price:6500,oldPrice:7800,badge:'خصم',emoji:'🌟',material:'بورسلان ونحاس عتيق',dims:'عرض ٢٨ × ارتفاع ٤٢ سم'},
-//   {id:7,name:'معلقة نيبيولا الخطية',cat:'pendant',price:32000,oldPrice:null,badge:'جديد',emoji:'✨',material:'نيكل مصقول وكريستال',dims:'طول ١٨٠ × ارتفاع ٢٠ سم'},
-//   {id:8,name:'ثريا الواحة',cat:'chandelier',price:145000,oldPrice:null,badge:null,emoji:'⭐',material:'نحاس مطلي ذهب عيار ٢٤',dims:'عرض ٢٠٠ × ارتفاع ١٥٠ سم'},
-// ];
+let firebaseProducts = [];
+
 
 let cart=[], customProducts=[];
 let orders=[
@@ -38,16 +30,16 @@ let isLoggedIn=false;
 async function loadProductsFromFirebase() {
   const snapshot = await getDocs(collection(db, "Product"));
 
-  const products = [];
+  firebaseProducts = [];
 
   snapshot.forEach(doc => {
-    products.push({
+    firebaseProducts.push({
       id: doc.id,
       ...doc.data()
     });
   });
 
-  renderCatalog(products);
+  renderCatalog(firebaseProducts);
 }
 function showPage(name){
   if(name==='admin'){
@@ -88,7 +80,9 @@ function doLogout(){
   showNotif('✦','تم تسجيل الخروج','وداعاً! تم تسجيل خروجك بأمان.');
 }
 
-function getAllProducts(){return [...customProducts];}
+function getAllProducts(){
+  return [...firebaseProducts, ...customProducts];
+}
 
 function productHTML(p){
   return`<div class="product-card">
@@ -390,3 +384,10 @@ window.updateQty = updateQty;
 window.removeFromCart = removeFromCart;
 window.submitOrder = submitOrder;
 window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.filterProducts = filterProducts;
+window.showAdminSection = showAdminSection;
+window.updateOrderStatus = updateOrderStatus;
+window.viewDetail = viewDetail;
+window.saveProduct = saveProduct;
+window.removeCustomProduct = removeCustomProduct;
