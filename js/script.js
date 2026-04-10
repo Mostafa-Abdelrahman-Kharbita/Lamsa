@@ -98,6 +98,7 @@ async function loadProductsFromFirebase() {
   });
 
   renderCatalog(firebaseProducts);
+  renderAdminProductList();
 }
 function showPage(name) {
   if (name === "admin") {
@@ -661,5 +662,6 @@ window.saveProduct = saveProduct;
 window.removeCustomProduct = removeCustomProduct;
 
 window.handleFileUpload = handleFileUpload;
-
+window.saveProduct = saveProduct;
+window.clearProductForm = clearProductForm;
 window.showNotif = showNotif;
