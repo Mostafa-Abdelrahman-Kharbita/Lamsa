@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
+console.log("script loaded ");
 const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "lamsa-18d05.firebaseapp.com",
@@ -111,9 +111,22 @@ function productHTML(p){
 function catLabel(c){return{chandelier:'ثريا',pendant:'معلقة',wall:'إضاءة جدار',floor:'تورشير',outdoor:'خارجية',table:'مصباح طاولة'}[c]||c;}
 function fmtP(n){return Number(n).toLocaleString('ar-EG')+' جنيه';}
 
-function renderHomeFeatured(){
-  const el=document.getElementById('home-products-grid');
-  if(el)el.innerHTML=getAllProducts().slice(0,6).map(productHTML).join('');
+async function renderHomeFeatured(){
+  const el = document.getElementById('home-products-grid');
+  if(!el) return;
+
+  const snapshot = await getDocs(collection(db, "Product"));
+
+  const products = [];
+
+  snapshot.forEach(doc => {
+    products.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  el.innerHTML = products.slice(0,6).map(productHTML).join('');
 }
 function renderCatalog(prods){
   const el=document.getElementById('catalog-products-grid');
