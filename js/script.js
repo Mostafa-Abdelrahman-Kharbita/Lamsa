@@ -389,3 +389,4 @@ window.quickAddToCart = quickAddToCart;
 window.updateQty = updateQty;
 window.removeFromCart = removeFromCart;
 window.submitOrder = submitOrder;
+window.doLogin = doLogin;
