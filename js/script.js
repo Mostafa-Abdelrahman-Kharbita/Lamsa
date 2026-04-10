@@ -98,8 +98,8 @@ async function loadProductsFromFirebase() {
   });
 
   renderCatalog(firebaseProducts);
-  renderAdminProductList();
 }
+console.log(firebaseProducts);
 function showPage(name) {
   if (name === "admin") {
     if (!isLoggedIn) {
@@ -132,7 +132,7 @@ function showPage(name) {
 
   if (name === "admin") {
     loadProductsFromFirebase().then(() => {
-      renderAdmin(); // 👈 يستنى الداتا الأول
+      renderAdmin(); // 👈 أهم سطر في حياتك
     });
   }
 
@@ -140,7 +140,6 @@ function showPage(name) {
     renderHomeFeatured();
   }
 }
-
 function doLogin() {
   const u = document.getElementById("admin-user").value.trim();
   const p = document.getElementById("admin-pass").value;
