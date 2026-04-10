@@ -427,20 +427,36 @@ function viewDetail(i) {
 function renderAdminProductList() {
   const el = document.getElementById("admin-product-list");
   if (!el) return;
-  el.innerHTML = getAllProducts()
-    .map(
-      (p, i) => `
+
+  const products = getAllProducts();
+
+  el.innerHTML = products.length
+    ? products
+        .map(
+          (p, i) => `
     <div style="background:var(--dark3);padding:18px;position:relative">
+      
       <div style="font-size:32px;text-align:center;margin-bottom:10px;height:72px;display:flex;align-items:center;justify-content:center">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>` : p.emoji || "💡"}
+        ${
+          p.imageUrl
+            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
+            : p.emoji || "💡"
+        }
       </div>
-      <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">${p.name}</div>
-      <div style="font-size:11px;color:var(--gold);letter-spacing:1px;text-transform:uppercase">${catLabel(p.cat)} · ${fmtP(p.price)}</div>
-      ${p.badge ? `<div style="margin-top:8px"><span class="badge badge-new">${p.badge}</span></div>` : ""}
-      ${i >= PRODUCTS.length ? `<button onclick="removeCustomProduct(${i - PRODUCTS.length})" style="position:absolute;top:10px;left:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 8px;cursor:pointer;font-size:11px">✕</button>` : ""}
-    </div>`,
-    )
-    .join("");
+
+      <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
+        ${p.name}
+      </div>
+
+      <div style="font-size:11px;color:var(--gold)">
+        ${catLabel(p.cat)} · ${fmtP(p.price)}
+      </div>
+
+    </div>
+  `,
+        )
+        .join("")
+    : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
 }
 function removeCustomProduct(i) {
   customProducts.splice(i, 1);
