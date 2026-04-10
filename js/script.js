@@ -108,29 +108,37 @@ function showPage(name) {
     }
   }
 
-  document
-    .querySelectorAll(".page")
-    .forEach((p) => p.classList.remove("active"));
+  document.querySelectorAll(".page").forEach((p) =>
+    p.classList.remove("active")
+  );
   document.getElementById("page-" + name).classList.add("active");
 
-  document
-    .querySelectorAll(".nav-links a")
-    .forEach((a) => a.classList.remove("active-link"));
+  document.querySelectorAll(".nav-links a").forEach((a) =>
+    a.classList.remove("active-link")
+  );
 
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-  if (name === "catalog") loadProductsFromFirebase();
-  if (name === "order") populateProductDropdown();
-
-  if (name === "admin") {
-    loadProductsFromFirebase(); // 👈 الحل هنا
-    renderAdmin();
+  if (name === "catalog") {
+    loadProductsFromFirebase();
   }
 
-  if (name === "home") renderHomeFeatured();
+  if (name === "order") {
+    populateProductDropdown();
+  }
+
+  if (name === "admin") {
+    loadProductsFromFirebase().then(() => {
+      renderAdmin(); // 👈 يستنى الداتا الأول
+    });
+  }
+
+  if (name === "home") {
+    renderHomeFeatured();
+  }
 }
 
 function doLogin() {
