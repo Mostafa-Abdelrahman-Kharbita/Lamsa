@@ -25,64 +25,6 @@ let firebaseProducts = [];
 
 let cart = [],
   customProducts = [];
-let orders = [
-  {
-    id: "#LM-2847",
-    client: "أميرة حسان",
-    product: "ثريا أورورا الكريستالية",
-    value: "٨٥,٠٠٠ جنيه",
-    status: "proc",
-    date: "١٨ مارس ٢٠٢٤",
-    email: "amira@example.com",
-    phone: "+20 10 1234 5678",
-    desc: "لوبي الفندق، سقف ارتفاعه ٦ أمتار، يحتاج سلسلة مخصصة الطول.",
-  },
-  {
-    id: "#LM-2846",
-    client: "كريم إبراهيم",
-    product: "تورشير أطلس × ٤",
-    value: "٧٤,٠٠٠ جنيه",
-    status: "new",
-    date: "١٧ مارس ٢٠٢٤",
-    email: "karim@example.com",
-    phone: "+20 11 9876 5432",
-    desc: "مشروع سكني في الزمالك. التسليم خلال أسبوعين.",
-  },
-  {
-    id: "#LM-2845",
-    client: "ليلى منصور",
-    product: "فانوس صحراء × ١٢",
-    value: "١٤٤,٠٠٠ جنيه",
-    status: "done",
-    date: "١٥ مارس ٢٠٢٤",
-    email: "leila@prestige.com",
-    phone: "+971 50 111 2222",
-    desc: "مشروع إضاءة حديقة الفندق.",
-  },
-  {
-    id: "#LM-2844",
-    client: "عمر فاروق",
-    product: "إضاءة جدار ميريديان × ٦",
-    value: "٥٣,٤٠٠ جنيه",
-    status: "cancel",
-    date: "١٢ مارس ٢٠٢٤",
-    email: "omar@example.com",
-    phone: "+20 12 5555 6666",
-    desc: "ممر المكاتب، جدران ارتفاعها ٢.٨ متر.",
-  },
-  {
-    id: "#LM-2843",
-    client: "نادية علي",
-    product: "مصباح طاولة سيليست × ٣",
-    value: "١٩,٥٠٠ جنيه",
-    status: "done",
-    date: "١٠ مارس ٢٠٢٤",
-    email: "nadia@example.com",
-    phone: "+20 10 7777 8888",
-    desc: "تجديد غرفة النوم في القاهرة الجديدة.",
-  },
-];
-
 const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
@@ -214,12 +156,10 @@ function productHTML(p) {
 function catLabel(c) {
   return (
     {
-      chandelier: "ثريا",
-      pendant: "معلقة",
-      wall: "إضاءة جدار",
-      floor: "تورشير",
-      outdoor: "خارجية",
-      table: "مصباح طاولة",
+     Magnetic_Track:"Magnetic Track",
+     Spot_light:"Spot light",
+     DoubleSpot_light:"Double Spot light",
+     Metal_Connector:"Metal Connector",
     }[c] || c
   );
 }
@@ -916,7 +856,7 @@ function openEditModal(id) {
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الفئة</label>
       <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
-        ${["chandelier","pendant","wall","floor","outdoor","table"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
+        ${["Magnetic_Track","Spot_light","DoubleSpot_light","Metal_Connector"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
       </select>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">السعر (جنيه)</label>

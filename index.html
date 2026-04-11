@@ -1,384 +1,1004 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LAMSA — إضاءة فاخرة</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LAMSA — إضاءة فاخرة</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo" onclick="showPage('home')">LAMSA</div>
+      <ul class="nav-links">
+        <li>
+          <a onclick="showPage('home')" class="active-link" id="nav-home"
+            >الرئيسية</a
+          >
+        </li>
+        <li><a onclick="showPage('catalog')" id="nav-catalog">الكتالوج</a></li>
+        <li><a onclick="showPage('order')" id="nav-order">الطلبات</a></li>
+        <li><a onclick="showPage('about')" id="nav-about">عن الشركة</a></li>
+      </ul>
+      <button class="nav-cta" onclick="showPage('order')">اطلب الآن</button>
+    </nav>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo" onclick="showPage('home')">LAMSA</div>
-  <ul class="nav-links">
-    <li><a onclick="showPage('home')" class="active-link" id="nav-home">الرئيسية</a></li>
-    <li><a onclick="showPage('catalog')" id="nav-catalog">الكتالوج</a></li>
-    <li><a onclick="showPage('order')" id="nav-order">الطلبات</a></li>
-    <li><a onclick="showPage('about')" id="nav-about">عن الشركة</a></li>
-  </ul>
-  <button class="nav-cta" onclick="showPage('order')">اطلب الآن</button>
-</nav>
-
-<!-- ===== HOME ===== -->
-<div class="page active" id="page-home">
-  <div class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-glow"></div>
-    <div class="hero-beam"></div>
-    <div class="hero-content">
-      <div class="hero-tag">منذ ٢٠٠٨ · القاهرة</div>
-      <h1 class="hero-title">أضئ<br><em>عالمك</em></h1>
-      <p class="hero-sub">إضاءة فاخرة للمساحات التي تستحق الكمال</p>
-      <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('catalog')">تصفّح المجموعة</button>
-        <button class="btn-secondary" onclick="showPage('about')">قصتنا</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="stats-strip">
-    <div class="stat-item"><div class="stat-num">+١٥</div><div class="stat-label">سنوات خبرة</div></div>
-    <div class="stat-item"><div class="stat-num">+٢ك</div><div class="stat-label">عميل سعيد</div></div>
-    <div class="stat-item"><div class="stat-num">+٣٨٠</div><div class="stat-label">منتج حصري</div></div>
-    <div class="stat-item"><div class="stat-num">١٢</div><div class="stat-label">دولة نخدمها</div></div>
-  </div>
-
-  <div class="section">
-    <div class="section-tag">الأكثر مبيعاً</div>
-    <h2 class="section-title">مجموعتنا <em>المميزة</em></h2>
-    <p class="section-body">كل قطعة شاهد على الحرفية — صُممت لتحوّل أي مكان إلى تجربة لا تُنسى.</p>
-    <div class="products-grid" style="margin-top:40px" id="home-products-grid"></div>
-    <div style="text-align:center;margin-top:44px">
-      <button class="btn-secondary" onclick="showPage('catalog')">عرض الكتالوج كاملاً ←</button>
-    </div>
-  </div>
-
-  <div class="section" style="background:var(--dark2)">
-    <div class="section-tag">لماذا لومينوس</div>
-    <h2 class="section-title">فن <em>الإضاءة</em></h2>
-    <div class="why-grid" style="margin-top:40px">
-      <div class="why-card"><div class="why-icon">✦</div><div class="why-title">حرفية يدوية</div><div class="why-text">كل قطعة تُصنع يدوياً بواسطة أمهر الحرفيين. لا إنتاج ضخم — نصنع تحفاً تدوم للأجيال.</div></div>
-      <div class="why-card"><div class="why-icon">⬡</div><div class="why-title">تصميم مخصص</div><div class="why-text">لديك رؤية؟ نحن نحولها إلى واقع. فريق التصميم لدينا يعمل معك لإنشاء إضاءة مثالية لمساحتك.</div></div>
-      <div class="why-card"><div class="why-icon">◈</div><div class="why-title">خدمة متكاملة</div><div class="why-text">من الاستشارة إلى التركيب، فريقنا يتولى كل التفاصيل. لا نعتبر العمل منتهياً حتى تكون راضياً تماماً.</div></div>
-      <div class="why-card"><div class="why-icon">◆</div><div class="why-title">موفرة للطاقة</div><div class="why-text">جميع منتجاتنا تعمل بتقنية LED المتطورة. جمال خارق مع توفير حتى ٨٥٪ في استهلاك الطاقة.</div></div>
-      <div class="why-card"><div class="why-icon">✧</div><div class="why-title">ضمان ٥ سنوات</div><div class="why-text">ثقتنا بالجودة مطلقة. كل منتج يأتي بضمان شامل لمدة خمس سنوات ودعم مدى الحياة.</div></div>
-      <div class="why-card"><div class="why-icon">⬟</div><div class="why-title">شحن عالمي</div><div class="why-text">نشحن إلى أكثر من ١٢ دولة بخدمة توصيل فاخرة. تصل إضاءتك مُعبأة بعناية ومؤمّنة بالكامل.</div></div>
-    </div>
-  </div>
-
-  <div class="section" style="background:var(--dark)">
-    <div class="section-tag">آراء العملاء</div>
-    <h2 class="section-title">ماذا <em>يقولون</em></h2>
-    <div class="testimonials-grid" style="margin-top:40px">
-      <div class="testimonial-card"><div class="stars">★★★★★</div><div class="testimonial-text">"الثريا في لوبي الفندق حصلت على إشادة أكثر من أي قرار تصميمي آخر. لومينوس فهمت رؤيتنا تماماً."</div><div class="testimonial-author">أميرة حسان</div><div class="testimonial-role">مديرة الديكور، فندق نايل بالاس</div></div>
-      <div class="testimonial-card"><div class="stars">★★★★★</div><div class="testimonial-text">"طلبت المستحيل — ثريا تشبه ضوء النجوم. سلّموا بالضبط ما تخيلته. أساتذة حقيقيون في صنعتهم."</div><div class="testimonial-author">كريم السيد</div><div class="testimonial-role">عميل سكني، دبي</div></div>
-      <div class="testimonial-card"><div class="stars">★★★★★</div><div class="testimonial-text">"احترافية، إبداع، واهتمام بالتفاصيل. من أول استشارة حتى التركيب النهائي، كل خطوة كانت مثالية."</div><div class="testimonial-author">ليلى منصور</div><div class="testimonial-role">رئيسة، مجموعة بريستيج للتطوير</div></div>
-    </div>
-  </div>
-
-  <div class="cta-banner">
-    <h2>مستعد لتحويل مساحتك؟</h2>
-    <p>تحدث مع مستشاري الإضاءة لدينا واكتشف الحل المثالي لمشروعك.</p>
-    <button class="btn-dark" onclick="showPage('order')">ابدأ طلبك</button>
-  </div>
-
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-brand"><div class="logo">LAMSA</div><p>نصنع تجارب إضاءة استثنائية منذ عام ٢٠٠٨. حيث تلتقي الفنون بالإضاءة.</p></div>
-      <div class="footer-col"><h4>التنقل</h4><a onclick="showPage('home')">الرئيسية</a><a onclick="showPage('catalog')">الكتالوج</a><a onclick="showPage('order')">الطلبات</a><a onclick="showPage('about')">عن الشركة</a></div>
-      <div class="footer-col"><h4>المجموعات</h4><a>الثريات</a><a>المعلقات</a><a>إضاءة الجدار</a><a>التورشيرات</a><a>الخارجية</a></div>
-      <div class="footer-col"><h4>تواصل معنا</h4><a>📍 القاهرة، مصر</a><a>📞 +20 2 1234 5678</a><a>✉ hello@luminos.com</a><a>⏰ الأحد–الخميس، ٩ص–٦م</a></div>
-    </div>
-    <div class="footer-bottom">
-      <p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p>
-      <div class="social-links"><a class="social-link">f</a><a class="social-link">in</a><a class="social-link">IG</a><a class="social-link">P</a></div>
-    </div>
-  </footer>
-</div>
-
-<!-- ===== CATALOG ===== -->
-<div class="page" id="page-catalog">
-  <div class="page-hero" style="padding-top:120px">
-    <div class="page-hero-bg"></div>
-    <div>
-      <h1><em>مجموعة</em><br>المنتجات</h1>
-      <p>أكثر من ٣٨٠ قطعة مصنوعة يدوياً لكل مساحة ورؤية</p>
-    </div>
-  </div>
-  <div class="filter-bar">
-    <span class="filter-label">تصفية:</span>
-    <button class="filter-btn active" onclick="filterProducts('all',this)">الكل</button>
-    <button class="filter-btn" onclick="filterProducts('chandelier',this)">ثريات</button>
-    <button class="filter-btn" onclick="filterProducts('pendant',this)">معلقات</button>
-    <button class="filter-btn" onclick="filterProducts('wall',this)">إضاءة جدار</button>
-    <button class="filter-btn" onclick="filterProducts('floor',this)">تورشيرات</button>
-    <button class="filter-btn" onclick="filterProducts('outdoor',this)">خارجية</button>
-    <button class="filter-btn" onclick="filterProducts('table',this)">طاولة</button>
-  </div>
-  <div class="section">
-    <div class="products-grid" id="catalog-products-grid"></div>
-  </div>
-  <footer><div class="footer-bottom"><p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p></div></footer>
-</div>
-
-<!-- ===== ORDER ===== -->
-<div class="page" id="page-order">
-  <div class="order-layout">
-   <div class="order-left">
-  <h2 class="form-title">أرسل <em>طلبك</em></h2>
-  <p class="form-sub">أدخل بياناتك وسنتواصل معك خلال ٢٤ ساعة لتأكيد الطلب ومناقشة التفاصيل.</p>
-
-  <div class="fsec-title">البيانات الشخصية</div>
-  <div class="form-row">
-    <div class="form-group"><label>الاسم الأول *</label><input type="text" id="fname" placeholder="أحمد"/></div>
-    <div class="form-group"><label>اسم العائلة</label><input type="text" id="lname" placeholder="حسن"/></div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label>البريد الإلكتروني *</label><input type="email" id="email" placeholder="ahmed@example.com"/></div>
-    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="phone" placeholder="+20 10 0000 0000"/></div>
-  </div>
-  <div class="form-group"><label>عنوان التسليم</label><input type="text" id="address" placeholder="الشارع، المدينة، الدولة"/></div>
-
-  <div class="fsec-title">المنتجات المختارة</div>
-  <div style="color:var(--gray);font-size:14px;margin-bottom:14px">
-    تصفح <a onclick="showPage('catalog')" style="color:var(--gold);cursor:pointer">الكتالوج</a> وأضف المنتجات، أو اختر من القائمة أدناه.
-  </div>
-  <div class="add-to-cart-bar">
-    <select id="quick-product" style="flex:1"><option value="">اختر منتجاً للإضافة...</option></select>
-    <input type="number" class="qty-input" id="quick-qty" value="1" min="1" max="99"/>
-    <button class="add-btn" onclick="quickAddToCart()">+ إضافة</button>
-  </div>
-
-  <!-- keep these hidden so submitOrder() doesn't break -->
-  <input type="hidden" id="proj-type"/>
-  <input type="hidden" id="budget"/>
-  <textarea id="description" style="display:none"></textarea>
-
-  <button class="submit-btn" onclick="submitOrder()">✦ إرسال طلب الاستفسار</button>
-  <p style="color:var(--gray);font-size:12px;margin-top:18px;letter-spacing:1px;text-align:center">
-    سنتواصل معك خلال ٢٤ ساعة لتأكيد ومناقشة طلبك
-  </p>
-</div>
-
-    <div class="order-right">
-      <div class="order-summary-title">ملخص الطلب</div>
-      <div id="cart-items"><div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div></div>
-      <div class="order-total" id="order-total" style="display:none">
-        <div class="total-row"><span>المجموع الفرعي</span><span id="subtotal-val">٠ جنيه</span></div>
-        <div class="total-row"><span>الشحن</span><span>يُحسب عند التأكيد</span></div>
-        <div class="total-row grand"><span>الإجمالي التقديري</span><span id="total-val">٠ جنيه</span></div>
-      </div>
-      <div style="margin-top:32px;padding:20px;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15)">
-        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">✦ خدمة متكاملة</div>
-        <div style="font-size:13px;color:var(--gray);line-height:1.8">كل طلب يشمل استشارة شخصية، تسليم مجدول، وتنسيق التركيب الاحترافي.</div>
-      </div>
-      <div style="margin-top:16px;padding:20px;border:1px solid rgba(255,255,255,0.06)">
-        <div style="font-size:13px;color:var(--gold);margin-bottom:6px;font-weight:500">📞 تحتاج مساعدة؟</div>
-        <div style="font-size:13px;color:var(--gray)">اتصل: <strong style="color:var(--white2)">+20 2 1234 5678</strong></div>
-        <div style="font-size:13px;color:var(--gray);margin-top:4px">الأحد–الخميس، ٩ص–٦م</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== ABOUT ===== -->
-<div class="page" id="page-about">
-  <div class="page-hero" style="padding-top:120px;height:50vh;align-items:center;justify-content:flex-start">
-    <div class="page-hero-bg"></div>
-    <div>
-      <h1>قصتنا<br><em>ونحن</em></h1>
-      <p>وُلدنا من شغف بالضوء، ونمونا لنصبح إرثاً في عالم الإضاءة</p>
-    </div>
-  </div>
-
-  <div class="about-story">
-    <div class="about-story-text">
-      <div class="section-tag">من نحن</div>
-      <h2 style="font-size:clamp(28px,3.5vw,48px);font-weight:300;color:var(--white);margin:14px 0">
-        خمسة عشر عاماً من<br><em style="color:var(--gold)">النور الخالص</em>
-      </h2>
-      <p style="color:var(--gray);font-size:15px;line-height:1.9;margin-bottom:18px">
-        تأسست لومينوس عام ٢٠٠٨ على يد الحرفي المتمكن يوسف الرشيدي، صائغ معادن من الجيل الثالث، برؤية واضحة: إحضار روعة فن الإضاءة الأوروبي إلى العالم العربي، مُضفراً بثراء تراثنا الخاص.
-      </p>
-      <p style="color:var(--gray);font-size:15px;line-height:1.9;margin-bottom:18px">
-        من ورشة صغيرة في القاهرة، نمونا لنصبح دار الإضاءة الفاخرة الأولى في المنطقة، نخدم عملاء من المغرب إلى الإمارات، من الفنادق الخمس نجوم إلى القصور الخاصة.
-      </p>
-      <p style="color:var(--gray);font-size:15px;line-height:1.9">
-        نؤمن أن الضوء ليس مجرد وظيفة — إنه روح المكان. كل قطعة نصنعها دعوة للشعور بشيء ما.
-      </p>
-    </div>
-    <div class="about-story-visual"><span style="position:relative;z-index:1">🏮</span></div>
-  </div>
-
-  <div class="timeline">
-    <div style="text-align:center;margin-bottom:52px">
-      <div class="section-tag">رحلتنا</div>
-      <h2 class="section-title">محطات في <em>النور</em></h2>
-    </div>
-    <div class="timeline-items">
-      <div class="timeline-item"><div><div class="timeline-year">٢٠٠٨</div><div class="timeline-text">تأسسنا في ورشة ٢٠٠ متر في مصر الجديدة بثلاثة حرفيين ومجموعة واحدة.</div></div><div class="timeline-dot"></div></div>
-      <div class="timeline-item"><div><div class="timeline-year">٢٠١١</div><div class="timeline-text">أول عقد دولي: توريد ٤٠٠ ثريا لمنتجع فاخر في شرم الشيخ.</div></div><div class="timeline-dot"></div></div>
-      <div class="timeline-item"><div><div class="timeline-year">٢٠١٤</div><div class="timeline-text">افتتاح صالة عرض في دبي. إطلاق خدمة التصميم المخصص.</div></div><div class="timeline-dot"></div></div>
-      <div class="timeline-item"><div><div class="timeline-year">٢٠١٨</div><div class="timeline-text">الاحتفال بعقد كامل مع إطلاق مجموعة التراث المستوحاة من الفن الإسلامي.</div></div><div class="timeline-dot"></div></div>
-      <div class="timeline-item"><div><div class="timeline-year">٢٠٢٢</div><div class="timeline-text">التوسع إلى ١٢ دولة. تحويل جميع خطوط الإنتاج إلى تقنية LED.</div></div><div class="timeline-dot"></div></div>
-      <div class="timeline-item"><div><div class="timeline-year">٢٠٢٤</div><div class="timeline-text">خدمة أكثر من ٢٠٠٠ عميل. جائزة أفضل علامة إضاءة فاخرة في قمة القاهرة للتصميم.</div></div><div class="timeline-dot"></div></div>
-    </div>
-  </div>
-
-  <div class="section" style="background:var(--dark2)">
-    <div class="section-tag">فريقنا</div>
-    <h2 class="section-title">العقول والأيدي <em>المبدعة</em></h2>
-    <div class="team-grid" style="margin-top:40px">
-      <div class="team-card"><div class="team-photo">👨‍🎨</div><div class="team-info"><div class="team-name">يوسف الرشيدي</div><div class="team-role">المؤسس والحرفي الأول</div><div class="team-bio">صائغ معادن من الجيل الثالث بخبرة تتجاوز ٣٠ عاماً. يداه شكّلتا كل مجموعة كبرى في لومينوس.</div></div></div>
-      <div class="team-card"><div class="team-photo">👩‍💼</div><div class="team-info"><div class="team-name">دينا خالد</div><div class="team-role">رئيسة قسم التصميم</div><div class="team-bio">خريجة كلية الفنون الملكية بلندن. دينا تجمع بين الإرث الشرقي ولغة التصميم المعاصرة في كل مجموعة.</div></div></div>
-      <div class="team-card"><div class="team-photo">👨‍🔧</div><div class="team-info"><div class="team-name">عمر فريد</div><div class="team-role">مدير التركيب</div><div class="team-bio">أكثر من ١٥ عاماً من تركيب الإضاءة في القصور والفنادق والمقرات الفاخرة عبر منطقة الشرق الأوسط وأوروبا.</div></div></div>
-    </div>
-  </div>
-
-  <div class="cta-banner">
-    <h2>لنصنع شيئاً استثنائياً معاً</h2>
-    <p>كل مساحة عظيمة تبدأ بمحادثة.</p>
-    <button class="btn-dark" onclick="showPage('order')">تواصل معنا</button>
-  </div>
-
-  <footer><div class="footer-bottom"><p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p></div></footer>
-</div>
-
-<!-- ===== ADMIN LOGIN ===== -->
-<div class="page" id="page-admin-login">
-  <div class="admin-login">
-    <div class="login-box">
-      <div class="login-logo">
-        <div>LAMSA</div>
-        <p>بوابة المسؤول</p>
-      </div>
-      <div class="login-error" id="login-error"></div>
-      <div class="form-group">
-        <label>اسم المستخدم</label>
-        <input type="text" id="admin-user" placeholder="admin" autocomplete="username"/>
-      </div>
-      <div class="form-group">
-        <label>كلمة المرور</label>
-        <input type="password" id="admin-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
-      </div>
-      <button class="login-submit" onclick="doLogin()">دخول ←</button>
-      <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--gray)">
-        هذه المنطقة للمسؤولين فقط
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- ===== ADMIN PANEL ===== -->
-<div class="page" id="page-admin">
-  <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar-title">لوحة التحكم</div>
-      <div class="sidebar-link active" onclick="showAdminSection('dashboard',this)"><span>▦</span> الرئيسية</div>
-      <div class="sidebar-link" onclick="showAdminSection('products',this)"><span>◈</span> المنتجات</div>
-      <div class="sidebar-link" onclick="showAdminSection('orders',this)"><span>✦</span> الطلبات</div>
-      <div style="padding:28px;border-top:1px solid rgba(201,168,76,0.1);margin-top:32px">
-        <div style="font-size:11px;color:var(--gray);margin-bottom:6px">مسجل الدخول كـ</div>
-        <div style="font-size:14px;color:var(--white);font-weight:500">Admin User</div>
-        <div style="font-size:12px;color:var(--gold);margin-top:4px">admin@luminos.com</div>
-        <button onclick="doLogout()" style="margin-top:16px;padding:8px 16px;background:transparent;border:1px solid rgba(239,68,68,0.3);color:#f87171;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px;width:100%">تسجيل خروج</button>
-      </div>
-    </aside>
-
-    <main class="admin-main">
-      <!-- Dashboard -->
-      <div class="admin-section active" id="section-dashboard">
-        <div class="admin-header"><h2>لوحة التحكم</h2><p>مرحباً. هذا ما يحدث في لومينوس اليوم.</p></div>
-        <div class="admin-cards">
-          <div class="admin-card"><div class="admin-card-val">47</div><div class="admin-card-label">إجمالي الطلبات</div><div class="admin-card-trend">↑ +١٢٪ هذا الشهر</div></div>
-          <div class="admin-card"><div class="admin-card-val" style="font-size:28px">٢٨٤ألف<br><span style="font-size:14px;color:var(--gray)">جنيه</span></div><div class="admin-card-label">الإيرادات (الشهر)</div><div class="admin-card-trend">↑ +٨٪ عن الشهر الماضي</div></div>
-          <div class="admin-card"><div class="admin-card-val" id="admin-prod-count">8</div><div class="admin-card-label">منتج نشط</div><div class="admin-card-trend">٣ في انتظار المراجعة</div></div>
-          <div class="admin-card"><div class="admin-card-val" id="admin-msg-count">5</div><div class="admin-card-label">رسائل جديدة</div><div class="admin-card-trend" style="color:#f87171">٢ تحتاج رد عاجل</div></div>
-        </div>
-        <div class="admin-panel">
-          <div class="admin-panel-title">آخر الطلبات <button class="panel-action" onclick="showAdminSection('orders',document.querySelectorAll('.sidebar-link')[2])">عرض الكل</button></div>
-          <table class="orders-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>المنتج</th><th>القيمة</th><th>الحالة</th><th>التاريخ</th></tr></thead>
-          <tbody id="dashboard-orders-body"></tbody></table>
-        </div>
-        <div class="admin-panel">
-          <div class="admin-panel-title">إجراءات سريعة</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-            <button class="panel-action" style="padding:18px;width:100%" onclick="showAdminSection('products',document.querySelectorAll('.sidebar-link')[1])">+ رفع منتج جديد</button>
-            <button class="panel-action" style="padding:18px;width:100%;background:var(--dark3);color:var(--gold);border:1px solid var(--gold)" onclick="showAdminSection('orders',document.querySelectorAll('.sidebar-link')[2])">عرض الطلبات المعلقة</button>
-            <button class="panel-action" style="padding:18px;width:100%;background:var(--dark3);color:var(--white2);border:1px solid rgba(255,255,255,0.1)" onclick="showAdminSection('messages',document.querySelectorAll('.sidebar-link')[3])">مراجعة الرسائل</button>
+    <!-- ===== HOME ===== -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-glow"></div>
+        <div class="hero-beam"></div>
+        <div class="hero-content">
+          <div class="hero-tag">منذ ٢٠٠٨ · القاهرة</div>
+          <h1 class="hero-title">أضئ<br /><em>عالمك</em></h1>
+          <p class="hero-sub">إضاءة فاخرة للمساحات التي تستحق الكمال</p>
+          <div class="hero-btns">
+            <button class="btn-primary" onclick="showPage('catalog')">
+              تصفّح المجموعة
+            </button>
+            <button class="btn-secondary" onclick="showPage('about')">
+              قصتنا
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Products -->
-      <div class="admin-section" id="section-products">
-        <div class="admin-header"><h2>المنتجات</h2><p>ارفع وأدر كتالوج الإضاءة الخاص بك.</p></div>
-        <div class="admin-panel">
-          <div class="admin-panel-title">رفع منتج جديد</div>
-          <div class="upload-zone" onclick="document.getElementById('file-input').click()">
-            <div class="upload-icon">📷</div>
-            <div class="upload-text"><strong>انقر لرفع صورة المنتج</strong><br>PNG، JPG، WEBP حتى 10MB</div>
-            <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileUpload(event)"/>
-          </div>
-          <div id="upload-preview" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px"></div>
-          <div class="product-form-grid">
-            <div class="form-group"><label>اسم المنتج *</label><input type="text" id="prod-name" placeholder="مثال: ثريا أورورا الكريستالية"/></div>
-            <div class="form-group"><label>الفئة *</label>
-              <select id="prod-category">
-                <option value="">اختر الفئة...</option>
-                <option value="chandelier">ثريا</option>
-                <option value="pendant">معلقة</option>
-                <option value="wall">إضاءة جدار</option>
-                <option value="floor">تورشير</option>
-                <option value="outdoor">خارجية</option>
-                <option value="table">طاولة</option>
-              </select>
+      <div class="stats-strip">
+        <div class="stat-item">
+          <div class="stat-num">+١٥</div>
+          <div class="stat-label">سنوات خبرة</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">+٢ك</div>
+          <div class="stat-label">عميل سعيد</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">+٣٨٠</div>
+          <div class="stat-label">منتج حصري</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">١٢</div>
+          <div class="stat-label">دولة نخدمها</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-tag">الأكثر مبيعاً</div>
+        <h2 class="section-title">مجموعتنا <em>المميزة</em></h2>
+        <p class="section-body">
+          كل قطعة شاهد على الحرفية — صُممت لتحوّل أي مكان إلى تجربة لا تُنسى.
+        </p>
+        <div
+          class="products-grid"
+          style="margin-top: 40px"
+          id="home-products-grid"
+        ></div>
+        <div style="text-align: center; margin-top: 44px">
+          <button class="btn-secondary" onclick="showPage('catalog')">
+            عرض الكتالوج كاملاً ←
+          </button>
+        </div>
+      </div>
+
+      <div class="section" style="background: var(--dark2)">
+        <div class="section-tag">لماذا لومينوس</div>
+        <h2 class="section-title">فن <em>الإضاءة</em></h2>
+        <div class="why-grid" style="margin-top: 40px">
+          <div class="why-card">
+            <div class="why-icon">✦</div>
+            <div class="why-title">حرفية يدوية</div>
+            <div class="why-text">
+              كل قطعة تُصنع يدوياً بواسطة أمهر الحرفيين. لا إنتاج ضخم — نصنع
+              تحفاً تدوم للأجيال.
             </div>
-            <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="prod-price" placeholder="25000" min="0"/></div>
-            <div class="form-group"><label>الكمية المتاحة *</label><input type="number" id="prod-quantity" placeholder="10" min="0"/></div>
           </div>
-          <div style="display:flex;gap:10px;margin-top:6px">
-            <button class="panel-action" style="padding:12px 36px" onclick="saveProduct()">حفظ المنتج</button>
-            <button onclick="clearProductForm()" style="padding:12px 36px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--gray);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">مسح النموذج</button>
+          <div class="why-card">
+            <div class="why-icon">⬡</div>
+            <div class="why-title">تصميم مخصص</div>
+            <div class="why-text">
+              لديك رؤية؟ نحن نحولها إلى واقع. فريق التصميم لدينا يعمل معك لإنشاء
+              إضاءة مثالية لمساحتك.
+            </div>
           </div>
-        </div>
-        <div class="admin-panel">
-          <div class="admin-panel-title">المنتجات الحالية (<span id="prod-list-count">0</span>)</div>
-          <div id="admin-product-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+          <div class="why-card">
+            <div class="why-icon">◈</div>
+            <div class="why-title">خدمة متكاملة</div>
+            <div class="why-text">
+              من الاستشارة إلى التركيب، فريقنا يتولى كل التفاصيل. لا نعتبر العمل
+              منتهياً حتى تكون راضياً تماماً.
+            </div>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">◆</div>
+            <div class="why-title">موفرة للطاقة</div>
+            <div class="why-text">
+              جميع منتجاتنا تعمل بتقنية LED المتطورة. جمال خارق مع توفير حتى ٨٥٪
+              في استهلاك الطاقة.
+            </div>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">✧</div>
+            <div class="why-title">ضمان ٥ سنوات</div>
+            <div class="why-text">
+              ثقتنا بالجودة مطلقة. كل منتج يأتي بضمان شامل لمدة خمس سنوات ودعم
+              مدى الحياة.
+            </div>
+          </div>
+          <div class="why-card">
+            <div class="why-icon">⬟</div>
+            <div class="why-title">شحن عالمي</div>
+            <div class="why-text">
+              نشحن إلى أكثر من ١٢ دولة بخدمة توصيل فاخرة. تصل إضاءتك مُعبأة
+              بعناية ومؤمّنة بالكامل.
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Orders -->
-      <div class="admin-section" id="section-orders">
-        <div class="admin-header"><h2>الطلبات</h2><p>إدارة الطلبات وتحديث حالاتها.</p></div>
-        <div class="admin-panel">
-          <div class="admin-panel-title">جميع الطلبات</div>
-          <table class="orders-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>المنتجات</th><th>القيمة</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead>
-          <tbody id="full-orders-body"></tbody></table>
+      <div class="section" style="background: var(--dark)">
+        <div class="section-tag">آراء العملاء</div>
+        <h2 class="section-title">ماذا <em>يقولون</em></h2>
+        <div class="testimonials-grid" style="margin-top: 40px">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <div class="testimonial-text">
+              "الثريا في لوبي الفندق حصلت على إشادة أكثر من أي قرار تصميمي آخر.
+              لومينوس فهمت رؤيتنا تماماً."
+            </div>
+            <div class="testimonial-author">أميرة حسان</div>
+            <div class="testimonial-role">مديرة الديكور، فندق نايل بالاس</div>
+          </div>
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <div class="testimonial-text">
+              "طلبت المستحيل — ثريا تشبه ضوء النجوم. سلّموا بالضبط ما تخيلته.
+              أساتذة حقيقيون في صنعتهم."
+            </div>
+            <div class="testimonial-author">كريم السيد</div>
+            <div class="testimonial-role">عميل سكني، دبي</div>
+          </div>
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <div class="testimonial-text">
+              "احترافية، إبداع، واهتمام بالتفاصيل. من أول استشارة حتى التركيب
+              النهائي، كل خطوة كانت مثالية."
+            </div>
+            <div class="testimonial-author">ليلى منصور</div>
+            <div class="testimonial-role">رئيسة، مجموعة بريستيج للتطوير</div>
+          </div>
         </div>
       </div>
-    </main>
-  </div>
-</div>
 
-<!-- SUCCESS -->
-<div class="success-overlay" id="success-overlay">
-  <div class="success-box">
-    <div class="success-icon">✦</div>
-    <div class="success-title">تم استلام طلبك!</div>
-    <div class="success-msg">شكراً على استفساركم.<br>سيتواصل فريقنا معك خلال ٢٤ ساعة<br>لتأكيد ومناقشة طلبك.</div>
-    <button class="btn-primary" onclick="document.getElementById('success-overlay').classList.remove('show');showPage('home')">العودة للرئيسية</button>
-  </div>
-</div>
+      <div class="cta-banner">
+        <h2>مستعد لتحويل مساحتك؟</h2>
+        <p>تحدث مع مستشاري الإضاءة لدينا واكتشف الحل المثالي لمشروعك.</p>
+        <button class="btn-dark" onclick="showPage('order')">ابدأ طلبك</button>
+      </div>
 
-<!-- NOTIFICATION -->
-<div class="notification" id="notification">
-  <div class="notif-icon" id="notif-icon">✦</div>
-  <div class="notif-text"><strong id="notif-title">تمت الإضافة</strong><span id="notif-msg">المنتج أُضيف إلى طلبك</span></div>
-</div>
+      <footer>
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">LAMSA</div>
+            <p>
+              نصنع تجارب إضاءة استثنائية منذ عام ٢٠٠٨. حيث تلتقي الفنون
+              بالإضاءة.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>التنقل</h4>
+            <a onclick="showPage('home')">الرئيسية</a
+            ><a onclick="showPage('catalog')">الكتالوج</a
+            ><a onclick="showPage('order')">الطلبات</a
+            ><a onclick="showPage('about')">عن الشركة</a>
+          </div>
+          <div class="footer-col">
+            <h4>المجموعات</h4>
+            <a>الثريات</a><a>المعلقات</a><a>إضاءة الجدار</a><a>التورشيرات</a
+            ><a>الخارجية</a>
+          </div>
+          <div class="footer-col">
+            <h4>تواصل معنا</h4>
+            <a>📍 القاهرة، مصر</a><a>📞 +20 2 1234 5678</a
+            ><a>✉ hello@luminos.com</a><a>⏰ الأحد–الخميس، ٩ص–٦م</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p>
+          <div class="social-links">
+            <a class="social-link">f</a><a class="social-link">in</a
+            ><a class="social-link">IG</a><a class="social-link">P</a>
+          </div>
+        </div>
+      </footer>
+    </div>
 
-<script type="module" src="js/script.js"></script>
-</body>
+    <!-- ===== CATALOG ===== -->
+    <div class="page" id="page-catalog">
+      <div class="page-hero" style="padding-top: 120px">
+        <div class="page-hero-bg"></div>
+        <div>
+          <h1><em>مجموعة</em><br />المنتجات</h1>
+          <p>أكثر من ٣٨٠ قطعة مصنوعة يدوياً لكل مساحة ورؤية</p>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-label">تصفية:</span>
+        <button class="filter-btn active" onclick="filterProducts('all', this)">
+          الكل
+        </button>
+        <button
+          class="filter-btn"
+          onclick="filterProducts('Magnetic_Track', this)"
+        >
+          Magnetic Track
+        </button>
+        <button class="filter-btn" onclick="filterProducts('Spot_light', this)">
+          Spot Light
+        </button>
+        <button
+          class="filter-btn"
+          onclick="filterProducts('DoubleSpot_light', this)"
+        >
+          Double Spot Light
+        </button>
+        <button
+          class="filter-btn"
+          onclick="filterProducts('Metal_Connector', this)"
+        >
+          Metal Connector
+        </button>
+      </div>
+      <div class="section">
+        <div class="products-grid" id="catalog-products-grid"></div>
+      </div>
+      <footer>
+        <div class="footer-bottom">
+          <p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ===== ORDER ===== -->
+    <div class="page" id="page-order">
+      <div class="order-layout">
+        <div class="order-left">
+          <h2 class="form-title">أرسل <em>طلبك</em></h2>
+          <p class="form-sub">
+            أدخل بياناتك وسنتواصل معك خلال ٢٤ ساعة لتأكيد الطلب ومناقشة
+            التفاصيل.
+          </p>
+
+          <div class="fsec-title">البيانات الشخصية</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>الاسم الأول *</label
+              ><input type="text" id="fname" placeholder="أحمد" />
+            </div>
+            <div class="form-group">
+              <label>اسم العائلة</label
+              ><input type="text" id="lname" placeholder="حسن" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>البريد الإلكتروني *</label
+              ><input type="email" id="email" placeholder="ahmed@example.com" />
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف</label
+              ><input type="tel" id="phone" placeholder="+20 10 0000 0000" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>عنوان التسليم</label
+            ><input
+              type="text"
+              id="address"
+              placeholder="الشارع، المدينة، الدولة"
+            />
+          </div>
+
+          <div class="fsec-title">المنتجات المختارة</div>
+          <div style="color: var(--gray); font-size: 14px; margin-bottom: 14px">
+            تصفح
+            <a
+              onclick="showPage('catalog')"
+              style="color: var(--gold); cursor: pointer"
+              >الكتالوج</a
+            >
+            وأضف المنتجات، أو اختر من القائمة أدناه.
+          </div>
+          <div class="add-to-cart-bar">
+            <select id="quick-product" style="flex: 1">
+              <option value="">اختر منتجاً للإضافة...</option>
+            </select>
+            <input
+              type="number"
+              class="qty-input"
+              id="quick-qty"
+              value="1"
+              min="1"
+              max="99"
+            />
+            <button class="add-btn" onclick="quickAddToCart()">+ إضافة</button>
+          </div>
+
+          <!-- keep these hidden so submitOrder() doesn't break -->
+          <input type="hidden" id="proj-type" />
+          <input type="hidden" id="budget" />
+          <textarea id="description" style="display: none"></textarea>
+
+          <button class="submit-btn" onclick="submitOrder()">
+            ✦ إرسال طلب الاستفسار
+          </button>
+          <p
+            style="
+              color: var(--gray);
+              font-size: 12px;
+              margin-top: 18px;
+              letter-spacing: 1px;
+              text-align: center;
+            "
+          >
+            سنتواصل معك خلال ٢٤ ساعة لتأكيد ومناقشة طلبك
+          </p>
+        </div>
+
+        <div class="order-right">
+          <div class="order-summary-title">ملخص الطلب</div>
+          <div id="cart-items">
+            <div class="cart-empty">
+              سلتك فارغة.<br />أضف منتجات من الكتالوج.
+            </div>
+          </div>
+          <div class="order-total" id="order-total" style="display: none">
+            <div class="total-row">
+              <span>المجموع الفرعي</span><span id="subtotal-val">٠ جنيه</span>
+            </div>
+            <div class="total-row">
+              <span>الشحن</span><span>يُحسب عند التأكيد</span>
+            </div>
+            <div class="total-row grand">
+              <span>الإجمالي التقديري</span><span id="total-val">٠ جنيه</span>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 32px;
+              padding: 20px;
+              background: rgba(201, 168, 76, 0.05);
+              border: 1px solid rgba(201, 168, 76, 0.15);
+            "
+          >
+            <div
+              style="
+                font-size: 11px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--gold);
+                margin-bottom: 10px;
+              "
+            >
+              ✦ خدمة متكاملة
+            </div>
+            <div style="font-size: 13px; color: var(--gray); line-height: 1.8">
+              كل طلب يشمل استشارة شخصية، تسليم مجدول، وتنسيق التركيب الاحترافي.
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 16px;
+              padding: 20px;
+              border: 1px solid rgba(255, 255, 255, 0.06);
+            "
+          >
+            <div
+              style="
+                font-size: 13px;
+                color: var(--gold);
+                margin-bottom: 6px;
+                font-weight: 500;
+              "
+            >
+              📞 تحتاج مساعدة؟
+            </div>
+            <div style="font-size: 13px; color: var(--gray)">
+              اتصل:
+              <strong style="color: var(--white2)">+20 2 1234 5678</strong>
+            </div>
+            <div style="font-size: 13px; color: var(--gray); margin-top: 4px">
+              الأحد–الخميس، ٩ص–٦م
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ===== -->
+    <div class="page" id="page-about">
+      <div
+        class="page-hero"
+        style="
+          padding-top: 120px;
+          height: 50vh;
+          align-items: center;
+          justify-content: flex-start;
+        "
+      >
+        <div class="page-hero-bg"></div>
+        <div>
+          <h1>قصتنا<br /><em>ونحن</em></h1>
+          <p>وُلدنا من شغف بالضوء، ونمونا لنصبح إرثاً في عالم الإضاءة</p>
+        </div>
+      </div>
+
+      <div class="about-story">
+        <div class="about-story-text">
+          <div class="section-tag">من نحن</div>
+          <h2
+            style="
+              font-size: clamp(28px, 3.5vw, 48px);
+              font-weight: 300;
+              color: var(--white);
+              margin: 14px 0;
+            "
+          >
+            خمسة عشر عاماً من<br /><em style="color: var(--gold)"
+              >النور الخالص</em
+            >
+          </h2>
+          <p
+            style="
+              color: var(--gray);
+              font-size: 15px;
+              line-height: 1.9;
+              margin-bottom: 18px;
+            "
+          >
+            تأسست لومينوس عام ٢٠٠٨ على يد الحرفي المتمكن يوسف الرشيدي، صائغ
+            معادن من الجيل الثالث، برؤية واضحة: إحضار روعة فن الإضاءة الأوروبي
+            إلى العالم العربي، مُضفراً بثراء تراثنا الخاص.
+          </p>
+          <p
+            style="
+              color: var(--gray);
+              font-size: 15px;
+              line-height: 1.9;
+              margin-bottom: 18px;
+            "
+          >
+            من ورشة صغيرة في القاهرة، نمونا لنصبح دار الإضاءة الفاخرة الأولى في
+            المنطقة، نخدم عملاء من المغرب إلى الإمارات، من الفنادق الخمس نجوم
+            إلى القصور الخاصة.
+          </p>
+          <p style="color: var(--gray); font-size: 15px; line-height: 1.9">
+            نؤمن أن الضوء ليس مجرد وظيفة — إنه روح المكان. كل قطعة نصنعها دعوة
+            للشعور بشيء ما.
+          </p>
+        </div>
+        <div class="about-story-visual">
+          <span style="position: relative; z-index: 1">🏮</span>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div style="text-align: center; margin-bottom: 52px">
+          <div class="section-tag">رحلتنا</div>
+          <h2 class="section-title">محطات في <em>النور</em></h2>
+        </div>
+        <div class="timeline-items">
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠٠٨</div>
+              <div class="timeline-text">
+                تأسسنا في ورشة ٢٠٠ متر في مصر الجديدة بثلاثة حرفيين ومجموعة
+                واحدة.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠١١</div>
+              <div class="timeline-text">
+                أول عقد دولي: توريد ٤٠٠ ثريا لمنتجع فاخر في شرم الشيخ.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠١٤</div>
+              <div class="timeline-text">
+                افتتاح صالة عرض في دبي. إطلاق خدمة التصميم المخصص.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠١٨</div>
+              <div class="timeline-text">
+                الاحتفال بعقد كامل مع إطلاق مجموعة التراث المستوحاة من الفن
+                الإسلامي.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠٢٢</div>
+              <div class="timeline-text">
+                التوسع إلى ١٢ دولة. تحويل جميع خطوط الإنتاج إلى تقنية LED.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div class="timeline-year">٢٠٢٤</div>
+              <div class="timeline-text">
+                خدمة أكثر من ٢٠٠٠ عميل. جائزة أفضل علامة إضاءة فاخرة في قمة
+                القاهرة للتصميم.
+              </div>
+            </div>
+            <div class="timeline-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="background: var(--dark2)">
+        <div class="section-tag">فريقنا</div>
+        <h2 class="section-title">العقول والأيدي <em>المبدعة</em></h2>
+        <div class="team-grid" style="margin-top: 40px">
+          <div class="team-card">
+            <div class="team-photo">👨‍🎨</div>
+            <div class="team-info">
+              <div class="team-name">يوسف الرشيدي</div>
+              <div class="team-role">المؤسس والحرفي الأول</div>
+              <div class="team-bio">
+                صائغ معادن من الجيل الثالث بخبرة تتجاوز ٣٠ عاماً. يداه شكّلتا كل
+                مجموعة كبرى في لومينوس.
+              </div>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-photo">👩‍💼</div>
+            <div class="team-info">
+              <div class="team-name">دينا خالد</div>
+              <div class="team-role">رئيسة قسم التصميم</div>
+              <div class="team-bio">
+                خريجة كلية الفنون الملكية بلندن. دينا تجمع بين الإرث الشرقي ولغة
+                التصميم المعاصرة في كل مجموعة.
+              </div>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-photo">👨‍🔧</div>
+            <div class="team-info">
+              <div class="team-name">عمر فريد</div>
+              <div class="team-role">مدير التركيب</div>
+              <div class="team-bio">
+                أكثر من ١٥ عاماً من تركيب الإضاءة في القصور والفنادق والمقرات
+                الفاخرة عبر منطقة الشرق الأوسط وأوروبا.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-banner">
+        <h2>لنصنع شيئاً استثنائياً معاً</h2>
+        <p>كل مساحة عظيمة تبدأ بمحادثة.</p>
+        <button class="btn-dark" onclick="showPage('order')">تواصل معنا</button>
+      </div>
+
+      <footer>
+        <div class="footer-bottom">
+          <p>© ٢٠٢٤ LAMSA. جميع الحقوق محفوظة.</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ===== ADMIN LOGIN ===== -->
+    <div class="page" id="page-admin-login">
+      <div class="admin-login">
+        <div class="login-box">
+          <div class="login-logo">
+            <div>LAMSA</div>
+            <p>بوابة المسؤول</p>
+          </div>
+          <div class="login-error" id="login-error"></div>
+          <div class="form-group">
+            <label>اسم المستخدم</label>
+            <input
+              type="text"
+              id="admin-user"
+              placeholder="admin"
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور</label>
+            <input
+              type="password"
+              id="admin-pass"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              onkeydown="if (event.key === 'Enter') doLogin();"
+            />
+          </div>
+          <button class="login-submit" onclick="doLogin()">دخول ←</button>
+          <p
+            style="
+              text-align: center;
+              margin-top: 20px;
+              font-size: 12px;
+              color: var(--gray);
+            "
+          >
+            هذه المنطقة للمسؤولين فقط
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN PANEL ===== -->
+    <div class="page" id="page-admin">
+      <div class="admin-layout">
+        <aside class="admin-sidebar">
+          <div class="admin-sidebar-title">لوحة التحكم</div>
+          <div
+            class="sidebar-link active"
+            onclick="showAdminSection('dashboard', this)"
+          >
+            <span>▦</span> الرئيسية
+          </div>
+          <div
+            class="sidebar-link"
+            onclick="showAdminSection('products', this)"
+          >
+            <span>◈</span> المنتجات
+          </div>
+          <div class="sidebar-link" onclick="showAdminSection('orders', this)">
+            <span>✦</span> الطلبات
+          </div>
+          <div
+            style="
+              padding: 28px;
+              border-top: 1px solid rgba(201, 168, 76, 0.1);
+              margin-top: 32px;
+            "
+          >
+            <div
+              style="font-size: 11px; color: var(--gray); margin-bottom: 6px"
+            >
+              مسجل الدخول كـ
+            </div>
+            <div style="font-size: 14px; color: var(--white); font-weight: 500">
+              Admin User
+            </div>
+            <div style="font-size: 12px; color: var(--gold); margin-top: 4px">
+              admin@luminos.com
+            </div>
+            <button
+              onclick="doLogout()"
+              style="
+                margin-top: 16px;
+                padding: 8px 16px;
+                background: transparent;
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                color: #f87171;
+                cursor: pointer;
+                font-family: &quot;Tajawal&quot;, sans-serif;
+                font-size: 12px;
+                width: 100%;
+              "
+            >
+              تسجيل خروج
+            </button>
+          </div>
+        </aside>
+
+        <main class="admin-main">
+          <!-- Dashboard -->
+          <div class="admin-section active" id="section-dashboard">
+            <div class="admin-header">
+              <h2>لوحة التحكم</h2>
+              <p>مرحباً. هذا ما يحدث في لومينوس اليوم.</p>
+            </div>
+            <div class="admin-cards">
+              <div class="admin-card">
+                <div class="admin-card-val">47</div>
+                <div class="admin-card-label">إجمالي الطلبات</div>
+                <div class="admin-card-trend">↑ +١٢٪ هذا الشهر</div>
+              </div>
+              <div class="admin-card">
+                <div class="admin-card-val" style="font-size: 28px">
+                  ٢٨٤ألف<br /><span style="font-size: 14px; color: var(--gray)"
+                    >جنيه</span
+                  >
+                </div>
+                <div class="admin-card-label">الإيرادات (الشهر)</div>
+                <div class="admin-card-trend">↑ +٨٪ عن الشهر الماضي</div>
+              </div>
+              <div class="admin-card">
+                <div class="admin-card-val" id="admin-prod-count">8</div>
+                <div class="admin-card-label">منتج نشط</div>
+                <div class="admin-card-trend">٣ في انتظار المراجعة</div>
+              </div>
+              <div class="admin-card">
+                <div class="admin-card-val" id="admin-msg-count">5</div>
+                <div class="admin-card-label">رسائل جديدة</div>
+                <div class="admin-card-trend" style="color: #f87171">
+                  ٢ تحتاج رد عاجل
+                </div>
+              </div>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">
+                آخر الطلبات
+                <button
+                  class="panel-action"
+                  onclick="
+                    showAdminSection(
+                      'orders',
+                      document.querySelectorAll('.sidebar-link')[2],
+                    )
+                  "
+                >
+                  عرض الكل
+                </button>
+              </div>
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>رقم الطلب</th>
+                    <th>العميل</th>
+                    <th>المنتج</th>
+                    <th>القيمة</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-orders-body"></tbody>
+              </table>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">إجراءات سريعة</div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: 14px;
+                "
+              >
+                <button
+                  class="panel-action"
+                  style="padding: 18px; width: 100%"
+                  onclick="
+                    showAdminSection(
+                      'products',
+                      document.querySelectorAll('.sidebar-link')[1],
+                    )
+                  "
+                >
+                  + رفع منتج جديد
+                </button>
+                <button
+                  class="panel-action"
+                  style="
+                    padding: 18px;
+                    width: 100%;
+                    background: var(--dark3);
+                    color: var(--gold);
+                    border: 1px solid var(--gold);
+                  "
+                  onclick="
+                    showAdminSection(
+                      'orders',
+                      document.querySelectorAll('.sidebar-link')[2],
+                    )
+                  "
+                >
+                  عرض الطلبات المعلقة
+                </button>
+                <button
+                  class="panel-action"
+                  style="
+                    padding: 18px;
+                    width: 100%;
+                    background: var(--dark3);
+                    color: var(--white2);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                  "
+                  onclick="
+                    showAdminSection(
+                      'messages',
+                      document.querySelectorAll('.sidebar-link')[3],
+                    )
+                  "
+                >
+                  مراجعة الرسائل
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products -->
+          <div class="admin-section" id="section-products">
+            <div class="admin-header">
+              <h2>المنتجات</h2>
+              <p>ارفع وأدر كتالوج الإضاءة الخاص بك.</p>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">رفع منتج جديد</div>
+              <div
+                class="upload-zone"
+                onclick="document.getElementById('file-input').click()"
+              >
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">
+                  <strong>انقر لرفع صورة المنتج</strong><br />PNG، JPG، WEBP حتى
+                  10MB
+                </div>
+                <input
+                  type="file"
+                  id="file-input"
+                  accept="image/*"
+                  style="display: none"
+                  onchange="handleFileUpload(event)"
+                />
+              </div>
+              <div
+                id="upload-preview"
+                style="
+                  display: flex;
+                  gap: 10px;
+                  flex-wrap: wrap;
+                  margin-bottom: 20px;
+                "
+              ></div>
+              <div class="product-form-grid">
+                <div class="form-group">
+                  <label>اسم المنتج *</label
+                  ><input
+                    type="text"
+                    id="prod-name"
+                    placeholder="مثال: ثريا أورورا الكريستالية"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>الفئة *</label>
+                  <select id="prod-category">
+                    <option value="">اختر الفئة...</option>
+                    <option value="Magnetic_Track">Magnetic Track</option>
+                    <option value="Spot_light">Spot Light</option>
+                    <option value="DoubleSpot_light">Double Spot Light</option>
+                    <option value="Metal_Connector">Metal Connector</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>السعر (جنيه) *</label
+                  ><input
+                    type="number"
+                    id="prod-price"
+                    placeholder="25000"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>الكمية المتاحة *</label
+                  ><input
+                    type="number"
+                    id="prod-quantity"
+                    placeholder="10"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 6px">
+                <button
+                  class="panel-action"
+                  style="padding: 12px 36px"
+                  onclick="saveProduct()"
+                >
+                  حفظ المنتج
+                </button>
+                <button
+                  onclick="clearProductForm()"
+                  style="
+                    padding: 12px 36px;
+                    background: transparent;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    color: var(--gray);
+                    cursor: pointer;
+                    font-family: &quot;Tajawal&quot;, sans-serif;
+                    font-size: 13px;
+                  "
+                >
+                  مسح النموذج
+                </button>
+              </div>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">
+                المنتجات الحالية (<span id="prod-list-count">0</span>)
+              </div>
+              <div
+                id="admin-product-list"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                  gap: 14px;
+                "
+              ></div>
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <div class="admin-section" id="section-orders">
+            <div class="admin-header">
+              <h2>الطلبات</h2>
+              <p>إدارة الطلبات وتحديث حالاتها.</p>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">جميع الطلبات</div>
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>رقم الطلب</th>
+                    <th>العميل</th>
+                    <th>المنتجات</th>
+                    <th>القيمة</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="full-orders-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-overlay" id="success-overlay">
+      <div class="success-box">
+        <div class="success-icon">✦</div>
+        <div class="success-title">تم استلام طلبك!</div>
+        <div class="success-msg">
+          شكراً على استفساركم.<br />سيتواصل فريقنا معك خلال ٢٤ ساعة<br />لتأكيد
+          ومناقشة طلبك.
+        </div>
+        <button
+          class="btn-primary"
+          onclick="
+            document.getElementById('success-overlay').classList.remove('show');
+            showPage('home');
+          "
+        >
+          العودة للرئيسية
+        </button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div class="notification" id="notification">
+      <div class="notif-icon" id="notif-icon">✦</div>
+      <div class="notif-text">
+        <strong id="notif-title">تمت الإضافة</strong
+        ><span id="notif-msg">المنتج أُضيف إلى طلبك</span>
+      </div>
+    </div>
+
+    <script type="module" src="js/script.js"></script>
+  </body>
 </html>
