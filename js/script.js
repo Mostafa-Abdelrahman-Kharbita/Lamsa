@@ -5,7 +5,6 @@ import {
   getDocs,
   addDoc,
   updateDoc,
-  deleteDoc,
   doc,
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
@@ -86,51 +85,76 @@ const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
 
-// Tracks which product is being edited (null = add mode)
-let currentEditId = null;
-
-// ─────────────────────────────────────────────
-// FIREBASE LOAD
-// ─────────────────────────────────────────────
+// =============================================
+// FIX 1: loadProductsFromFirebase now returns
+// the populated array so .then() callers
+// are guaranteed fresh data.
+// =============================================
 async function loadProductsFromFirebase() {
   const snapshot = await getDocs(collection(db, "Product"));
+
   firebaseProducts = [];
+
   snapshot.forEach((docSnap) => {
-    firebaseProducts.push({ id: docSnap.id, ...docSnap.data() });
+    firebaseProducts.push({
+      id: docSnap.id,
+      ...docSnap.data(),
+    });
   });
+
   renderCatalog(firebaseProducts);
+
+  // FIX: return the array so callers can chain .then(products => ...)
   return firebaseProducts;
 }
 
-// ─────────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────────
 function showPage(name) {
-  if (name === "admin" && !isLoggedIn) {
-    showPage("admin-login");
-    return;
+  if (name === "admin") {
+    if (!isLoggedIn) {
+      showPage("admin-login");
+      return;
+    }
   }
 
-  document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+  document.querySelectorAll(".page").forEach((p) =>
+    p.classList.remove("active")
+  );
   document.getElementById("page-" + name).classList.add("active");
 
-  document.querySelectorAll(".nav-links a").forEach((a) => a.classList.remove("active-link"));
+  document.querySelectorAll(".nav-links a").forEach((a) =>
+    a.classList.remove("active-link")
+  );
+
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 
-  if (name === "catalog") loadProductsFromFirebase();
-  if (name === "order") populateProductDropdown();
-  if (name === "home") renderHomeFeatured();
+  if (name === "catalog") {
+    loadProductsFromFirebase();
+  }
+
+  if (name === "order") {
+    populateProductDropdown();
+  }
+
+  // =============================================
+  // FIX 2: Wait for Firebase data to fully load
+  // before calling renderAdmin(), so
+  // firebaseProducts is populated when
+  // renderAdminProductList() reads it.
+  // =============================================
   if (name === "admin") {
-    loadProductsFromFirebase().then(() => renderAdmin());
+    loadProductsFromFirebase().then(() => {
+      renderAdmin();
+    });
+  }
+
+  if (name === "home") {
+    renderHomeFeatured();
   }
 }
 
-// ─────────────────────────────────────────────
-// AUTH
-// ─────────────────────────────────────────────
 function doLogin() {
   const u = document.getElementById("admin-user").value.trim();
   const p = document.getElementById("admin-pass").value;
@@ -139,10 +163,20 @@ function doLogin() {
     document.getElementById("login-error").textContent = "";
     document.getElementById("admin-user").value = "";
     document.getElementById("admin-pass").value = "";
-    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+    document
+      .querySelectorAll(".page")
+      .forEach((p) => p.classList.remove("active"));
     document.getElementById("page-admin").classList.add("active");
     window.scrollTo({ top: 0, behavior: "smooth" });
-    loadProductsFromFirebase().then(() => renderAdmin());
+
+    // =============================================
+    // FIX 3: doLogin also needs to wait for
+    // Firebase before calling renderAdmin(),
+    // same pattern as showPage("admin").
+    // =============================================
+    loadProductsFromFirebase().then(() => {
+      renderAdmin();
+    });
   } else {
     document.getElementById("login-error").textContent =
       "اسم المستخدم أو كلمة المرور غير صحيحة";
@@ -155,9 +189,6 @@ function doLogout() {
   showNotif("✦", "تم تسجيل الخروج", "وداعاً! تم تسجيل خروجك بأمان.");
 }
 
-// ─────────────────────────────────────────────
-// PRODUCT HELPERS
-// ─────────────────────────────────────────────
 function getAllProducts() {
   return [...firebaseProducts, ...customProducts];
 }
@@ -166,9 +197,7 @@ function productHTML(p) {
   return `<div class="product-card">
     ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ""}
     <div class="product-img">
-      ${p.imageUrl
-        ? `<img src="${p.imageUrl}"/>`
-        : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
+      ${p.imageUrl ? `<img src="${p.imageUrl}"/>` : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
     </div>
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
@@ -183,25 +212,33 @@ function productHTML(p) {
 }
 
 function catLabel(c) {
-  return {
-    chandelier: "ثريا", pendant: "معلقة", wall: "إضاءة جدار",
-    floor: "تورشير", outdoor: "خارجية", table: "مصباح طاولة",
-  }[c] || c;
+  return (
+    {
+      chandelier: "ثريا",
+      pendant: "معلقة",
+      wall: "إضاءة جدار",
+      floor: "تورشير",
+      outdoor: "خارجية",
+      table: "مصباح طاولة",
+    }[c] || c
+  );
 }
 
 function fmtP(n) {
   return Number(n).toLocaleString("ar-EG") + " جنيه";
 }
 
-// ─────────────────────────────────────────────
-// RENDER FUNCTIONS
-// ─────────────────────────────────────────────
 async function renderHomeFeatured() {
   const el = document.getElementById("home-products-grid");
   if (!el) return;
+
   const snapshot = await getDocs(collection(db, "Product"));
   const products = [];
-  snapshot.forEach((docSnap) => products.push({ id: docSnap.id, ...docSnap.data() }));
+
+  snapshot.forEach((docSnap) => {
+    products.push({ id: docSnap.id, ...docSnap.data() });
+  });
+
   el.innerHTML = products.slice(0, 6).map(productHTML).join("");
 }
 
@@ -214,211 +251,19 @@ function renderCatalog(prods) {
 }
 
 function filterProducts(cat, btn) {
-  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+  document
+    .querySelectorAll(".filter-btn")
+    .forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   const all = getAllProducts();
   renderCatalog(cat === "all" ? all : all.filter((p) => p.cat === cat));
 }
 
-function renderAdmin() {
-  renderDashboardOrders();
-  renderFullOrders();
-  renderAdminProductList(firebaseProducts);
-  renderMessages();
-  renderAnalytics();
-  document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
-  document.getElementById("prod-list-count").textContent = getAllProducts().length;
-}
-
-function renderAdminProductList(products) {
-  const el = document.getElementById("admin-product-list");
-  if (!el) return;
-  const list = products || firebaseProducts;
-  el.innerHTML = list.length
-    ? list.map((p) => `
-      <div style="background:var(--dark3);padding:18px;position:relative;border:1px solid rgba(255,255,255,0.05)">
-        <div style="height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-          ${p.imageUrl
-            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
-            : `<span style="font-size:32px">💡</span>`}
-        </div>
-        <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">${p.name}</div>
-        <div style="font-size:11px;color:var(--gold)">${catLabel(p.cat)} · ${fmtP(p.price)}</div>
-        <div style="font-size:11px;color:var(--gray);margin-top:4px">الكمية: ${p.quantity ?? 0}</div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button onclick="editProduct('${p.id}')"
-            style="flex:1;padding:7px 0;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">
-            ✏️ تعديل
-          </button>
-          <button onclick="deleteProduct('${p.id}')"
-            style="flex:1;padding:7px 0;background:transparent;border:1px solid rgba(239,68,68,0.3);color:#f87171;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">
-            🗑️ حذف
-          </button>
-        </div>
-      </div>`).join("")
-    : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
-}
-
-// ─────────────────────────────────────────────
-// EDIT — fills the form and switches to edit mode
-// ─────────────────────────────────────────────
-function editProduct(id) {
-  const p = firebaseProducts.find((x) => x.id === id);
-  if (!p) return;
-
-  // Populate form fields
-  document.getElementById("prod-name").value = p.name;
-  document.getElementById("prod-category").value = p.cat;
-  document.getElementById("prod-price").value = p.price;
-  document.getElementById("prod-quantity").value = p.quantity ?? 0;
-
-  // Show existing image in preview
-  const preview = document.getElementById("upload-preview");
-  preview.innerHTML = "";
-  if (p.imageUrl) {
-    const img = document.createElement("img");
-    img.src = p.imageUrl;
-    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
-    img.dataset.dataurl = p.imageUrl;
-    preview.appendChild(img);
-  }
-
-  // Switch save button to update mode
-  currentEditId = id;
-  const saveBtn = document.querySelector("[onclick='saveProduct()']");
-  if (saveBtn) {
-    saveBtn.textContent = "✦ حفظ التعديلات";
-    saveBtn.style.background = "rgba(201,168,76,0.15)";
-    saveBtn.style.border = "1px solid var(--gold)";
-  }
-
-  // Scroll to form
-  document.getElementById("section-products").scrollIntoView({ behavior: "smooth" });
-  showNotif("✏️", "وضع التعديل", `جاري تعديل: ${p.name}`);
-}
-
-// ─────────────────────────────────────────────
-// DELETE — removes document from Firestore
-// ─────────────────────────────────────────────
-async function deleteProduct(id) {
-  const p = firebaseProducts.find((x) => x.id === id);
-  const name = p ? p.name : "المنتج";
-  if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
-
-  try {
-    await deleteDoc(doc(db, "Product", id));
-    showNotif("✦", "تم الحذف", `تم حذف "${name}" بنجاح`);
-
-    await loadProductsFromFirebase();
-    renderAdminProductList(firebaseProducts);
-    renderHomeFeatured();
-
-    document.getElementById("admin-prod-count").textContent = firebaseProducts.length;
-    document.getElementById("prod-list-count").textContent = firebaseProducts.length;
-  } catch (e) {
-    console.error(e);
-    showNotif("⚠", "خطأ", "فشل حذف المنتج");
-  }
-}
-
-// ─────────────────────────────────────────────
-// SAVE — handles both add and update in one place
-// ─────────────────────────────────────────────
-async function saveProduct() {
-  const name = document.getElementById("prod-name").value.trim();
-  const cat = document.getElementById("prod-category").value;
-  const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
-
-  if (!name || !cat || !price) {
-    showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
-    return;
-  }
-
-  const imgEl = document.querySelector("#upload-preview img");
-  const productData = {
-    name,
-    cat,
-    price,
-    quantity,
-    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
-  };
-
-  try {
-    if (currentEditId) {
-      // ── UPDATE existing document ──
-      const ref = doc(db, "Product", currentEditId);
-      await updateDoc(ref, productData);
-      showNotif("✦", "تم التعديل!", `"${name}" اتعدل بنجاح`);
-      currentEditId = null;
-
-      // Reset save button
-      const saveBtn = document.querySelector("[onclick='saveProduct()']");
-      if (saveBtn) {
-        saveBtn.textContent = "حفظ المنتج";
-        saveBtn.style.background = "";
-        saveBtn.style.border = "";
-      }
-    } else {
-      // ── ADD new document ──
-      await addDoc(collection(db, "Product"), productData);
-      showNotif("✦", "تم الحفظ!", `"${name}" أُضيف بنجاح`);
-    }
-
-    await loadProductsFromFirebase();
-    renderAdminProductList(firebaseProducts);
-    renderHomeFeatured();
-    clearProductForm();
-
-    document.getElementById("admin-prod-count").textContent = firebaseProducts.length;
-    document.getElementById("prod-list-count").textContent = firebaseProducts.length;
-  } catch (error) {
-    console.error(error);
-    showNotif("⚠", "خطأ", "فشلت العملية، تحقق من الكونسول");
-  }
-}
-
-// ─────────────────────────────────────────────
-// FORM HELPERS
-// ─────────────────────────────────────────────
-function clearProductForm() {
-  ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
-  );
-  document.getElementById("prod-category").value = "";
-  document.getElementById("upload-preview").innerHTML = "";
-  document.getElementById("file-input").value = "";
-
-  // Cancel any active edit mode
-  currentEditId = null;
-  const saveBtn = document.querySelector("[onclick='saveProduct()']");
-  if (saveBtn) {
-    saveBtn.textContent = "حفظ المنتج";
-    saveBtn.style.background = "";
-    saveBtn.style.border = "";
-  }
-}
-
-function handleFileUpload(e) {
-  const preview = document.getElementById("upload-preview");
-  preview.innerHTML = ""; // one image at a time
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const img = document.createElement("img");
-    img.src = ev.target.result;
-    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
-    img.dataset.dataurl = ev.target.result;
-    preview.appendChild(img);
-  };
-  reader.readAsDataURL(file);
-}
-
-// ─────────────────────────────────────────────
-// CART
-// ─────────────────────────────────────────────
+// =============================================
+// FIX 4: addToCart now always matches by
+// Firebase doc id (string), fixing the
+// previous mixed number/string id lookup.
+// =============================================
 function addToCart(id) {
   const all = getAllProducts();
   const p = all.find((x) => x.id === id || x.id === String(id));
@@ -448,25 +293,24 @@ function updateCartUI() {
   const tot = document.getElementById("order-total");
   if (!el) return;
   if (!cart.length) {
-    el.innerHTML = '<div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div>';
+    el.innerHTML =
+      '<div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div>';
     if (tot) tot.style.display = "none";
     return;
   }
-  el.innerHTML = cart.map((c, i) => `
+  el.innerHTML = cart
+    .map(
+      (c, i) => `
     <div class="cart-item">
       <div class="cart-img">${c.imageUrl ? `<img src="${c.imageUrl}"/>` : c.emoji || "💡"}</div>
       <div>
         <div class="cart-name">${c.name}</div>
-        <div class="cart-qty">الكمية:
-          <input type="number" value="${c.qty}" min="1"
-            onchange="updateQty(${i},this.value)"
-            style="width:48px;padding:2px 4px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:12px"/>
-          <span onclick="removeFromCart(${i})"
-            style="cursor:pointer;color:var(--gray);margin-right:8px;font-size:12px">✕ حذف</span>
-        </div>
+        <div class="cart-qty">الكمية: <input type="number" value="${c.qty}" min="1" onchange="updateQty(${i},this.value)" style="width:48px;padding:2px 4px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:12px"/> <span onclick="removeFromCart(${i})" style="cursor:pointer;color:var(--gray);margin-right:8px;font-size:12px">✕ حذف</span></div>
       </div>
       <div class="cart-price">${fmtP(c.price * c.qty)}</div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
   const sub = cart.reduce((a, c) => a + c.price * c.qty, 0);
   document.getElementById("subtotal-val").textContent = fmtP(sub);
   document.getElementById("total-val").textContent = fmtP(sub);
@@ -489,13 +333,13 @@ function populateProductDropdown() {
   sel.innerHTML =
     '<option value="">اختر منتجاً للإضافة...</option>' +
     getAllProducts()
-      .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+      .map(
+        (p) =>
+          `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
+      )
       .join("");
 }
 
-// ─────────────────────────────────────────────
-// ORDERS
-// ─────────────────────────────────────────────
 function submitOrder() {
   const fname = document.getElementById("fname").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -514,7 +358,9 @@ function submitOrder() {
       : "غير محدد",
     status: "new",
     date: new Date().toLocaleDateString("ar-EG", {
-      day: "numeric", month: "long", year: "numeric",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     }),
     email,
     phone: document.getElementById("phone").value,
@@ -523,86 +369,162 @@ function submitOrder() {
   cart = [];
   updateCartUI();
   ["fname", "lname", "email", "phone", "address", "description"].forEach(
-    (id) => (document.getElementById(id).value = "")
+    (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("success-overlay").classList.add("show");
 }
 
 const STATUS_MAP = {
-  new: "badge-new", proc: "badge-proc", done: "badge-done", cancel: "badge-cancel",
+  new: "badge-new",
+  proc: "badge-proc",
+  done: "badge-done",
+  cancel: "badge-cancel",
 };
 const STATUS_LABEL = {
-  new: "جديد", proc: "قيد المعالجة", done: "مكتمل", cancel: "ملغى",
+  new: "جديد",
+  proc: "قيد المعالجة",
+  done: "مكتمل",
+  cancel: "ملغى",
 };
 
 function showAdminSection(name, btn) {
-  document.querySelectorAll(".admin-section").forEach((s) => s.classList.remove("active"));
+  document
+    .querySelectorAll(".admin-section")
+    .forEach((s) => s.classList.remove("active"));
   document.getElementById("section-" + name).classList.add("active");
-  document.querySelectorAll(".sidebar-link").forEach((l) => l.classList.remove("active"));
+  document
+    .querySelectorAll(".sidebar-link")
+    .forEach((l) => l.classList.remove("active"));
   if (btn) btn.classList.add("active");
+}
+
+function renderAdmin() {
+  renderDashboardOrders();
+  renderFullOrders();
+  // =============================================
+  // FIX 5: Pass firebaseProducts explicitly so
+  // renderAdminProductList always uses the latest
+  // loaded data, not a potentially stale closure.
+  // =============================================
+  renderAdminProductList(firebaseProducts);
+  renderMessages();
+  renderAnalytics();
+  document.getElementById("admin-prod-count").textContent =
+    getAllProducts().length;
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  document.getElementById("prod-list-count").textContent =
+    getAllProducts().length;
 }
 
 function renderDashboardOrders() {
   const tbody = document.getElementById("dashboard-orders-body");
   if (!tbody) return;
-  tbody.innerHTML = orders.slice(0, 5).map((o) => `<tr>
-    <td style="color:var(--gold);font-weight:500">${o.id}</td>
-    <td>${o.client}</td>
+  tbody.innerHTML = orders
+    .slice(0, 5)
+    .map(
+      (o) => `<tr>
+    <td style="color:var(--gold);font-weight:500">${o.id}</td><td>${o.client}</td>
     <td style="color:var(--gray);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
-    <td>${o.value}</td>
-    <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
-    <td style="color:var(--gray)">${o.date}</td>
-  </tr>`).join("");
+    <td>${o.value}</td><td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
+    <td style="color:var(--gray)">${o.date}</td></tr>`,
+    )
+    .join("");
 }
 
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
-  tbody.innerHTML = orders.map((o, i) => `<tr>
-    <td style="color:var(--gold)">${o.id}</td>
-    <td>${o.client}</td>
+  tbody.innerHTML = orders
+    .map(
+      (o, i) => `<tr>
+    <td style="color:var(--gold)">${o.id}</td><td>${o.client}</td>
     <td style="color:var(--gray);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
     <td>${o.value}</td>
-    <td>
-      <select onchange="updateOrderStatus(${i},this.value)"
-        style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
-        ${["new", "proc", "done", "cancel"].map((s) =>
-          `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`
-        ).join("")}
-      </select>
-    </td>
+    <td><select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
+      ${["new", "proc", "done", "cancel"].map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}</select></td>
     <td style="color:var(--gray)">${o.date}</td>
-    <td>
-      <button onclick="viewDetail(${i})"
-        style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">
-        عرض
-      </button>
-    </td>
-  </tr>`).join("");
+    <td><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
+  </tr>`,
+    )
+    .join("");
 }
 
 function updateOrderStatus(i, status) {
   orders[i].status = status;
   renderDashboardOrders();
-  document.getElementById("admin-msg-count").textContent =
-    orders.filter((o) => o.status === "new").length;
-  showNotif("✦", "تم التحديث", `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`);
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  showNotif(
+    "✦",
+    "تم التحديث",
+    `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`,
+  );
 }
 
 function viewDetail(i) {
   const o = orders[i];
   alert(
-    `الطلب: ${o.id}\nالعميل: ${o.client}\nالبريد: ${o.email}\nالهاتف: ${o.phone || "غير محدد"}\nالمنتج: ${o.product}\nالقيمة: ${o.value}\nالتاريخ: ${o.date}\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`
+    `الطلب: ${o.id}\nالعميل: ${o.client}\nالبريد: ${o.email}\nالهاتف: ${o.phone || "غير محدد"}\nالمنتج: ${o.product}\nالقيمة: ${o.value}\nالتاريخ: ${o.date}\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`,
   );
 }
 
-// ─────────────────────────────────────────────
-// MESSAGES & ANALYTICS
-// ─────────────────────────────────────────────
+// =============================================
+// FIX 6: renderAdminProductList now accepts a
+// products parameter instead of silently
+// reading the module-level firebaseProducts.
+// This makes the timing explicit and testable.
+// =============================================
+function renderAdminProductList(products) {
+  const el = document.getElementById("admin-product-list");
+  if (!el) return;
+
+  // Fallback to module-level array if no argument passed
+  const list = products || firebaseProducts;
+
+  el.innerHTML = list.length
+    ? list
+        .map(
+          (p) => `
+    <div style="background:var(--dark3);padding:18px;position:relative">
+      <div style="font-size:32px;text-align:center;margin-bottom:10px;height:72px;display:flex;align-items:center;justify-content:center">
+        ${
+          p.imageUrl
+            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
+            : p.emoji || "💡"
+        }
+      </div>
+      <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
+        ${p.name}
+      </div>
+      <div style="font-size:11px;color:var(--gold)">
+        ${catLabel(p.cat)} · ${fmtP(p.price)}
+      </div>
+    </div>
+  `,
+        )
+        .join("")
+    : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
+}
+
+function removeCustomProduct(i) {
+  customProducts.splice(i, 1);
+  renderAdminProductList(firebaseProducts);
+  document.getElementById("admin-prod-count").textContent =
+    getAllProducts().length;
+  document.getElementById("prod-list-count").textContent =
+    getAllProducts().length;
+  showNotif("✦", "تم الحذف", "تم حذف المنتج من الكتالوج");
+}
+
 function renderMessages() {
   const el = document.getElementById("messages-list");
   if (!el) return;
-  el.innerHTML = orders.map((o, i) => `
+  el.innerHTML = orders
+    .map(
+      (o, i) => `
     <div class="admin-panel" style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
@@ -621,12 +543,11 @@ function renderMessages() {
       </div>
       <div style="display:flex;gap:10px">
         <a href="mailto:${o.email}" class="panel-action" style="display:inline-block;text-decoration:none">الرد بالبريد</a>
-        <button onclick="updateOrderStatus(${i},'proc')"
-          style="padding:8px 18px;background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">
-          تحديد كـ "قيد المعالجة"
-        </button>
+        <button onclick="updateOrderStatus(${i},'proc')" style="padding:8px 18px;background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">تحديد كـ "قيد المعالجة"</button>
       </div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 }
 
 function renderAnalytics() {
@@ -634,39 +555,136 @@ function renderAnalytics() {
   const chart = document.getElementById("revenue-chart");
   if (!bars || !chart) return;
   [
-    { name: "الثريات",         pct: 42, val: "٥٠٤ألف جنيه" },
-    { name: "المعلقات",        pct: 28, val: "٣٣٦ألف جنيه" },
-    { name: "إضاءة الجدار",   pct: 14, val: "١٦٨ألف جنيه" },
-    { name: "التورشيرات",      pct: 9,  val: "١٠٨ألف جنيه" },
-    { name: "الخارجية وأخرى", pct: 7,  val: "٨٤ألف جنيه"  },
+    { name: "الثريات", pct: 42, val: "٥٠٤ألف جنيه" },
+    { name: "المعلقات", pct: 28, val: "٣٣٦ألف جنيه" },
+    { name: "إضاءة الجدار", pct: 14, val: "١٦٨ألف جنيه" },
+    { name: "التورشيرات", pct: 9, val: "١٠٨ألف جنيه" },
+    { name: "الخارجية وأخرى", pct: 7, val: "٨٤ألف جنيه" },
   ].forEach((c) => {
     const d = document.createElement("div");
-    d.innerHTML = `
-      <div style="display:flex;justify-content:space-between;margin-bottom:7px;font-size:13px">
-        <span style="color:var(--white2)">${c.name}</span>
-        <span style="color:var(--gold)">${c.pct}٪ · ${c.val}</span>
-      </div>
-      <div style="height:5px;background:var(--dark3)">
-        <div style="height:100%;width:${c.pct}%;background:linear-gradient(to left,var(--gold-dark),var(--gold));transition:width 1s ease"></div>
-      </div>`;
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:7px;font-size:13px"><span style="color:var(--white2)">${c.name}</span><span style="color:var(--gold)">${c.pct}٪ · ${c.val}</span></div><div style="height:5px;background:var(--dark3)"><div style="height:100%;width:${c.pct}%;background:linear-gradient(to left,var(--gold-dark),var(--gold));transition:width 1s ease"></div></div>`;
     bars.appendChild(d);
   });
-  const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-  const vals   = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
-  const max    = Math.max(...vals);
-  chart.innerHTML = months.map((m, i) => `
+  const months = [
+    "يناير","فبراير","مارس","أبريل","مايو","يونيو",
+    "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
+  ];
+  const vals = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
+  const max = Math.max(...vals);
+  chart.innerHTML = months
+    .map(
+      (m, i) => `
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
       <div style="font-size:10px;color:var(--gold)">${vals[i]}k</div>
       <div style="flex:1;width:100%;display:flex;align-items:flex-end">
         <div style="width:100%;height:${(vals[i] / max) * 100}%;background:linear-gradient(to top,var(--gold-dark),var(--gold));opacity:0.8;min-height:6px"></div>
       </div>
       <div style="font-size:9px;color:var(--gray);writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);height:36px">${m}</div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("");
 }
 
-// ─────────────────────────────────────────────
-// NOTIFICATION
-// ─────────────────────────────────────────────
+function handleFileUpload(e) {
+  const preview = document.getElementById("upload-preview");
+  Array.from(e.target.files).forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = document.createElement("img");
+      img.src = ev.target.result;
+      img.style.cssText =
+        "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
+      img.dataset.dataurl = ev.target.result;
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveProduct() {
+  const name = document.getElementById("prod-name").value.trim();
+  const cat = document.getElementById("prod-category").value;
+  const price = parseFloat(document.getElementById("prod-price").value);
+  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+
+  if (!name || !cat || !price) {
+    showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
+    return;
+  }
+
+  const imgEl = document.querySelector("#upload-preview img");
+
+  const productData = {
+    name,
+    cat,
+    price,
+    quantity,
+    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
+  };
+
+  try {
+    await addDoc(collection(db, "Product"), productData);
+    showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
+
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
+    renderHomeFeatured();
+    clearProductForm();
+
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
+  } catch (error) {
+    console.error(error);
+    showNotif("⚠", "خطأ", "فشل حفظ المنتج");
+  }
+}
+
+function clearProductForm() {
+  ["prod-name", "prod-price", "prod-quantity"].forEach(
+    (id) => (document.getElementById(id).value = "")
+  );
+  document.getElementById("prod-category").value = "";
+  document.getElementById("upload-preview").innerHTML = "";
+  document.getElementById("file-input").value = "";
+}
+
+async function updateProduct(id) {
+  const name = document.getElementById("prod-name").value.trim();
+  const cat = document.getElementById("prod-category").value;
+  const price = parseFloat(document.getElementById("prod-price").value);
+  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+
+  if (!name || !cat || !price) {
+    showNotif("⚠", "حقول ناقصة", "من فضلك أدخل البيانات");
+    return;
+  }
+
+  const imgEl = document.querySelector("#upload-preview img");
+
+  const updatedData = {
+    name,
+    cat,
+    price,
+    quantity,
+    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
+  };
+
+  try {
+    const ref = doc(db, "Product", id);
+    await updateDoc(ref, updatedData);
+    showNotif("✦", "تم التعديل", "تم تحديث المنتج 🔥");
+
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
+    renderHomeFeatured();
+  } catch (error) {
+    console.error(error);
+    showNotif("⚠", "خطأ", "فشل التعديل");
+  }
+}
+
 let notifTimer;
 function showNotif(icon, title, msg) {
   document.getElementById("notif-icon").textContent = icon;
@@ -678,34 +696,43 @@ function showNotif(icon, title, msg) {
   notifTimer = setTimeout(() => el.classList.remove("show"), 3500);
 }
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
+// =============================================
+// FIX 7: Only call renderHomeFeatured() on
+// initial load — never call bare renderAdmin()
+// at module level since firebaseProducts is
+// still empty at that point.
+// =============================================
 renderHomeFeatured();
 
-// ─────────────────────────────────────────────
-// GLOBALS
-// ─────────────────────────────────────────────
-window.showPage                = showPage;
-window.doLogin                 = doLogin;
-window.doLogout                = doLogout;
+// ===== MAKE EVERYTHING GLOBAL =====
+window.showPage = showPage;
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+
 window.loadProductsFromFirebase = loadProductsFromFirebase;
-window.renderCatalog           = renderCatalog;
-window.renderHomeFeatured      = renderHomeFeatured;
-window.filterProducts          = filterProducts;
-window.addToCart               = addToCart;
-window.quickAddToCart          = quickAddToCart;
-window.updateQty               = updateQty;
-window.removeFromCart          = removeFromCart;
-window.submitOrder             = submitOrder;
+window.renderCatalog = renderCatalog;
+window.renderHomeFeatured = renderHomeFeatured;
+
+window.filterProducts = filterProducts;
+
+window.addToCart = addToCart;
+window.quickAddToCart = quickAddToCart;
+window.updateQty = updateQty;
+window.removeFromCart = removeFromCart;
+
+window.submitOrder = submitOrder;
 window.populateProductDropdown = populateProductDropdown;
-window.showAdminSection        = showAdminSection;
-window.renderAdmin             = renderAdmin;
-window.updateOrderStatus       = updateOrderStatus;
-window.viewDetail              = viewDetail;
-window.saveProduct             = saveProduct;
-window.clearProductForm        = clearProductForm;
-window.handleFileUpload        = handleFileUpload;
-window.editProduct             = editProduct;
-window.deleteProduct           = deleteProduct;
-window.showNotif               = showNotif;
+
+window.showAdminSection = showAdminSection;
+window.renderAdmin = renderAdmin;
+
+window.updateOrderStatus = updateOrderStatus;
+window.viewDetail = viewDetail;
+
+window.saveProduct = saveProduct;
+window.removeCustomProduct = removeCustomProduct;
+window.updateProduct = updateProduct;
+
+window.handleFileUpload = handleFileUpload;
+window.clearProductForm = clearProductForm;
+window.showNotif = showNotif;
