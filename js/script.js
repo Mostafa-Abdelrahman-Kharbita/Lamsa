@@ -24,16 +24,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let firebaseProducts = [];
 
-let cart = [],
-  customProducts = [];
-
-// Orders are now fully managed by Firestore
+let cart = [], customProducts = [];
 let orders = [];
 
-const ADMIN_USER = "admin",
-  ADMIN_PASS = "luminos2024";
+const ADMIN_USER = "admin", ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
-
 let currentEditId = null;
 
 // ─────────────────────────────────────────────
@@ -50,25 +45,20 @@ async function loadProductsFromFirebase() {
 }
 
 // ─────────────────────────────────────────────
-// FIREBASE — ORDERS
+// FIREBASE — ORDERS  (collection name: "order")
 // ─────────────────────────────────────────────
-
-/**
- * Loads all orders from the "Orders" Firestore collection,
- * sorted by createdAt descending (newest first).
- */
 async function loadOrdersFromFirebase() {
   try {
-    const q = query(collection(db, "Orders"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "order"), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
     orders = [];
     snapshot.forEach((docSnap) => {
       orders.push({ id: docSnap.id, ...docSnap.data() });
     });
   } catch (e) {
-    // If index not ready yet, fall back to unordered fetch
-    console.warn("Ordered query failed, falling back:", e);
-    const snapshot = await getDocs(collection(db, "Orders"));
+    // Index not built yet — fall back to unordered
+    console.warn("Ordered fetch failed, using unordered fallback:", e);
+    const snapshot = await getDocs(collection(db, "order"));
     orders = [];
     snapshot.forEach((docSnap) => {
       orders.push({ id: docSnap.id, ...docSnap.data() });
@@ -77,41 +67,27 @@ async function loadOrdersFromFirebase() {
   return orders;
 }
 
-/**
- * Writes a new order document to Firestore and returns the
- * generated document id.
- */
 async function addOrderToFirebase(orderData) {
-  const ref = await addDoc(collection(db, "Orders"), {
+  const ref = await addDoc(collection(db, "order"), {
     ...orderData,
     createdAt: Date.now(),
   });
   return ref.id;
 }
 
-/**
- * Updates the status field of an existing order document.
- */
 async function updateOrderStatusInFirebase(firestoreId, status) {
-  const ref = doc(db, "Orders", firestoreId);
-  await updateDoc(ref, { status });
+  await updateDoc(doc(db, "order", firestoreId), { status });
 }
 
-/**
- * Deletes an order document from Firestore.
- */
 async function deleteOrderFromFirebase(firestoreId) {
-  await deleteDoc(doc(db, "Orders", firestoreId));
+  await deleteDoc(doc(db, "order", firestoreId));
 }
 
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
 function showPage(name) {
-  if (name === "admin" && !isLoggedIn) {
-    showPage("admin-login");
-    return;
-  }
+  if (name === "admin" && !isLoggedIn) { showPage("admin-login"); return; }
 
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
@@ -123,12 +99,10 @@ function showPage(name) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   if (name === "catalog") loadProductsFromFirebase();
-  if (name === "order") populateProductDropdown();
-  if (name === "home") renderHomeFeatured();
+  if (name === "order")   populateProductDropdown();
+  if (name === "home")    renderHomeFeatured();
   if (name === "admin") {
-    Promise.all([loadProductsFromFirebase(), loadOrdersFromFirebase()]).then(() =>
-      renderAdmin()
-    );
+    Promise.all([loadProductsFromFirebase(), loadOrdersFromFirebase()]).then(() => renderAdmin());
   }
 }
 
@@ -146,12 +120,9 @@ function doLogin() {
     document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
     document.getElementById("page-admin").classList.add("active");
     window.scrollTo({ top: 0, behavior: "smooth" });
-    Promise.all([loadProductsFromFirebase(), loadOrdersFromFirebase()]).then(() =>
-      renderAdmin()
-    );
+    Promise.all([loadProductsFromFirebase(), loadOrdersFromFirebase()]).then(() => renderAdmin());
   } else {
-    document.getElementById("login-error").textContent =
-      "اسم المستخدم أو كلمة المرور غير صحيحة";
+    document.getElementById("login-error").textContent = "اسم المستخدم أو كلمة المرور غير صحيحة";
   }
 }
 
@@ -164,19 +135,15 @@ function doLogout() {
 // ─────────────────────────────────────────────
 // PRODUCT HELPERS
 // ─────────────────────────────────────────────
-function getAllProducts() {
-  return [...firebaseProducts, ...customProducts];
-}
+function getAllProducts() { return [...firebaseProducts, ...customProducts]; }
 
 function productHTML(p) {
   return `<div class="product-card">
     ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ""}
     <div class="product-img">
-      ${
-        p.imageUrl
-          ? `<img src="${p.imageUrl}"/>`
-          : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`
-      }
+      ${p.imageUrl
+        ? `<img src="${p.imageUrl}"/>`
+        : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
     </div>
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
@@ -191,24 +158,14 @@ function productHTML(p) {
 }
 
 function catLabel(c) {
-  return (
-    {
-      chandelier: "ثريا",
-      pendant: "معلقة",
-      wall: "إضاءة جدار",
-      floor: "تورشير",
-      outdoor: "خارجية",
-      table: "مصباح طاولة",
-    }[c] || c
-  );
+  return { chandelier:"ثريا", pendant:"معلقة", wall:"إضاءة جدار",
+           floor:"تورشير", outdoor:"خارجية", table:"مصباح طاولة" }[c] || c;
 }
 
-function fmtP(n) {
-  return Number(n).toLocaleString("ar-EG") + " جنيه";
-}
+function fmtP(n) { return Number(n).toLocaleString("ar-EG") + " جنيه"; }
 
 // ─────────────────────────────────────────────
-// RENDER FUNCTIONS
+// RENDER
 // ─────────────────────────────────────────────
 async function renderHomeFeatured() {
   const el = document.getElementById("home-products-grid");
@@ -241,9 +198,7 @@ function renderAdmin() {
   renderMessages();
   renderAnalytics();
   document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-  document.getElementById("admin-msg-count").textContent = orders.filter(
-    (o) => o.status === "new"
-  ).length;
+  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
   document.getElementById("prod-list-count").textContent = getAllProducts().length;
 }
 
@@ -252,16 +207,12 @@ function renderAdminProductList(products) {
   if (!el) return;
   const list = products || firebaseProducts;
   el.innerHTML = list.length
-    ? list
-        .map(
-          (p) => `
+    ? list.map((p) => `
       <div style="background:var(--dark3);padding:18px;position:relative;border:1px solid rgba(255,255,255,0.05)">
         <div style="height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-          ${
-            p.imageUrl
-              ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
-              : `<span style="font-size:32px">💡</span>`
-          }
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
+            : `<span style="font-size:32px">💡</span>`}
         </div>
         <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">${p.name}</div>
         <div style="font-size:11px;color:var(--gold)">${catLabel(p.cat)} · ${fmtP(p.price)}</div>
@@ -276,22 +227,20 @@ function renderAdminProductList(products) {
             🗑️ حذف
           </button>
         </div>
-      </div>`
-        )
-        .join("")
+      </div>`).join("")
     : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
 }
 
 // ─────────────────────────────────────────────
-// EDIT / DELETE PRODUCTS (unchanged logic)
+// PRODUCTS — EDIT / DELETE / SAVE
 // ─────────────────────────────────────────────
 function editProduct(id) {
   const p = firebaseProducts.find((x) => x.id === id);
   if (!p) return;
 
-  document.getElementById("prod-name").value = p.name;
+  document.getElementById("prod-name").value     = p.name;
   document.getElementById("prod-category").value = p.cat;
-  document.getElementById("prod-price").value = p.price;
+  document.getElementById("prod-price").value    = p.price;
   document.getElementById("prod-quantity").value = p.quantity ?? 0;
 
   const preview = document.getElementById("upload-preview");
@@ -299,8 +248,7 @@ function editProduct(id) {
   if (p.imageUrl) {
     const img = document.createElement("img");
     img.src = p.imageUrl;
-    img.style.cssText =
-      "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
+    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
     img.dataset.dataurl = p.imageUrl;
     preview.appendChild(img);
   }
@@ -321,17 +269,14 @@ async function deleteProduct(id) {
   const p = firebaseProducts.find((x) => x.id === id);
   const name = p ? p.name : "المنتج";
   if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
-
   try {
     await deleteDoc(doc(db, "Product", id));
     showNotif("✦", "تم الحذف", `تم حذف "${name}" بنجاح`);
-
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-
     document.getElementById("admin-prod-count").textContent = firebaseProducts.length;
-    document.getElementById("prod-list-count").textContent = firebaseProducts.length;
+    document.getElementById("prod-list-count").textContent  = firebaseProducts.length;
   } catch (e) {
     console.error(e);
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
@@ -339,9 +284,9 @@ async function deleteProduct(id) {
 }
 
 async function saveProduct() {
-  const name = document.getElementById("prod-name").value.trim();
-  const cat = document.getElementById("prod-category").value;
-  const price = parseFloat(document.getElementById("prod-price").value);
+  const name     = document.getElementById("prod-name").value.trim();
+  const cat      = document.getElementById("prod-category").value;
+  const price    = parseFloat(document.getElementById("prod-price").value);
   const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
@@ -350,39 +295,25 @@ async function saveProduct() {
   }
 
   const imgEl = document.querySelector("#upload-preview img");
-  const productData = {
-    name,
-    cat,
-    price,
-    quantity,
-    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
-  };
+  const productData = { name, cat, price, quantity, imageUrl: imgEl ? imgEl.dataset.dataurl : null };
 
   try {
     if (currentEditId) {
-      const ref = doc(db, "Product", currentEditId);
-      await updateDoc(ref, productData);
+      await updateDoc(doc(db, "Product", currentEditId), productData);
       showNotif("✦", "تم التعديل!", `"${name}" اتعدل بنجاح`);
       currentEditId = null;
-
       const saveBtn = document.querySelector("[onclick='saveProduct()']");
-      if (saveBtn) {
-        saveBtn.textContent = "حفظ المنتج";
-        saveBtn.style.background = "";
-        saveBtn.style.border = "";
-      }
+      if (saveBtn) { saveBtn.textContent = "حفظ المنتج"; saveBtn.style.background = ""; saveBtn.style.border = ""; }
     } else {
       await addDoc(collection(db, "Product"), productData);
       showNotif("✦", "تم الحفظ!", `"${name}" أُضيف بنجاح`);
     }
-
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
-
     document.getElementById("admin-prod-count").textContent = firebaseProducts.length;
-    document.getElementById("prod-list-count").textContent = firebaseProducts.length;
+    document.getElementById("prod-list-count").textContent  = firebaseProducts.length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشلت العملية، تحقق من الكونسول");
@@ -390,20 +321,13 @@ async function saveProduct() {
 }
 
 function clearProductForm() {
-  ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
-  );
-  document.getElementById("prod-category").value = "";
+  ["prod-name", "prod-price", "prod-quantity"].forEach((id) => (document.getElementById(id).value = ""));
+  document.getElementById("prod-category").value  = "";
   document.getElementById("upload-preview").innerHTML = "";
-  document.getElementById("file-input").value = "";
-
+  document.getElementById("file-input").value     = "";
   currentEditId = null;
   const saveBtn = document.querySelector("[onclick='saveProduct()']");
-  if (saveBtn) {
-    saveBtn.textContent = "حفظ المنتج";
-    saveBtn.style.background = "";
-    saveBtn.style.border = "";
-  }
+  if (saveBtn) { saveBtn.textContent = "حفظ المنتج"; saveBtn.style.background = ""; saveBtn.style.border = ""; }
 }
 
 function handleFileUpload(e) {
@@ -415,8 +339,7 @@ function handleFileUpload(e) {
   reader.onload = (ev) => {
     const img = document.createElement("img");
     img.src = ev.target.result;
-    img.style.cssText =
-      "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
+    img.style.cssText = "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
     img.dataset.dataurl = ev.target.result;
     preview.appendChild(img);
   };
@@ -427,8 +350,7 @@ function handleFileUpload(e) {
 // CART
 // ─────────────────────────────────────────────
 function addToCart(id) {
-  const all = getAllProducts();
-  const p = all.find((x) => x.id === id || x.id === String(id));
+  const p = getAllProducts().find((x) => x.id === id || x.id === String(id));
   if (!p) return;
   const ex = cart.find((c) => c.id === p.id);
   if (ex) ex.qty++;
@@ -451,62 +373,46 @@ function quickAddToCart() {
 }
 
 function updateCartUI() {
-  const el = document.getElementById("cart-items");
+  const el  = document.getElementById("cart-items");
   const tot = document.getElementById("order-total");
   if (!el) return;
   if (!cart.length) {
-    el.innerHTML =
-      '<div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div>';
+    el.innerHTML = '<div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div>';
     if (tot) tot.style.display = "none";
     return;
   }
-  el.innerHTML = cart
-    .map(
-      (c, i) => `
+  el.innerHTML = cart.map((c, i) => `
     <div class="cart-item">
       <div class="cart-img">${c.imageUrl ? `<img src="${c.imageUrl}"/>` : c.emoji || "💡"}</div>
       <div>
         <div class="cart-name">${c.name}</div>
         <div class="cart-qty">الكمية:
-          <input type="number" value="${c.qty}" min="1"
-            onchange="updateQty(${i},this.value)"
+          <input type="number" value="${c.qty}" min="1" onchange="updateQty(${i},this.value)"
             style="width:48px;padding:2px 4px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:12px"/>
           <span onclick="removeFromCart(${i})"
             style="cursor:pointer;color:var(--gray);margin-right:8px;font-size:12px">✕ حذف</span>
         </div>
       </div>
       <div class="cart-price">${fmtP(c.price * c.qty)}</div>
-    </div>`
-    )
-    .join("");
+    </div>`).join("");
   const sub = cart.reduce((a, c) => a + c.price * c.qty, 0);
   document.getElementById("subtotal-val").textContent = fmtP(sub);
-  document.getElementById("total-val").textContent = fmtP(sub);
+  document.getElementById("total-val").textContent    = fmtP(sub);
   if (tot) tot.style.display = "block";
 }
 
-function updateQty(i, val) {
-  cart[i].qty = Math.max(1, parseInt(val) || 1);
-  updateCartUI();
-}
-
-function removeFromCart(i) {
-  cart.splice(i, 1);
-  updateCartUI();
-}
+function updateQty(i, val) { cart[i].qty = Math.max(1, parseInt(val) || 1); updateCartUI(); }
+function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
 
 function populateProductDropdown() {
   const sel = document.getElementById("quick-product");
   if (!sel) return;
-  sel.innerHTML =
-    '<option value="">اختر منتجاً للإضافة...</option>' +
-    getAllProducts()
-      .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
-      .join("");
+  sel.innerHTML = '<option value="">اختر منتجاً للإضافة...</option>' +
+    getAllProducts().map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`).join("");
 }
 
 // ─────────────────────────────────────────────
-// ORDERS  ← now Firebase-backed
+// ORDERS — submit (writes to "order" collection)
 // ─────────────────────────────────────────────
 async function submitOrder() {
   const fname = document.getElementById("fname").value.trim();
@@ -516,44 +422,39 @@ async function submitOrder() {
     return;
   }
 
-  const totalValue = cart.length
-    ? cart.reduce((a, c) => a + c.price * c.qty, 0)
-    : 0;
+  const totalValue = cart.reduce((a, c) => a + c.price * c.qty, 0);
 
   const newOrder = {
-    // Human-readable display id generated client-side; Firestore doc id is the real key
-    displayId: "#LM-" + (Math.floor(Math.random() * 9000) + 1000),
-    client: fname + " " + (document.getElementById("lname").value || ""),
-    product: cart.length
+    displayId : "#LM-" + (Math.floor(Math.random() * 9000) + 1000),
+    client    : (fname + " " + (document.getElementById("lname").value || "")).trim(),
+    product   : cart.length
       ? cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", ")
       : "استفسار عام",
-    rawValue: totalValue,
-    value: totalValue ? fmtP(totalValue) : "غير محدد",
-    status: "new",
-    date: new Date().toLocaleDateString("ar-EG", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
+    rawValue  : totalValue,
+    value     : totalValue ? fmtP(totalValue) : "غير محدد",
+    status    : "new",
+    date      : new Date().toLocaleDateString("ar-EG", { day:"numeric", month:"long", year:"numeric" }),
     email,
-    phone: document.getElementById("phone").value,
-    desc: document.getElementById("description").value,
+    phone     : document.getElementById("phone").value,
+    address   : document.getElementById("address").value,
+    projType  : document.getElementById("proj-type").value,
+    budget    : document.getElementById("budget").value,
+    desc      : document.getElementById("description").value,
   };
 
   try {
-    // Write to Firestore — returns the new doc id
     const firestoreId = await addOrderToFirebase(newOrder);
-
-    // Merge Firestore id into the local object so status updates work immediately
     newOrder.id = firestoreId;
     orders.unshift(newOrder);
 
-    // Clear form & cart
+    // Reset form & cart
     cart = [];
     updateCartUI();
-    ["fname", "lname", "email", "phone", "address", "description"].forEach(
+    ["fname","lname","email","phone","address","description"].forEach(
       (id) => (document.getElementById(id).value = "")
     );
+    document.getElementById("proj-type").value = "";
+    document.getElementById("budget").value    = "";
 
     document.getElementById("success-overlay").classList.add("show");
   } catch (e) {
@@ -562,18 +463,11 @@ async function submitOrder() {
   }
 }
 
-const STATUS_MAP = {
-  new: "badge-new",
-  proc: "badge-proc",
-  done: "badge-done",
-  cancel: "badge-cancel",
-};
-const STATUS_LABEL = {
-  new: "جديد",
-  proc: "قيد المعالجة",
-  done: "مكتمل",
-  cancel: "ملغى",
-};
+// ─────────────────────────────────────────────
+// ORDERS — admin render & status update
+// ─────────────────────────────────────────────
+const STATUS_MAP   = { new:"badge-new", proc:"badge-proc", done:"badge-done", cancel:"badge-cancel" };
+const STATUS_LABEL = { new:"جديد", proc:"قيد المعالجة", done:"مكتمل", cancel:"ملغى" };
 
 function showAdminSection(name, btn) {
   document.querySelectorAll(".admin-section").forEach((s) => s.classList.remove("active"));
@@ -585,27 +479,20 @@ function showAdminSection(name, btn) {
 function renderDashboardOrders() {
   const tbody = document.getElementById("dashboard-orders-body");
   if (!tbody) return;
-  tbody.innerHTML = orders
-    .slice(0, 5)
-    .map(
-      (o) => `<tr>
+  tbody.innerHTML = orders.slice(0, 5).map((o) => `<tr>
     <td style="color:var(--gold);font-weight:500">${o.displayId || o.id}</td>
     <td>${o.client}</td>
     <td style="color:var(--gray);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
     <td>${o.value}</td>
     <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
     <td style="color:var(--gray)">${o.date}</td>
-  </tr>`
-    )
-    .join("");
+  </tr>`).join("");
 }
 
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
-  tbody.innerHTML = orders
-    .map(
-      (o, i) => `<tr>
+  tbody.innerHTML = orders.map((o, i) => `<tr>
     <td style="color:var(--gold)">${o.displayId || o.id}</td>
     <td>${o.client}</td>
     <td style="color:var(--gray);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
@@ -613,12 +500,9 @@ function renderFullOrders() {
     <td>
       <select onchange="updateOrderStatus(${i},this.value)"
         style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
-        ${["new", "proc", "done", "cancel"]
-          .map(
-            (s) =>
-              `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`
-          )
-          .join("")}
+        ${["new","proc","done","cancel"].map((s) =>
+          `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`
+        ).join("")}
       </select>
     </td>
     <td style="color:var(--gray)">${o.date}</td>
@@ -628,29 +512,20 @@ function renderFullOrders() {
         عرض
       </button>
     </td>
-  </tr>`
-    )
-    .join("");
+  </tr>`).join("");
 }
 
-/**
- * Updates order status both in the local array and in Firestore.
- * Each order object carries its Firestore document id in `o.id`.
- */
 async function updateOrderStatus(i, status) {
   const o = orders[i];
   o.status = status;
   renderDashboardOrders();
   renderFullOrders();
-  document.getElementById("admin-msg-count").textContent = orders.filter(
-    (x) => x.status === "new"
-  ).length;
-  showNotif("✦", "تم التحديث", `${o.displayId || o.id} تم تحديثه إلى: ${STATUS_LABEL[status]}`);
-
+  document.getElementById("admin-msg-count").textContent = orders.filter((x) => x.status === "new").length;
+  showNotif("✦", "تم التحديث", `${o.displayId || o.id} → ${STATUS_LABEL[status]}`);
   try {
     await updateOrderStatusInFirebase(o.id, status);
   } catch (e) {
-    console.error("Failed to sync status to Firestore:", e);
+    console.error("Firestore status sync failed:", e);
     showNotif("⚠", "تحذير", "تعذّر حفظ التحديث في قاعدة البيانات");
   }
 }
@@ -658,7 +533,17 @@ async function updateOrderStatus(i, status) {
 function viewDetail(i) {
   const o = orders[i];
   alert(
-    `الطلب: ${o.displayId || o.id}\nالعميل: ${o.client}\nالبريد: ${o.email}\nالهاتف: ${o.phone || "غير محدد"}\nالمنتج: ${o.product}\nالقيمة: ${o.value}\nالتاريخ: ${o.date}\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`
+    `الطلب: ${o.displayId || o.id}` +
+    `\nالعميل: ${o.client}` +
+    `\nالبريد: ${o.email}` +
+    `\nالهاتف: ${o.phone || "غير محدد"}` +
+    `\nالعنوان: ${o.address || "غير محدد"}` +
+    `\nنوع المشروع: ${o.projType || "غير محدد"}` +
+    `\nالميزانية: ${o.budget || "غير محدد"}` +
+    `\nالمنتج: ${o.product}` +
+    `\nالقيمة: ${o.value}` +
+    `\nالتاريخ: ${o.date}` +
+    `\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`
   );
 }
 
@@ -668,9 +553,7 @@ function viewDetail(i) {
 function renderMessages() {
   const el = document.getElementById("messages-list");
   if (!el) return;
-  el.innerHTML = orders
-    .map(
-      (o, i) => `
+  el.innerHTML = orders.map((o, i) => `
     <div class="admin-panel" style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
@@ -694,21 +577,24 @@ function renderMessages() {
           تحديد كـ "قيد المعالجة"
         </button>
       </div>
-    </div>`
-    )
-    .join("");
+    </div>`).join("");
 }
 
 function renderAnalytics() {
-  const bars = document.getElementById("analytics-bars");
+  const bars  = document.getElementById("analytics-bars");
   const chart = document.getElementById("revenue-chart");
   if (!bars || !chart) return;
+
+  // Clear first to prevent duplication on re-render
+  bars.innerHTML  = "";
+  chart.innerHTML = "";
+
   [
-    { name: "الثريات",         pct: 42, val: "٥٠٤ألف جنيه" },
-    { name: "المعلقات",        pct: 28, val: "٣٣٦ألف جنيه" },
-    { name: "إضاءة الجدار",   pct: 14, val: "١٦٨ألف جنيه" },
-    { name: "التورشيرات",      pct: 9,  val: "١٠٨ألف جنيه" },
-    { name: "الخارجية وأخرى", pct: 7,  val: "٨٤ألف جنيه"  },
+    { name:"الثريات",         pct:42, val:"٥٠٤ألف جنيه" },
+    { name:"المعلقات",        pct:28, val:"٣٣٦ألف جنيه" },
+    { name:"إضاءة الجدار",   pct:14, val:"١٦٨ألف جنيه" },
+    { name:"التورشيرات",      pct:9,  val:"١٠٨ألف جنيه" },
+    { name:"الخارجية وأخرى", pct:7,  val:"٨٤ألف جنيه"  },
   ].forEach((c) => {
     const d = document.createElement("div");
     d.innerHTML = `
@@ -721,21 +607,18 @@ function renderAnalytics() {
       </div>`;
     bars.appendChild(d);
   });
+
   const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-  const vals   = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
+  const vals   = [62,78,85,91,105,88,96,112,134,98,118,142];
   const max    = Math.max(...vals);
-  chart.innerHTML = months
-    .map(
-      (m, i) => `
+  chart.innerHTML = months.map((m, i) => `
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
       <div style="font-size:10px;color:var(--gold)">${vals[i]}k</div>
       <div style="flex:1;width:100%;display:flex;align-items:flex-end">
-        <div style="width:100%;height:${(vals[i] / max) * 100}%;background:linear-gradient(to top,var(--gold-dark),var(--gold));opacity:0.8;min-height:6px"></div>
+        <div style="width:100%;height:${(vals[i]/max)*100}%;background:linear-gradient(to top,var(--gold-dark),var(--gold));opacity:0.8;min-height:6px"></div>
       </div>
       <div style="font-size:9px;color:var(--gray);writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);height:36px">${m}</div>
-    </div>`
-    )
-    .join("");
+    </div>`).join("");
 }
 
 // ─────────────────────────────────────────────
@@ -743,9 +626,9 @@ function renderAnalytics() {
 // ─────────────────────────────────────────────
 let notifTimer;
 function showNotif(icon, title, msg) {
-  document.getElementById("notif-icon").textContent = icon;
+  document.getElementById("notif-icon").textContent  = icon;
   document.getElementById("notif-title").textContent = title;
-  document.getElementById("notif-msg").textContent = msg;
+  document.getElementById("notif-msg").textContent   = msg;
   const el = document.getElementById("notification");
   el.classList.add("show");
   clearTimeout(notifTimer);
@@ -753,34 +636,34 @@ function showNotif(icon, title, msg) {
 }
 
 // ─────────────────────────────────────────────
-// INIT — load orders alongside products on startup
+// INIT
 // ─────────────────────────────────────────────
 Promise.all([renderHomeFeatured(), loadOrdersFromFirebase()]);
 
 // ─────────────────────────────────────────────
 // GLOBALS
 // ─────────────────────────────────────────────
-window.showPage                 = showPage;
-window.doLogin                  = doLogin;
-window.doLogout                 = doLogout;
+window.showPage                  = showPage;
+window.doLogin                   = doLogin;
+window.doLogout                  = doLogout;
 window.loadProductsFromFirebase  = loadProductsFromFirebase;
 window.loadOrdersFromFirebase    = loadOrdersFromFirebase;
-window.renderCatalog            = renderCatalog;
-window.renderHomeFeatured       = renderHomeFeatured;
-window.filterProducts           = filterProducts;
-window.addToCart                = addToCart;
-window.quickAddToCart           = quickAddToCart;
-window.updateQty                = updateQty;
-window.removeFromCart           = removeFromCart;
-window.submitOrder              = submitOrder;
-window.populateProductDropdown  = populateProductDropdown;
-window.showAdminSection         = showAdminSection;
-window.renderAdmin              = renderAdmin;
-window.updateOrderStatus        = updateOrderStatus;
-window.viewDetail               = viewDetail;
-window.saveProduct              = saveProduct;
-window.clearProductForm         = clearProductForm;
-window.handleFileUpload         = handleFileUpload;
-window.editProduct              = editProduct;
-window.deleteProduct            = deleteProduct;
-window.showNotif                = showNotif;
+window.renderCatalog             = renderCatalog;
+window.renderHomeFeatured        = renderHomeFeatured;
+window.filterProducts            = filterProducts;
+window.addToCart                 = addToCart;
+window.quickAddToCart            = quickAddToCart;
+window.updateQty                 = updateQty;
+window.removeFromCart            = removeFromCart;
+window.submitOrder               = submitOrder;
+window.populateProductDropdown   = populateProductDropdown;
+window.showAdminSection          = showAdminSection;
+window.renderAdmin               = renderAdmin;
+window.updateOrderStatus         = updateOrderStatus;
+window.viewDetail                = viewDetail;
+window.saveProduct               = saveProduct;
+window.clearProductForm          = clearProductForm;
+window.handleFileUpload          = handleFileUpload;
+window.editProduct               = editProduct;
+window.deleteProduct             = deleteProduct;
+window.showNotif                 = showNotif;
