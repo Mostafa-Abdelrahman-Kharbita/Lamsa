@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -341,20 +342,29 @@ function populateProductDropdown() {
       .join("");
 }
 
-function submitOrder() {
+async function submitOrder() {
   const fname = document.getElementById("fname").value.trim();
   const email = document.getElementById("email").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+
   if (!fname || !email) {
     showNotif("⚠", "معلومات ناقصة", "من فضلك أدخل اسمك وبريدك الإلكتروني.");
     return;
   }
-  orders.unshift({
-    id: "#LM-" + (2848 + orders.length),
+
+  const orderData = {
     client: fname + " " + (document.getElementById("lname").value || ""),
+    email,
+    phone: phone || "غير محدد",
+    address: address || "غير محدد",
     product: cart.length
       ? cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", ")
       : "استفسار عام",
     value: cart.length
+      ? cart.reduce((a, c) => a + c.price * c.qty, 0)
+      : 0,
+    valueFormatted: cart.length
       ? fmtP(cart.reduce((a, c) => a + c.price * c.qty, 0))
       : "غير محدد",
     status: "new",
@@ -363,16 +373,37 @@ function submitOrder() {
       month: "long",
       year: "numeric",
     }),
-    email,
-    phone: document.getElementById("phone").value,
-    desc: document.getElementById("description").value,
-  });
-  cart = [];
-  updateCartUI();
-  ["fname", "lname", "email", "phone", "address", "description"].forEach(
-    (id) => (document.getElementById(id).value = ""),
-  );
-  document.getElementById("success-overlay").classList.add("show");
+    createdAt: serverTimestamp(),
+    desc: document.getElementById("description").value || "",
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "Orders"), orderData);
+
+    // Also push to local orders array so admin sees it immediately
+    orders.unshift({
+      id: "#LM-" + docRef.id.slice(0, 6).toUpperCase(),
+      client: orderData.client,
+      product: orderData.product,
+      value: orderData.valueFormatted,
+      status: "new",
+      date: orderData.date,
+      email: orderData.email,
+      phone: orderData.phone,
+      desc: orderData.desc,
+    });
+
+    cart = [];
+    updateCartUI();
+    ["fname", "lname", "email", "phone", "address", "description"].forEach(
+      (id) => (document.getElementById(id).value = "")
+    );
+    document.getElementById("success-overlay").classList.add("show");
+    showNotif("✦", "تم الإرسال!", "طلبك وصلنا وسنتواصل معك قريباً.");
+  } catch (error) {
+    console.error(error);
+    showNotif("⚠", "خطأ", "فشل إرسال الطلب، حاول مجدداً.");
+  }
 }
 
 const STATUS_MAP = {

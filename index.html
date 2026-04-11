@@ -126,56 +126,41 @@
 <!-- ===== ORDER ===== -->
 <div class="page" id="page-order">
   <div class="order-layout">
-    <div class="order-left">
-      <h2 class="form-title">أرسل <em>طلبك</em></h2>
-      <p class="form-sub">أدخل بياناتك وسنتواصل معك خلال ٢٤ ساعة لتأكيد الطلب ومناقشة التفاصيل.</p>
+   <div class="order-left">
+  <h2 class="form-title">أرسل <em>طلبك</em></h2>
+  <p class="form-sub">أدخل بياناتك وسنتواصل معك خلال ٢٤ ساعة لتأكيد الطلب ومناقشة التفاصيل.</p>
 
-      <div class="fsec-title">البيانات الشخصية</div>
-      <div class="form-row">
-        <div class="form-group"><label>الاسم الأول *</label><input type="text" id="fname" placeholder="أحمد"/></div>
-        <div class="form-group"><label>اسم العائلة *</label><input type="text" id="lname" placeholder="حسن"/></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>البريد الإلكتروني *</label><input type="email" id="email" placeholder="ahmed@example.com"/></div>
-        <div class="form-group"><label>رقم الهاتف *</label><input type="tel" id="phone" placeholder="+20 10 0000 0000"/></div>
-      </div>
+  <div class="fsec-title">البيانات الشخصية</div>
+  <div class="form-row">
+    <div class="form-group"><label>الاسم الأول *</label><input type="text" id="fname" placeholder="أحمد"/></div>
+    <div class="form-group"><label>اسم العائلة</label><input type="text" id="lname" placeholder="حسن"/></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>البريد الإلكتروني *</label><input type="email" id="email" placeholder="ahmed@example.com"/></div>
+    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="phone" placeholder="+20 10 0000 0000"/></div>
+  </div>
+  <div class="form-group"><label>عنوان التسليم</label><input type="text" id="address" placeholder="الشارع، المدينة، الدولة"/></div>
 
-      <div class="fsec-title">تفاصيل المشروع</div>
-      <div class="form-row">
-        <div class="form-group"><label>نوع المشروع</label>
-          <select id="proj-type">
-            <option value="">اختر النوع...</option>
-            <option>سكني</option><option>تجاري</option><option>فندق / مطعم</option><option>مكاتب</option><option>أخرى</option>
-          </select>
-        </div>
-        <div class="form-group"><label>الميزانية التقريبية</label>
-          <select id="budget">
-            <option value="">اختر النطاق...</option>
-            <option>أقل من ١٠,٠٠٠ جنيه</option><option>١٠,٠٠٠ – ٥٠,٠٠٠ جنيه</option>
-            <option>٥٠,٠٠٠ – ١٥٠,٠٠٠ جنيه</option><option>١٥٠,٠٠٠ – ٥٠٠,٠٠٠ جنيه</option><option>+٥٠٠,٠٠٠ جنيه</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group"><label>عنوان التسليم</label><input type="text" id="address" placeholder="الشارع، المدينة، الدولة"/></div>
-      <div class="form-group"><label>وصف المشروع والطلبات الخاصة</label>
-        <textarea id="description" rows="5" placeholder="صِف مساحتك، تفضيلاتك في الأسلوب، أبعاد الغرفة، المزاج المطلوب..."></textarea>
-      </div>
+  <div class="fsec-title">المنتجات المختارة</div>
+  <div style="color:var(--gray);font-size:14px;margin-bottom:14px">
+    تصفح <a onclick="showPage('catalog')" style="color:var(--gold);cursor:pointer">الكتالوج</a> وأضف المنتجات، أو اختر من القائمة أدناه.
+  </div>
+  <div class="add-to-cart-bar">
+    <select id="quick-product" style="flex:1"><option value="">اختر منتجاً للإضافة...</option></select>
+    <input type="number" class="qty-input" id="quick-qty" value="1" min="1" max="99"/>
+    <button class="add-btn" onclick="quickAddToCart()">+ إضافة</button>
+  </div>
 
-      <div class="fsec-title">المنتجات المختارة</div>
-      <div style="color:var(--gray);font-size:14px;margin-bottom:14px">
-        تصفح <a onclick="showPage('catalog')" style="color:var(--gold);cursor:pointer">الكتالوج</a> وأضف المنتجات، أو صِف ما تبحث عنه أعلاه.
-      </div>
-      <div class="add-to-cart-bar">
-        <select id="quick-product" style="flex:1"><option value="">اختر منتجاً للإضافة...</option></select>
-        <input type="number" class="qty-input" id="quick-qty" value="1" min="1" max="99"/>
-        <button class="add-btn" onclick="quickAddToCart()">+ إضافة</button>
-      </div>
+  <!-- keep these hidden so submitOrder() doesn't break -->
+  <input type="hidden" id="proj-type"/>
+  <input type="hidden" id="budget"/>
+  <textarea id="description" style="display:none"></textarea>
 
-      <button class="submit-btn" onclick="submitOrder()">✦ إرسال طلب الاستفسار</button>
-      <p style="color:var(--gray);font-size:12px;margin-top:18px;letter-spacing:1px;text-align:center">
-        سنتواصل معك خلال ٢٤ ساعة لتأكيد ومناقشة طلبك
-      </p>
-    </div>
+  <button class="submit-btn" onclick="submitOrder()">✦ إرسال طلب الاستفسار</button>
+  <p style="color:var(--gray);font-size:12px;margin-top:18px;letter-spacing:1px;text-align:center">
+    سنتواصل معك خلال ٢٤ ساعة لتأكيد ومناقشة طلبك
+  </p>
+</div>
 
     <div class="order-right">
       <div class="order-summary-title">ملخص الطلب</div>
