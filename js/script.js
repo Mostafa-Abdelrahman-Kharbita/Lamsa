@@ -137,7 +137,9 @@ function showPage(name) {
   }
 
   if (name === "order") {
-    populateProductDropdown();
+    loadProductsFromFirebase().then(() => {
+      populateProductDropdown();
+    });
   }
 
   // =============================================
@@ -277,17 +279,27 @@ function addToCart(id) {
   showNotif("✦", "أُضيف للطلب", p.name + " أُضيف إلى طلبك");
 }
 
-function quickAddToCart() {
-  const sel = document.getElementById("quick-product");
-  const qty = parseInt(document.getElementById("quick-qty").value) || 1;
-  if (!sel.value) return;
-  const p = getAllProducts().find((x) => x.name === sel.value);
-  if (!p) return;
+function addToCart(id) {
+  const all = getAllProducts();
+  let p = all.find((x) => x.id === id || x.id === String(id));
+  if (!p) {
+    // products not loaded yet, load then retry
+    loadProductsFromFirebase().then(() => {
+      const p2 = getAllProducts().find((x) => x.id === id || x.id === String(id));
+      if (!p2) return;
+      const ex = cart.find((c) => c.id === p2.id);
+      if (ex) ex.qty++;
+      else cart.push({ ...p2, qty: 1 });
+      updateCartUI();
+      showNotif("✦", "أُضيف للطلب", p2.name + " أُضيف إلى طلبك");
+    });
+    return;
+  }
   const ex = cart.find((c) => c.id === p.id);
-  if (ex) ex.qty += qty;
-  else cart.push({ ...p, qty });
+  if (ex) ex.qty++;
+  else cart.push({ ...p, qty: 1 });
   updateCartUI();
-  showNotif("✦", "أُضيف", `${qty}× ${p.name} أُضيفت`);
+  showNotif("✦", "أُضيف للطلب", p.name + " أُضيف إلى طلبك");
 }
 
 function updateCartUI() {
@@ -332,13 +344,22 @@ function removeFromCart(i) {
 function populateProductDropdown() {
   const sel = document.getElementById("quick-product");
   if (!sel) return;
+  const all = getAllProducts();
+  if (!all.length) {
+    // retry after load
+    loadProductsFromFirebase().then(() => {
+      sel.innerHTML =
+        '<option value="">اختر منتجاً للإضافة...</option>' +
+        getAllProducts()
+          .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+          .join("");
+    });
+    return;
+  }
   sel.innerHTML =
     '<option value="">اختر منتجاً للإضافة...</option>' +
-    getAllProducts()
-      .map(
-        (p) =>
-          `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
-      )
+    all
+      .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
       .join("");
 }
 
