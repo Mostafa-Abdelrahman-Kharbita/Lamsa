@@ -268,16 +268,6 @@ function filterProducts(cat, btn) {
 // Firebase doc id (string), fixing the
 // previous mixed number/string id lookup.
 // =============================================
-function addToCart(id) {
-  const all = getAllProducts();
-  const p = all.find((x) => x.id === id || x.id === String(id));
-  if (!p) return;
-  const ex = cart.find((c) => c.id === p.id);
-  if (ex) ex.qty++;
-  else cart.push({ ...p, qty: 1 });
-  updateCartUI();
-  showNotif("✦", "أُضيف للطلب", p.name + " أُضيف إلى طلبك");
-}
 
 function addToCart(id) {
   const all = getAllProducts();
