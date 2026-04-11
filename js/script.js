@@ -148,9 +148,9 @@ function showPage(name) {
   // firebaseProducts is populated when
   // renderAdminProductList() reads it.
   // =============================================
-  if (name === "admin") {
-    loadProductsFromFirebase().then(() => {
-      renderAdmin();
+ if (name === "admin") {
+    loadProductsFromFirebase().then(async () => {
+      await renderAdmin();
     });
   }
 
@@ -178,8 +178,8 @@ function doLogin() {
     // Firebase before calling renderAdmin(),
     // same pattern as showPage("admin").
     // =============================================
-    loadProductsFromFirebase().then(() => {
-      renderAdmin();
+   loadProductsFromFirebase().then(async () => {
+      await renderAdmin();
     });
   } else {
     document.getElementById("login-error").textContent =
@@ -451,21 +451,16 @@ function showAdminSection(name, btn) {
   if (btn) btn.classList.add("active");
 }
 
-function renderAdmin() {
-  loadOrdersFromFirebase().then(() => {
-    renderDashboardOrders();
-    renderFullOrders();
-    renderAdminProductList(firebaseProducts);
-    renderMessages();
-    renderAnalytics();
-    document.getElementById("admin-prod-count").textContent =
-      getAllProducts().length;
-    document.getElementById("admin-msg-count").textContent = orders.filter(
-      (o) => o.status === "new",
-    ).length;
-    document.getElementById("prod-list-count").textContent =
-      getAllProducts().length;
-  });
+async function renderAdmin() {
+  await loadOrdersFromFirebase();
+  renderDashboardOrders();
+  renderFullOrders();
+  renderAdminProductList(firebaseProducts);
+  renderMessages();
+  renderAnalytics();
+  document.getElementById("admin-prod-count").textContent = getAllProducts().length;
+  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
+  document.getElementById("prod-list-count").textContent = getAllProducts().length;
 }
 
 function renderDashboardOrders() {
@@ -501,17 +496,21 @@ function renderFullOrders() {
     .join("");
 }
 
-function updateOrderStatus(i, status) {
+async function updateOrderStatus(i, status) {
   orders[i].status = status;
+  // update in Firebase if it has a firestoreId
+  if (orders[i].firestoreId) {
+    try {
+      await updateDoc(doc(db, "Orders", orders[i].firestoreId), { status });
+    } catch (e) {
+      console.error("فشل تحديث الحالة:", e);
+    }
+  }
   renderDashboardOrders();
-  document.getElementById("admin-msg-count").textContent = orders.filter(
-    (o) => o.status === "new",
-  ).length;
-  showNotif(
-    "✦",
-    "تم التحديث",
-    `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`,
-  );
+  renderFullOrders();
+  renderMessages();
+  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
+  showNotif("✦", "تم التحديث", `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`);
 }
 
 function viewDetail(i) {
