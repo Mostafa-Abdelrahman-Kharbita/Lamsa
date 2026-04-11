@@ -5,6 +5,7 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
@@ -481,7 +482,6 @@ function renderAdminProductList(products) {
   const el = document.getElementById("admin-product-list");
   if (!el) return;
 
-  // Fallback to module-level array if no argument passed
   const list = products || firebaseProducts;
 
   el.innerHTML = list.length
@@ -499,8 +499,12 @@ function renderAdminProductList(products) {
       <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
         ${p.name}
       </div>
-      <div style="font-size:11px;color:var(--gold)">
+      <div style="font-size:11px;color:var(--gold);margin-bottom:12px">
         ${catLabel(p.cat)} · ${fmtP(p.price)}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="openEditModal('${p.id}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">✏ تعديل</button>
+        <button onclick="deleteProduct('${p.id}','${p.name}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(255,80,80,0.4);color:#ff6b6b;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">🗑 حذف</button>
       </div>
     </div>
   `,
@@ -695,7 +699,94 @@ function showNotif(icon, title, msg) {
   clearTimeout(notifTimer);
   notifTimer = setTimeout(() => el.classList.remove("show"), 3500);
 }
+// ===== DELETE PRODUCT =====
+async function deleteProduct(id, name) {
+  if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
+  try {
+    await deleteDoc(doc(db, "Product", id));
+    showNotif("🗑", "تم الحذف", `${name} تم حذفه من Firebase`);
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
+    renderHomeFeatured();
+    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
+    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+  } catch (error) {
+    console.error(error);
+    showNotif("⚠", "خطأ", "فشل حذف المنتج");
+  }
+}
 
+// ===== OPEN EDIT MODAL =====
+function openEditModal(id) {
+  const p = firebaseProducts.find((x) => x.id === id);
+  if (!p) return;
+
+  // Remove old modal if exists
+  const old = document.getElementById("edit-modal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "edit-modal";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px
+  `;
+  modal.innerHTML = `
+    <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:480px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif">
+      <button onclick="document.getElementById('edit-modal').remove()" style="position:absolute;top:14px;left:16px;background:transparent;border:none;color:var(--gray,#888);font-size:20px;cursor:pointer">✕</button>
+      <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px;letter-spacing:1px">✏ تعديل المنتج</div>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اسم المنتج</label>
+      <input id="edit-prod-name" value="${p.name || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الفئة</label>
+      <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
+        ${["chandelier","pendant","wall","floor","outdoor","table"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
+      </select>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">السعر (جنيه)</label>
+      <input id="edit-prod-price" type="number" value="${p.price || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الكمية</label>
+      <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:24px;box-sizing:border-box"/>
+
+      <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:var(--dark,#0a0a0a);border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
+        حفظ التعديلات
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// ===== SAVE EDIT FROM MODAL =====
+async function saveEditProduct(id) {
+  const name = document.getElementById("edit-prod-name").value.trim();
+  const cat = document.getElementById("edit-prod-cat").value;
+  const price = parseFloat(document.getElementById("edit-prod-price").value);
+  const quantity = parseInt(document.getElementById("edit-prod-qty").value) || 0;
+
+  if (!name || !cat || !price) {
+    showNotif("⚠", "حقول ناقصة", "من فضلك أدخل جميع البيانات");
+    return;
+  }
+
+  const existing = firebaseProducts.find((x) => x.id === id);
+
+  try {
+    await updateDoc(doc(db, "Product", id), {
+      name, cat, price, quantity,
+      imageUrl: existing?.imageUrl || null,
+    });
+    showNotif("✦", "تم التعديل", `${name} تم تحديثه بنجاح 🔥`);
+    document.getElementById("edit-modal").remove();
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
+    renderHomeFeatured();
+  } catch (error) {
+    console.error(error);
+    showNotif("⚠", "خطأ", "فشل حفظ التعديلات");
+  }
+}
 // =============================================
 // FIX 7: Only call renderHomeFeatured() on
 // initial load — never call bare renderAdmin()
@@ -736,3 +827,7 @@ window.updateProduct = updateProduct;
 window.handleFileUpload = handleFileUpload;
 window.clearProductForm = clearProductForm;
 window.showNotif = showNotif;
+
+window.deleteProduct = deleteProduct;
+window.openEditModal = openEditModal;
+window.saveEditProduct = saveEditProduct;
