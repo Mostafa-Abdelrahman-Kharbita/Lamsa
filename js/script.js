@@ -545,9 +545,107 @@ async function updateOrderStatus(i, status) {
 
 function viewDetail(i) {
   const o = orders[i];
-  alert(
-    `الطلب: ${o.id}\nالعميل: ${o.client}\nالبريد: ${o.email}\nالهاتف: ${o.phone || "غير محدد"}\nالمنتج: ${o.product}\nالقيمة: ${o.value}\nالتاريخ: ${o.date}\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`,
-  );
+
+  const old = document.getElementById("order-detail-modal");
+  if (old) old.remove();
+
+  const statusColors = {
+    new: "#c9a84c",
+    proc: "#3b82f6",
+    done: "#22c55e",
+    cancel: "#ef4444",
+  };
+
+  const modal = document.createElement("div");
+  modal.id = "order-detail-modal";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    overflow-y:auto
+  `;
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid rgba(201,168,76,0.25);width:100%;max-width:560px;margin:auto;position:relative;direction:rtl;font-family:'Tajawal',sans-serif;overflow:hidden">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1a1500,#0a0a0a);padding:28px 32px;border-bottom:1px solid rgba(201,168,76,0.15);display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:11px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:8px">تفاصيل الطلب</div>
+          <div style="font-size:24px;color:#fff;font-weight:300">${o.id}</div>
+          <div style="margin-top:10px">
+            <span style="background:${statusColors[o.status]}22;color:${statusColors[o.status]};border:1px solid ${statusColors[o.status]}44;padding:4px 14px;font-size:12px;letter-spacing:1px">
+              ${STATUS_LABEL[o.status]}
+            </span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('order-detail-modal').remove()" 
+          style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:28px 32px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Client Info -->
+        <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
+          <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:16px">معلومات العميل</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">الاسم</div>
+              <div style="font-size:15px;color:#fff">${o.client}</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">التاريخ</div>
+              <div style="font-size:15px;color:#fff">${o.date}</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">البريد الإلكتروني</div>
+              <div style="font-size:14px;color:var(--gold,#c9a84c)">${o.email}</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">الهاتف</div>
+              <div style="font-size:14px;color:#fff">${o.phone || "غير محدد"}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Info -->
+        <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
+          <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:16px">تفاصيل الطلب</div>
+          <div style="font-size:10px;color:#666;margin-bottom:6px;letter-spacing:1px">المنتجات</div>
+          <div style="font-size:14px;color:#e0e0e0;line-height:1.8;margin-bottom:16px;padding:12px;background:#111;border-right:2px solid var(--gold,#c9a84c)">${o.product}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
+            <span style="font-size:12px;color:#666;letter-spacing:1px">القيمة الإجمالية</span>
+            <span style="font-size:22px;color:var(--gold,#c9a84c);font-weight:500">${o.value}</span>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        ${o.desc ? `
+        <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
+          <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:12px">ملاحظات</div>
+          <div style="font-size:13px;color:#aaa;line-height:1.8">${o.desc}</div>
+        </div>` : ""}
+
+        <!-- Actions -->
+        <div style="display:flex;gap:10px">
+          <a href="mailto:${o.email}" style="flex:1;padding:12px;background:linear-gradient(135deg,#a07830,#c9a84c);color:#000;text-decoration:none;text-align:center;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700">
+            ✉ مراسلة العميل
+          </a>
+          <button onclick="document.getElementById('order-detail-modal').remove()" 
+            style="flex:1;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">
+            إغلاق
+          </button>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
+
+  document.body.appendChild(modal);
 }
 
 // =============================================
