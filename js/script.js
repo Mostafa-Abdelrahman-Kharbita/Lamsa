@@ -466,8 +466,7 @@ async function renderAdmin() {
   renderDashboardOrders();
   renderFullOrders();
   renderAdminProductList(firebaseProducts);
-  renderMessages();
-  renderAnalytics();
+
 
   document.getElementById("admin-prod-count").textContent = getAllProducts().length;
   document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
