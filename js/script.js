@@ -354,30 +354,34 @@ function populateProductDropdown() {
 }
 
 async function submitOrder() {
-  const fname = document.getElementById("fname").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
+  const fname = document.getElementById("fname")?.value.trim() || "";
+  const lname = document.getElementById("lname")?.value.trim() || "";
+  const email = document.getElementById("email")?.value.trim() || "";
+  const phone = document.getElementById("phone")?.value.trim() || "";
+  const address = document.getElementById("address")?.value.trim() || "";
+  const desc = document.getElementById("description")?.value.trim() || "";
 
   if (!fname || !email) {
     showNotif("⚠", "معلومات ناقصة", "من فضلك أدخل اسمك وبريدك الإلكتروني.");
     return;
   }
 
+  if (!cart.length) {
+    showNotif("⚠", "السلة فارغة", "من فضلك أضف منتجاً واحداً على الأقل.");
+    return;
+  }
+
+  const totalValue = cart.reduce((a, c) => a + c.price * c.qty, 0);
+
   const orderData = {
-    client: fname + " " + (document.getElementById("lname").value || ""),
+    client: (fname + " " + lname).trim(),
     email,
     phone: phone || "غير محدد",
     address: address || "غير محدد",
-    product: cart.length
-      ? cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", ")
-      : "استفسار عام",
-    value: cart.length
-      ? cart.reduce((a, c) => a + c.price * c.qty, 0)
-      : 0,
-    valueFormatted: cart.length
-      ? fmtP(cart.reduce((a, c) => a + c.price * c.qty, 0))
-      : "غير محدد",
+    product: cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", "),
+    value: totalValue,
+    valueFormatted: fmtP(totalValue),
+    items: cart.map((c) => ({ id: c.id, name: c.name, price: c.price, qty: c.qty })),
     status: "new",
     date: new Date().toLocaleDateString("ar-EG", {
       day: "numeric",
@@ -385,15 +389,15 @@ async function submitOrder() {
       year: "numeric",
     }),
     createdAt: serverTimestamp(),
-    desc: document.getElementById("description").value || "",
+    desc,
   };
 
   try {
     const docRef = await addDoc(collection(db, "Orders"), orderData);
 
-    // Also push to local orders array so admin sees it immediately
     orders.unshift({
       id: "#LM-" + docRef.id.slice(0, 6).toUpperCase(),
+      firestoreId: docRef.id,
       client: orderData.client,
       product: orderData.product,
       value: orderData.valueFormatted,
@@ -406,9 +410,12 @@ async function submitOrder() {
 
     cart = [];
     updateCartUI();
-    ["fname", "lname", "email", "phone", "address", "description"].forEach(
-      (id) => (document.getElementById(id).value = "")
-    );
+
+    ["fname", "lname", "email", "phone", "address", "description"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+
     document.getElementById("success-overlay").classList.add("show");
     showNotif("✦", "تم الإرسال!", "طلبك وصلنا وسنتواصل معك قريباً.");
   } catch (error) {
@@ -416,7 +423,6 @@ async function submitOrder() {
     showNotif("⚠", "خطأ", "فشل إرسال الطلب، حاول مجدداً.");
   }
 }
-
 const STATUS_MAP = {
   new: "badge-new",
   proc: "badge-proc",
@@ -884,6 +890,26 @@ async function saveEditProduct(id) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ التعديلات");
   }
+}
+
+function quickAddToCart() {
+  const sel = document.getElementById("quick-product");
+  const qty = parseInt(document.getElementById("quick-qty").value) || 1;
+  if (!sel.value) {
+    showNotif("⚠", "اختر منتجاً", "من فضلك اختر منتجاً أولاً.");
+    return;
+  }
+  const all = getAllProducts();
+  const p = all.find((x) => x.name === sel.value);
+  if (!p) {
+    showNotif("⚠", "خطأ", "المنتج غير موجود، حاول مجدداً.");
+    return;
+  }
+  const ex = cart.find((c) => c.id === p.id);
+  if (ex) ex.qty += qty;
+  else cart.push({ ...p, qty });
+  updateCartUI();
+  showNotif("✦", "أُضيف", `${qty}× ${p.name} أُضيفت`);
 }
 // =============================================
 // FIX 7: Only call renderHomeFeatured() on
