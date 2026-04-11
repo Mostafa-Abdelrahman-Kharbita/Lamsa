@@ -25,6 +25,7 @@ let firebaseProducts = [];
 
 let cart = [],
   customProducts = [];
+  let orders = [];
 const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
