@@ -605,6 +605,7 @@ async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
+  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
@@ -617,25 +618,19 @@ async function saveProduct() {
     name,
     cat,
     price,
-    oldPrice: parseFloat(document.getElementById("prod-sale").value) || null,
-    badge: document.getElementById("prod-badge").value || null,
+    quantity,
     imageUrl: imgEl ? imgEl.dataset.dataurl : null,
-    material: document.getElementById("prod-material").value,
-    dims: document.getElementById("prod-dims").value,
-    quantity: 0,
   };
 
   try {
     await addDoc(collection(db, "Product"), productData);
     showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
 
-    // Reload from Firebase then re-render admin product list
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
 
-    // Update counts
     document.getElementById("admin-prod-count").textContent =
       getAllProducts().length;
     document.getElementById("prod-list-count").textContent =
@@ -647,15 +642,9 @@ async function saveProduct() {
 }
 
 function clearProductForm() {
-  [
-    "prod-name",
-    "prod-price",
-    "prod-sale",
-    "prod-material",
-    "prod-dims",
-    "prod-desc",
-    "prod-badge",
-  ].forEach((id) => (document.getElementById(id).value = ""));
+  ["prod-name", "prod-price", "prod-quantity"].forEach(
+    (id) => (document.getElementById(id).value = "")
+  );
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
   document.getElementById("file-input").value = "";
@@ -665,6 +654,7 @@ async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
+  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل البيانات");
@@ -677,11 +667,8 @@ async function updateProduct(id) {
     name,
     cat,
     price,
-    oldPrice: parseFloat(document.getElementById("prod-sale").value) || null,
-    badge: document.getElementById("prod-badge").value || null,
+    quantity,
     imageUrl: imgEl ? imgEl.dataset.dataurl : null,
-    material: document.getElementById("prod-material").value,
-    dims: document.getElementById("prod-dims").value,
   };
 
   try {
