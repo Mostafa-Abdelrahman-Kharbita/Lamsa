@@ -352,7 +352,6 @@ function populateProductDropdown() {
       .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
       .join("");
 }
-
 async function submitOrder() {
   const fname = document.getElementById("fname")?.value.trim() || "";
   const lname = document.getElementById("lname")?.value.trim() || "";
@@ -392,9 +391,15 @@ async function submitOrder() {
     desc,
   };
 
+  // Show loading state on button
+  const btn = document.querySelector(".submit-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "جارٍ الإرسال..."; }
+
   try {
     const docRef = await addDoc(collection(db, "Orders"), orderData);
+    console.log("✅ Order saved to Firebase:", docRef.id);
 
+    // Add to local orders array immediately
     orders.unshift({
       id: "#LM-" + docRef.id.slice(0, 6).toUpperCase(),
       firestoreId: docRef.id,
@@ -408,19 +413,24 @@ async function submitOrder() {
       desc: orderData.desc,
     });
 
+    // Clear cart and form
     cart = [];
     updateCartUI();
-
     ["fname", "lname", "email", "phone", "address", "description"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = "";
     });
 
+    // Show success
     document.getElementById("success-overlay").classList.add("show");
     showNotif("✦", "تم الإرسال!", "طلبك وصلنا وسنتواصل معك قريباً.");
+
   } catch (error) {
-    console.error(error);
-    showNotif("⚠", "خطأ", "فشل إرسال الطلب، حاول مجدداً.");
+    console.error("❌ Firebase error:", error);
+    showNotif("⚠", "خطأ", "فشل إرسال الطلب: " + error.message);
+  } finally {
+    // Restore button
+    if (btn) { btn.disabled = false; btn.textContent = "✦ إرسال طلب الاستفسار"; }
   }
 }
 const STATUS_MAP = {
