@@ -116,14 +116,14 @@ function showPage(name) {
     }
   }
 
-  document.querySelectorAll(".page").forEach((p) =>
-    p.classList.remove("active")
-  );
+  document
+    .querySelectorAll(".page")
+    .forEach((p) => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
 
-  document.querySelectorAll(".nav-links a").forEach((a) =>
-    a.classList.remove("active-link")
-  );
+  document
+    .querySelectorAll(".nav-links a")
+    .forEach((a) => a.classList.remove("active-link"));
 
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
@@ -481,7 +481,6 @@ function renderAdminProductList(products) {
   const el = document.getElementById("admin-product-list");
   if (!el) return;
 
-  // Fallback to module-level array if no argument passed
   const list = products || firebaseProducts;
 
   el.innerHTML = list.length
@@ -489,6 +488,7 @@ function renderAdminProductList(products) {
         .map(
           (p) => `
     <div style="background:var(--dark3);padding:18px;position:relative">
+      
       <div style="font-size:32px;text-align:center;margin-bottom:10px;height:72px;display:flex;align-items:center;justify-content:center">
         ${
           p.imageUrl
@@ -496,19 +496,56 @@ function renderAdminProductList(products) {
             : p.emoji || "💡"
         }
       </div>
+
       <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
         ${p.name}
       </div>
+
       <div style="font-size:11px;color:var(--gold)">
         ${catLabel(p.cat)} · ${fmtP(p.price)}
       </div>
+
+      <!-- 👇 الكمية -->
+      <div style="font-size:11px;color:gray;margin-top:4px">
+        الكمية: ${p.quantity || 0}
+      </div>
+
+      <!-- 👇 الأزرار -->
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="editProduct('${p.id}')" style="flex:1">✏️ تعديل</button>
+        <button onclick="deleteProduct('${p.id}')" style="flex:1;color:red">🗑️ حذف</button>
+      </div>
+
     </div>
   `,
         )
         .join("")
     : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
 }
+function editProduct(id) {
+  const p = firebaseProducts.find((x) => x.id === id);
+  if (!p) return;
 
+  document.getElementById("prod-name").value = p.name;
+  document.getElementById("prod-category").value = p.cat;
+  document.getElementById("prod-price").value = p.price;
+  document.getElementById("prod-quantity").value = p.quantity || 0;
+
+  window.currentEditId = id;
+}
+async function deleteProduct(id) {
+  if (!confirm("متأكد انك عايز تمسح المنتج؟")) return;
+
+  try {
+    await deleteDoc(doc(db, "Product", id));
+
+    showNotif("✦", "تم الحذف", "تم حذف المنتج بنجاح");
+
+    await loadProductsFromFirebase();
+  } catch (e) {
+    console.error(e);
+  }
+}
 function removeCustomProduct(i) {
   customProducts.splice(i, 1);
   renderAdminProductList(firebaseProducts);
@@ -566,8 +603,18 @@ function renderAnalytics() {
     bars.appendChild(d);
   });
   const months = [
-    "يناير","فبراير","مارس","أبريل","مايو","يونيو",
-    "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
   ];
   const vals = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
   const max = Math.max(...vals);
@@ -605,7 +652,8 @@ async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
@@ -623,27 +671,40 @@ async function saveProduct() {
   };
 
   try {
-    await addDoc(collection(db, "Product"), productData);
-    showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
+    // 👇 الفرق هنا
+    if (window.currentEditId) {
+      await updateProduct(window.currentEditId);
+      window.currentEditId = null;
+
+      showNotif("✦", "تم التعديل!", name + " اتعدل بنجاح 🔥");
+    } else {
+      await addDoc(collection(db, "Product"), productData);
+
+      showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
+    }
 
     await loadProductsFromFirebase();
+
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
+
     clearProductForm();
 
     document.getElementById("admin-prod-count").textContent =
-      getAllProducts().length;
+      firebaseProducts.length;
+
     document.getElementById("prod-list-count").textContent =
-      getAllProducts().length;
+      firebaseProducts.length;
+
   } catch (error) {
     console.error(error);
-    showNotif("⚠", "خطأ", "فشل حفظ المنتج");
+    showNotif("⚠", "خطأ", "فشل العملية");
   }
 }
 
 function clearProductForm() {
   ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
+    (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
@@ -654,7 +715,8 @@ async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل البيانات");
