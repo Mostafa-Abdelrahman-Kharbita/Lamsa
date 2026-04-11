@@ -7,7 +7,7 @@ import {
   updateDoc,
   doc,
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-console.log("script loaded ");
+
 const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "lamsa-18d05.firebaseapp.com",
@@ -85,21 +85,29 @@ const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
 
+// =============================================
+// FIX 1: loadProductsFromFirebase now returns
+// the populated array so .then() callers
+// are guaranteed fresh data.
+// =============================================
 async function loadProductsFromFirebase() {
   const snapshot = await getDocs(collection(db, "Product"));
 
   firebaseProducts = [];
 
-  snapshot.forEach((doc) => {
+  snapshot.forEach((docSnap) => {
     firebaseProducts.push({
-      id: doc.id,
-      ...doc.data(),
+      id: docSnap.id,
+      ...docSnap.data(),
     });
   });
 
   renderCatalog(firebaseProducts);
+
+  // FIX: return the array so callers can chain .then(products => ...)
+  return firebaseProducts;
 }
-console.log(firebaseProducts);
+
 function showPage(name) {
   if (name === "admin") {
     if (!isLoggedIn) {
@@ -130,9 +138,15 @@ function showPage(name) {
     populateProductDropdown();
   }
 
+  // =============================================
+  // FIX 2: Wait for Firebase data to fully load
+  // before calling renderAdmin(), so
+  // firebaseProducts is populated when
+  // renderAdminProductList() reads it.
+  // =============================================
   if (name === "admin") {
     loadProductsFromFirebase().then(() => {
-      renderAdmin(); // 👈 أهم سطر في حياتك
+      renderAdmin();
     });
   }
 
@@ -140,6 +154,7 @@ function showPage(name) {
     renderHomeFeatured();
   }
 }
+
 function doLogin() {
   const u = document.getElementById("admin-user").value.trim();
   const p = document.getElementById("admin-pass").value;
@@ -153,7 +168,15 @@ function doLogin() {
       .forEach((p) => p.classList.remove("active"));
     document.getElementById("page-admin").classList.add("active");
     window.scrollTo({ top: 0, behavior: "smooth" });
-    renderAdmin();
+
+    // =============================================
+    // FIX 3: doLogin also needs to wait for
+    // Firebase before calling renderAdmin(),
+    // same pattern as showPage("admin").
+    // =============================================
+    loadProductsFromFirebase().then(() => {
+      renderAdmin();
+    });
   } else {
     document.getElementById("login-error").textContent =
       "اسم المستخدم أو كلمة المرور غير صحيحة";
@@ -183,7 +206,7 @@ function productHTML(p) {
         ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
         <div class="product-price">${fmtP(p.price)}</div>
       </div>
-      <button class="add-btn-card" onclick="addToCart(${p.id || '"' + p.name + '"'})">+ أضف للطلب</button>
+      <button class="add-btn-card" onclick="addToCart('${p.id}')">+ أضف للطلب</button>
     </div>
   </div>`;
 }
@@ -200,6 +223,7 @@ function catLabel(c) {
     }[c] || c
   );
 }
+
 function fmtP(n) {
   return Number(n).toLocaleString("ar-EG") + " جنيه";
 }
@@ -209,18 +233,15 @@ async function renderHomeFeatured() {
   if (!el) return;
 
   const snapshot = await getDocs(collection(db, "Product"));
-
   const products = [];
 
-  snapshot.forEach((doc) => {
-    products.push({
-      id: doc.id,
-      ...doc.data(),
-    });
+  snapshot.forEach((docSnap) => {
+    products.push({ id: docSnap.id, ...docSnap.data() });
   });
 
   el.innerHTML = products.slice(0, 6).map(productHTML).join("");
 }
+
 function renderCatalog(prods) {
   const el = document.getElementById("catalog-products-grid");
   if (!el) return;
@@ -228,6 +249,7 @@ function renderCatalog(prods) {
     ? prods.map(productHTML).join("")
     : `<div style="color:var(--gray);padding:60px;text-align:center;grid-column:1/-1;font-size:18px;font-style:italic">لا توجد منتجات في هذه الفئة بعد.</div>`;
 }
+
 function filterProducts(cat, btn) {
   document
     .querySelectorAll(".filter-btn")
@@ -237,31 +259,35 @@ function filterProducts(cat, btn) {
   renderCatalog(cat === "all" ? all : all.filter((p) => p.cat === cat));
 }
 
-function addToCart(idOrName) {
+// =============================================
+// FIX 4: addToCart now always matches by
+// Firebase doc id (string), fixing the
+// previous mixed number/string id lookup.
+// =============================================
+function addToCart(id) {
   const all = getAllProducts();
-  const p =
-    typeof idOrName === "number"
-      ? all.find((x) => x.id === idOrName)
-      : all.find((x) => x.name === idOrName);
+  const p = all.find((x) => x.id === id || x.id === String(id));
   if (!p) return;
-  const ex = cart.find((c) => c.name === p.name);
+  const ex = cart.find((c) => c.id === p.id);
   if (ex) ex.qty++;
   else cart.push({ ...p, qty: 1 });
   updateCartUI();
   showNotif("✦", "أُضيف للطلب", p.name + " أُضيف إلى طلبك");
 }
+
 function quickAddToCart() {
   const sel = document.getElementById("quick-product");
   const qty = parseInt(document.getElementById("quick-qty").value) || 1;
   if (!sel.value) return;
   const p = getAllProducts().find((x) => x.name === sel.value);
   if (!p) return;
-  const ex = cart.find((c) => c.name === p.name);
+  const ex = cart.find((c) => c.id === p.id);
   if (ex) ex.qty += qty;
   else cart.push({ ...p, qty });
   updateCartUI();
   showNotif("✦", "أُضيف", `${qty}× ${p.name} أُضيفت`);
 }
+
 function updateCartUI() {
   const el = document.getElementById("cart-items");
   const tot = document.getElementById("order-total");
@@ -290,14 +316,17 @@ function updateCartUI() {
   document.getElementById("total-val").textContent = fmtP(sub);
   if (tot) tot.style.display = "block";
 }
+
 function updateQty(i, val) {
   cart[i].qty = Math.max(1, parseInt(val) || 1);
   updateCartUI();
 }
+
 function removeFromCart(i) {
   cart.splice(i, 1);
   updateCartUI();
 }
+
 function populateProductDropdown() {
   const sel = document.getElementById("quick-product");
   if (!sel) return;
@@ -368,10 +397,16 @@ function showAdminSection(name, btn) {
     .forEach((l) => l.classList.remove("active"));
   if (btn) btn.classList.add("active");
 }
+
 function renderAdmin() {
   renderDashboardOrders();
   renderFullOrders();
-  renderAdminProductList();
+  // =============================================
+  // FIX 5: Pass firebaseProducts explicitly so
+  // renderAdminProductList always uses the latest
+  // loaded data, not a potentially stale closure.
+  // =============================================
+  renderAdminProductList(firebaseProducts);
   renderMessages();
   renderAnalytics();
   document.getElementById("admin-prod-count").textContent =
@@ -382,6 +417,7 @@ function renderAdmin() {
   document.getElementById("prod-list-count").textContent =
     getAllProducts().length;
 }
+
 function renderDashboardOrders() {
   const tbody = document.getElementById("dashboard-orders-body");
   if (!tbody) return;
@@ -396,6 +432,7 @@ function renderDashboardOrders() {
     )
     .join("");
 }
+
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
@@ -413,6 +450,7 @@ function renderFullOrders() {
     )
     .join("");
 }
+
 function updateOrderStatus(i, status) {
   orders[i].status = status;
   renderDashboardOrders();
@@ -425,24 +463,32 @@ function updateOrderStatus(i, status) {
     `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`,
   );
 }
+
 function viewDetail(i) {
   const o = orders[i];
   alert(
     `الطلب: ${o.id}\nالعميل: ${o.client}\nالبريد: ${o.email}\nالهاتف: ${o.phone || "غير محدد"}\nالمنتج: ${o.product}\nالقيمة: ${o.value}\nالتاريخ: ${o.date}\n\nالتفاصيل:\n${o.desc || "لا توجد تفاصيل إضافية"}`,
   );
 }
-function renderAdminProductList() {
+
+// =============================================
+// FIX 6: renderAdminProductList now accepts a
+// products parameter instead of silently
+// reading the module-level firebaseProducts.
+// This makes the timing explicit and testable.
+// =============================================
+function renderAdminProductList(products) {
   const el = document.getElementById("admin-product-list");
   if (!el) return;
 
-  const products = firebaseProducts;
+  // Fallback to module-level array if no argument passed
+  const list = products || firebaseProducts;
 
-  el.innerHTML = products.length
-    ? products
+  el.innerHTML = list.length
+    ? list
         .map(
-          (p, i) => `
+          (p) => `
     <div style="background:var(--dark3);padding:18px;position:relative">
-      
       <div style="font-size:32px;text-align:center;margin-bottom:10px;height:72px;display:flex;align-items:center;justify-content:center">
         ${
           p.imageUrl
@@ -450,30 +496,29 @@ function renderAdminProductList() {
             : p.emoji || "💡"
         }
       </div>
-
       <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
         ${p.name}
       </div>
-
       <div style="font-size:11px;color:var(--gold)">
         ${catLabel(p.cat)} · ${fmtP(p.price)}
       </div>
-
     </div>
   `,
         )
         .join("")
     : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
 }
+
 function removeCustomProduct(i) {
   customProducts.splice(i, 1);
-  renderAdminProductList();
+  renderAdminProductList(firebaseProducts);
   document.getElementById("admin-prod-count").textContent =
     getAllProducts().length;
   document.getElementById("prod-list-count").textContent =
     getAllProducts().length;
   showNotif("✦", "تم الحذف", "تم حذف المنتج من الكتالوج");
 }
+
 function renderMessages() {
   const el = document.getElementById("messages-list");
   if (!el) return;
@@ -504,6 +549,7 @@ function renderMessages() {
     )
     .join("");
 }
+
 function renderAnalytics() {
   const bars = document.getElementById("analytics-bars");
   const chart = document.getElementById("revenue-chart");
@@ -520,18 +566,8 @@ function renderAnalytics() {
     bars.appendChild(d);
   });
   const months = [
-    "يناير",
-    "فبراير",
-    "مارس",
-    "أبريل",
-    "مايو",
-    "يونيو",
-    "يوليو",
-    "أغسطس",
-    "سبتمبر",
-    "أكتوبر",
-    "نوفمبر",
-    "ديسمبر",
+    "يناير","فبراير","مارس","أبريل","مايو","يونيو",
+    "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
   ];
   const vals = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
   const max = Math.max(...vals);
@@ -564,6 +600,7 @@ function handleFileUpload(e) {
     reader.readAsDataURL(file);
   });
 }
+
 async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
@@ -590,19 +627,25 @@ async function saveProduct() {
 
   try {
     await addDoc(collection(db, "Product"), productData);
-
     showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
 
-    // نعمل refresh للبيانات
-    loadProductsFromFirebase();
+    // Reload from Firebase then re-render admin product list
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-
     clearProductForm();
+
+    // Update counts
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ المنتج");
   }
 }
+
 function clearProductForm() {
   [
     "prod-name",
@@ -617,6 +660,7 @@ function clearProductForm() {
   document.getElementById("upload-preview").innerHTML = "";
   document.getElementById("file-input").value = "";
 }
+
 async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
@@ -642,18 +686,18 @@ async function updateProduct(id) {
 
   try {
     const ref = doc(db, "Product", id);
-
     await updateDoc(ref, updatedData);
-
     showNotif("✦", "تم التعديل", "تم تحديث المنتج 🔥");
 
-    loadProductsFromFirebase();
+    await loadProductsFromFirebase();
+    renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل التعديل");
   }
 }
+
 let notifTimer;
 function showNotif(icon, title, msg) {
   document.getElementById("notif-icon").textContent = icon;
@@ -665,7 +709,14 @@ function showNotif(icon, title, msg) {
   notifTimer = setTimeout(() => el.classList.remove("show"), 3500);
 }
 
+// =============================================
+// FIX 7: Only call renderHomeFeatured() on
+// initial load — never call bare renderAdmin()
+// at module level since firebaseProducts is
+// still empty at that point.
+// =============================================
 renderHomeFeatured();
+
 // ===== MAKE EVERYTHING GLOBAL =====
 window.showPage = showPage;
 window.doLogin = doLogin;
@@ -693,8 +744,8 @@ window.viewDetail = viewDetail;
 
 window.saveProduct = saveProduct;
 window.removeCustomProduct = removeCustomProduct;
+window.updateProduct = updateProduct;
 
 window.handleFileUpload = handleFileUpload;
-window.saveProduct = saveProduct;
 window.clearProductForm = clearProductForm;
 window.showNotif = showNotif;
