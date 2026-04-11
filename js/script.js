@@ -798,3 +798,5 @@ window.updateProduct = updateProduct;
 window.handleFileUpload = handleFileUpload;
 window.clearProductForm = clearProductForm;
 window.showNotif = showNotif;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
