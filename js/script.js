@@ -452,23 +452,20 @@ function showAdminSection(name, btn) {
 }
 
 function renderAdmin() {
-  renderDashboardOrders();
-  renderFullOrders();
-  // =============================================
-  // FIX 5: Pass firebaseProducts explicitly so
-  // renderAdminProductList always uses the latest
-  // loaded data, not a potentially stale closure.
-  // =============================================
-  renderAdminProductList(firebaseProducts);
-  renderMessages();
-  renderAnalytics();
-  document.getElementById("admin-prod-count").textContent =
-    getAllProducts().length;
-  document.getElementById("admin-msg-count").textContent = orders.filter(
-    (o) => o.status === "new",
-  ).length;
-  document.getElementById("prod-list-count").textContent =
-    getAllProducts().length;
+  loadOrdersFromFirebase().then(() => {
+    renderDashboardOrders();
+    renderFullOrders();
+    renderAdminProductList(firebaseProducts);
+    renderMessages();
+    renderAnalytics();
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("admin-msg-count").textContent = orders.filter(
+      (o) => o.status === "new",
+    ).length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
+  });
 }
 
 function renderDashboardOrders() {
@@ -840,6 +837,33 @@ function clearEditImage(originalUrl) {
   const fileInput = document.getElementById("edit-file-input");
   if (fileInput) fileInput.value = "";
 }
+
+async function loadOrdersFromFirebase() {
+  try {
+    const snapshot = await getDocs(collection(db, "Orders"));
+    const firebaseOrders = [];
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      firebaseOrders.push({
+        id: "#LM-" + docSnap.id.slice(0, 6).toUpperCase(),
+        firestoreId: docSnap.id,
+        client: data.client || "غير محدد",
+        product: data.product || "غير محدد",
+        value: data.valueFormatted || (data.value ? fmtP(data.value) : "غير محدد"),
+        status: data.status || "new",
+        date: data.date || "",
+        email: data.email || "",
+        phone: data.phone || "غير محدد",
+        desc: data.desc || "",
+      });
+    });
+    // Merge: firebase orders first, keep any local-only ones
+    const localOnly = orders.filter((o) => !o.firestoreId);
+    orders = [...firebaseOrders, ...localOnly];
+  } catch (error) {
+    console.error("فشل تحميل الطلبات:", error);
+  }
+}
 // ===== SAVE EDIT FROM MODAL =====
 async function saveEditProduct(id) {
   const name = document.getElementById("edit-prod-name").value.trim();
@@ -919,3 +943,4 @@ window.saveEditProduct = saveEditProduct;
 
 window.handleEditImageUpload = handleEditImageUpload;
 window.clearEditImage = clearEditImage;
+window.loadOrdersFromFirebase = loadOrdersFromFirebase;
