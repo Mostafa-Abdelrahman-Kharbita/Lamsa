@@ -721,7 +721,6 @@ function openEditModal(id) {
   const p = firebaseProducts.find((x) => x.id === id);
   if (!p) return;
 
-  // Remove old modal if exists
   const old = document.getElementById("edit-modal");
   if (old) old.remove();
 
@@ -729,10 +728,11 @@ function openEditModal(id) {
   modal.id = "edit-modal";
   modal.style.cssText = `
     position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
-    display:flex;align-items:center;justify-content:center;padding:20px
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    overflow-y:auto
   `;
   modal.innerHTML = `
-    <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:480px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif">
+    <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:480px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif;margin:auto">
       <button onclick="document.getElementById('edit-modal').remove()" style="position:absolute;top:14px;left:16px;background:transparent;border:none;color:var(--gray,#888);font-size:20px;cursor:pointer">✕</button>
       <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px;letter-spacing:1px">✏ تعديل المنتج</div>
 
@@ -748,7 +748,21 @@ function openEditModal(id) {
       <input id="edit-prod-price" type="number" value="${p.price || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الكمية</label>
-      <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:24px;box-sizing:border-box"/>
+      <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الصورة الحالية</label>
+      <div id="edit-img-preview" style="width:100%;height:120px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden">
+        ${p.imageUrl
+          ? `<img id="edit-current-img" src="${p.imageUrl}" style="max-height:120px;max-width:100%;object-fit:contain"/>`
+          : `<span id="edit-current-img" style="color:var(--gray,#888);font-size:13px">لا توجد صورة</span>`
+        }
+      </div>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">رفع صورة جديدة (اختياري)</label>
+      <input type="file" id="edit-file-input" accept="image/*" onchange="handleEditImageUpload(event)" style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box;cursor:pointer"/>
+      <button onclick="clearEditImage('${p.imageUrl || ''}')" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(255,80,80,0.3);color:#ff6b6b;font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;margin-bottom:24px">
+        🗑 إزالة الصورة الحالية
+      </button>
 
       <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:var(--dark,#0a0a0a);border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
         حفظ التعديلات
@@ -757,7 +771,23 @@ function openEditModal(id) {
   `;
   document.body.appendChild(modal);
 }
+function handleEditImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const preview = document.getElementById("edit-img-preview");
+    preview.innerHTML = `<img id="edit-current-img" src="${ev.target.result}" style="max-height:120px;max-width:100%;object-fit:contain" data-dataurl="${ev.target.result}"/>`;
+  };
+  reader.readAsDataURL(file);
+}
 
+function clearEditImage(originalUrl) {
+  const preview = document.getElementById("edit-img-preview");
+  preview.innerHTML = `<span id="edit-current-img" style="color:var(--gray,#888);font-size:13px">لا توجد صورة</span>`;
+  const fileInput = document.getElementById("edit-file-input");
+  if (fileInput) fileInput.value = "";
+}
 // ===== SAVE EDIT FROM MODAL =====
 async function saveEditProduct(id) {
   const name = document.getElementById("edit-prod-name").value.trim();
@@ -770,12 +800,15 @@ async function saveEditProduct(id) {
     return;
   }
 
-  const existing = firebaseProducts.find((x) => x.id === id);
+  // Get image: new upload takes priority, then existing, then null if cleared
+  const imgEl = document.querySelector("#edit-img-preview img");
+  const imageUrl = imgEl
+    ? (imgEl.dataset.dataurl || imgEl.getAttribute("src"))
+    : null;
 
   try {
     await updateDoc(doc(db, "Product", id), {
-      name, cat, price, quantity,
-      imageUrl: existing?.imageUrl || null,
+      name, cat, price, quantity, imageUrl,
     });
     showNotif("✦", "تم التعديل", `${name} تم تحديثه بنجاح 🔥`);
     document.getElementById("edit-modal").remove();
@@ -831,3 +864,6 @@ window.showNotif = showNotif;
 window.deleteProduct = deleteProduct;
 window.openEditModal = openEditModal;
 window.saveEditProduct = saveEditProduct;
+
+window.handleEditImageUpload = handleEditImageUpload;
+window.clearEditImage = clearEditImage;
