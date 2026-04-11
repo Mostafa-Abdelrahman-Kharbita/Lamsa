@@ -148,10 +148,8 @@ function showPage(name) {
   // firebaseProducts is populated when
   // renderAdminProductList() reads it.
   // =============================================
- if (name === "admin") {
-    loadProductsFromFirebase().then(async () => {
-      await renderAdmin();
-    });
+if (name === "admin") {
+    renderAdmin();
   }
 
   if (name === "home") {
@@ -178,9 +176,7 @@ function doLogin() {
     // Firebase before calling renderAdmin(),
     // same pattern as showPage("admin").
     // =============================================
-   loadProductsFromFirebase().then(async () => {
-      await renderAdmin();
-    });
+   renderAdmin();
   } else {
     document.getElementById("login-error").textContent =
       "اسم المستخدم أو كلمة المرور غير صحيحة";
@@ -458,28 +454,48 @@ function showAdminSection(name, btn) {
 }
 
 async function renderAdmin() {
+  // Show loading indicator
+  const main = document.querySelector(".admin-main");
+  if (main) main.style.opacity = "0.5";
+
+  await loadProductsFromFirebase();
   await loadOrdersFromFirebase();
+
+  if (main) main.style.opacity = "1";
+
   renderDashboardOrders();
   renderFullOrders();
   renderAdminProductList(firebaseProducts);
   renderMessages();
   renderAnalytics();
+
   document.getElementById("admin-prod-count").textContent = getAllProducts().length;
   document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
   document.getElementById("prod-list-count").textContent = getAllProducts().length;
+
+  // Update total orders count card
+  const totalCard = document.querySelector(".admin-card .admin-card-val");
+  if (totalCard) totalCard.textContent = orders.length;
 }
 
 function renderDashboardOrders() {
   const tbody = document.getElementById("dashboard-orders-body");
   if (!tbody) return;
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:30px">لا توجد طلبات بعد</td></tr>`;
+    return;
+  }
   tbody.innerHTML = orders
-    .slice(0, 5)
+    .slice(0, 10)
     .map(
       (o) => `<tr>
-    <td style="color:var(--gold);font-weight:500">${o.id}</td><td>${o.client}</td>
+    <td style="color:var(--gold);font-weight:500">${o.id}</td>
+    <td>${o.client}</td>
     <td style="color:var(--gray);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
-    <td>${o.value}</td><td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
-    <td style="color:var(--gray)">${o.date}</td></tr>`,
+    <td>${o.value}</td>
+    <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
+    <td style="color:var(--gray)">${o.date}</td>
+    </tr>`
     )
     .join("");
 }
@@ -487,17 +503,25 @@ function renderDashboardOrders() {
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">لا توجد طلبات بعد</td></tr>`;
+    return;
+  }
   tbody.innerHTML = orders
     .map(
       (o, i) => `<tr>
-    <td style="color:var(--gold)">${o.id}</td><td>${o.client}</td>
+    <td style="color:var(--gold)">${o.id}</td>
+    <td>${o.client}</td>
     <td style="color:var(--gray);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
     <td>${o.value}</td>
-    <td><select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
-      ${["new", "proc", "done", "cancel"].map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}</select></td>
+    <td>
+      <select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
+        ${["new","proc","done","cancel"].map((s) => `<option value="${s}" ${o.status===s?"selected":""}>${STATUS_LABEL[s]}</option>`).join("")}
+      </select>
+    </td>
     <td style="color:var(--gray)">${o.date}</td>
     <td><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
-  </tr>`,
+  </tr>`
     )
     .join("");
 }
@@ -862,9 +886,9 @@ async function loadOrdersFromFirebase() {
         desc: data.desc || "",
       });
     });
-    // Merge: firebase orders first, keep any local-only ones
-    const localOnly = orders.filter((o) => !o.firestoreId);
-    orders = [...firebaseOrders, ...localOnly];
+    if (firebaseOrders.length > 0) {
+      orders = firebaseOrders;
+    }
   } catch (error) {
     console.error("فشل تحميل الطلبات:", error);
   }
