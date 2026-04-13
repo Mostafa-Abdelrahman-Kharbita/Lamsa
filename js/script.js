@@ -529,7 +529,7 @@ async function submitOrder() {
     // Restore button
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "✦ إرسال طلب الاستفسار";
+      btn.textContent = "✦ ارسال الطلب";
     }
   }
 }
