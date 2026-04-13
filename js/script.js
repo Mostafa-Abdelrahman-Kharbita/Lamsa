@@ -135,12 +135,105 @@ function doLogout() {
 function getAllProducts() {
   return [...firebaseProducts, ...customProducts];
 }
+function openProductGallery(id) {
+  const p = getAllProducts().find(x => x.id === id);
+  if (!p) return;
 
+  const images = Array.isArray(p.images) && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
+
+  const old = document.getElementById("product-gallery-modal");
+  if (old) old.remove();
+
+  let currentIndex = 0;
+
+  const modal = document.createElement("div");
+  modal.id = "product-gallery-modal";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    direction:rtl;font-family:'Tajawal',sans-serif;
+  `;
+
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid rgba(201,168,76,0.2);width:100%;max-width:620px;position:relative;margin:auto">
+      
+      <!-- Close -->
+      <button onclick="document.getElementById('product-gallery-modal').remove()"
+        style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.1);color:#888;width:34px;height:34px;font-size:16px;cursor:pointer;z-index:10">✕</button>
+
+      <!-- Main Image -->
+      <div style="position:relative;background:#1a1a1a;height:360px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <img id="gallery-main-img" src="${images[currentIndex] || ''}" 
+          style="max-height:100%;max-width:100%;object-fit:contain;transition:opacity 0.2s"/>
+        
+        ${images.length > 1 ? `
+        <button onclick="galleryPrev()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;height:38px;font-size:18px;cursor:pointer">›</button>
+        <button onclick="galleryNext()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;font-size:18px;height:38px;cursor:pointer">‹</button>
+        ` : ''}
+
+        <div id="gallery-counter" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:var(--gold,#c9a84c);font-size:12px;padding:3px 12px;letter-spacing:1px">
+          ${images.length > 1 ? `1 / ${images.length}` : ''}
+        </div>
+      </div>
+
+      <!-- Thumbnails -->
+      ${images.length > 1 ? `
+      <div id="gallery-thumbs" style="display:flex;gap:6px;padding:12px;overflow-x:auto;background:#0a0a0a;border-top:1px solid rgba(201,168,76,0.1)">
+        ${images.map((src, i) => `
+          <img src="${src}" onclick="galleryGoTo(${i})" id="thumb-${i}"
+            style="width:64px;height:64px;object-fit:cover;cursor:pointer;flex-shrink:0;
+            border:2px solid ${i === 0 ? 'var(--gold,#c9a84c)' : 'transparent'};opacity:${i === 0 ? 1 : 0.5};transition:all 0.2s"/>
+        `).join("")}
+      </div>` : ''}
+
+      <!-- Info -->
+      <div style="padding:20px 24px;border-top:1px solid rgba(255,255,255,0.05)">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:6px">${catLabel(p.cat)}</div>
+        <div style="font-size:20px;color:#fff;margin-bottom:10px">${p.name}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:20px;color:var(--gold,#c9a84c);font-weight:500">${fmtP(p.price)}</div>
+          <button onclick="addToCart('${p.id}');document.getElementById('product-gallery-modal').remove()"
+            style="padding:10px 28px;background:var(--gold,#c9a84c);border:none;color:#000;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px">
+            + أضف للطلب
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Close on backdrop
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+
+  // Inject gallery nav functions into window temporarily
+  const galleryImages = images;
+  window._galleryIndex = 0;
+
+  window.galleryGoTo = function(i) {
+    window._galleryIndex = i;
+    const mainImg = document.getElementById("gallery-main-img");
+    if (mainImg) { mainImg.style.opacity = 0; setTimeout(() => { mainImg.src = galleryImages[i]; mainImg.style.opacity = 1; }, 150); }
+    const counter = document.getElementById("gallery-counter");
+    if (counter) counter.textContent = `${i + 1} / ${galleryImages.length}`;
+    galleryImages.forEach((_, j) => {
+      const t = document.getElementById(`thumb-${j}`);
+      if (t) { t.style.border = j === i ? "2px solid var(--gold,#c9a84c)" : "2px solid transparent"; t.style.opacity = j === i ? "1" : "0.5"; }
+    });
+  };
+
+  window.galleryNext = function() { window.galleryGoTo((window._galleryIndex + 1) % galleryImages.length); };
+  window.galleryPrev = function() { window.galleryGoTo((window._galleryIndex - 1 + galleryImages.length) % galleryImages.length); };
+}
 function productHTML(p) {
-  return `<div class="product-card">
+  const images = Array.isArray(p.images) && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
+  const hasMultiple = images.length > 1;
+
+  return `<div class="product-card" onclick="openProductGallery('${p.id}')" style="cursor:pointer">
     ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ""}
+    ${hasMultiple ? `<div style="position:absolute;top:14px;left:14px;background:rgba(0,0,0,0.7);color:var(--gold);font-size:11px;padding:3px 9px;letter-spacing:1px;z-index:2">📷 ${images.length}</div>` : ""}
     <div class="product-img">
-      ${p.imageUrl ? `<img src="${p.imageUrl}"/>` : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
+      ${images.length ? `<img src="${images[0]}"/>` : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
     </div>
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
@@ -150,7 +243,7 @@ function productHTML(p) {
           ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
           <div class="product-price">${fmtP(p.price)}</div>
         </div>
-        <button class="add-btn-card" onclick="addToCart('${p.id}')">+ أضف للطلب</button>
+        <button class="add-btn-card" onclick="event.stopPropagation();addToCart('${p.id}')">+ أضف للطلب</button>
       </div>
     </div>
   </div>`;
@@ -706,18 +799,32 @@ function renderAnalytics() {
     )
     .join("");
 }
+function removeImage(i) {
+  pendingImages.splice(i, 1);
+  renderUploadPreview(document.getElementById("upload-preview"), pendingImages, false);
+}
+function removeEditImage(i) {
+  editPendingImages.splice(i, 1);
+  renderEditPreview();
+}
+function renderUploadPreview(container, images, isEdit) {
+  container.innerHTML = images.map((src, i) => `
+    <div style="position:relative;display:inline-block;margin:4px">
+      <img src="${src}" style="width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)"/>
+      <button onclick="${isEdit ? 'removeEditImage' : 'removeImage'}(${i})" 
+        style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.7);border:none;color:#ff6b6b;cursor:pointer;font-size:11px;padding:2px 5px">✕</button>
+    </div>
+  `).join("");
+}
+let pendingImages = []; // stores base64 strings
 
 function handleFileUpload(e) {
   const preview = document.getElementById("upload-preview");
   Array.from(e.target.files).forEach((file) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      img.style.cssText =
-        "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
-      img.dataset.dataurl = ev.target.result;
-      preview.appendChild(img);
+      pendingImages.push(ev.target.result);
+      renderUploadPreview(preview, pendingImages, false);
     };
     reader.readAsDataURL(file);
   });
@@ -734,29 +841,22 @@ async function saveProduct() {
     return;
   }
 
-  const imgEl = document.querySelector("#upload-preview img");
-
   const productData = {
-    name,
-    cat,
-    price,
-    quantity,
-    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
+    name, cat, price, quantity,
+    images: pendingImages,                        // array of base64
+    imageUrl: pendingImages[0] || null,           // keep first as thumbnail
   };
 
   try {
     await addDoc(collection(db, "Product"), productData);
     showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
-
+    pendingImages = [];
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
-
-    document.getElementById("admin-prod-count").textContent =
-      getAllProducts().length;
-    document.getElementById("prod-list-count").textContent =
-      getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
+    document.getElementById("prod-list-count").textContent = getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ المنتج");
@@ -770,6 +870,17 @@ function clearProductForm() {
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
   document.getElementById("file-input").value = "";
+  pendingImages = [];
+}
+
+function clearProductForm() {
+  ["prod-name", "prod-price", "prod-quantity"].forEach(
+    (id) => (document.getElementById(id).value = "")
+  );
+  document.getElementById("prod-category").value = "";
+  document.getElementById("upload-preview").innerHTML = "";
+  document.getElementById("file-input").value = "";
+  pendingImages = [];
 }
 
 async function updateProduct(id) {
@@ -833,71 +944,88 @@ async function deleteProduct(id, name) {
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
   }
 }
-
+function renderEditPreview() {
+  const container = document.getElementById("edit-img-preview");
+  if (!container) return;
+  if (!editPendingImages.length) {
+    container.innerHTML = `<span style="color:var(--gray,#888);font-size:13px;padding:8px">لا توجد صور</span>`;
+    return;
+  }
+  container.innerHTML = editPendingImages.map((src, i) => `
+    <div style="position:relative;display:inline-block">
+      <img src="${src}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)"/>
+      <button onclick="removeEditImage(${i})" 
+        style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.75);border:none;color:#ff6b6b;cursor:pointer;font-size:11px;padding:2px 5px">✕</button>
+      ${i === 0 ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,76,0.8);color:#000;font-size:9px;text-align:center;padding:2px">رئيسية</div>` : ''}
+    </div>
+  `).join("");
+}
 // ===== OPEN EDIT MODAL =====
+let editPendingImages = [];
+
 function openEditModal(id) {
   const p = firebaseProducts.find((x) => x.id === id);
   if (!p) return;
+
+  editPendingImages = Array.isArray(p.images) && p.images.length
+    ? [...p.images]
+    : p.imageUrl ? [p.imageUrl] : [];
 
   const old = document.getElementById("edit-modal");
   if (old) old.remove();
 
   const modal = document.createElement("div");
-  modal.id = "edit-modal";
+  modal.id = "edit-modal";handleEditImageUploadsaveEditProduct
   modal.style.cssText = `
     position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-    overflow-y:auto
+    display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto
   `;
   modal.innerHTML = `
     <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:480px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif;margin:auto">
       <button onclick="document.getElementById('edit-modal').remove()" style="position:absolute;top:14px;left:16px;background:transparent;border:none;color:var(--gray,#888);font-size:20px;cursor:pointer">✕</button>
-      <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px;letter-spacing:1px">✏ تعديل المنتج</div>
+      <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px">✏ تعديل المنتج</div>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اسم المنتج</label>
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">اسم المنتج</label>
       <input id="edit-prod-name" value="${p.name || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الفئة</label>
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الفئة</label>
       <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
         ${["Magnetic_Track","Spot_light","DoubleSpot_light","Metal_Connector"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
       </select>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">السعر (جنيه)</label>
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">السعر (جنيه)</label>
       <input id="edit-prod-price" type="number" value="${p.price || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الكمية</label>
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الكمية</label>
       <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الصورة الحالية</label>
-      <div id="edit-img-preview" style="width:100%;height:120px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden">
-        ${p.imageUrl
-          ? `<img id="edit-current-img" src="${p.imageUrl}" style="max-height:120px;max-width:100%;object-fit:contain"/>`
-          : `<span id="edit-current-img" style="color:var(--gray,#888);font-size:13px">لا توجد صورة</span>`
-        }
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الصور الحالية</label>
+      <div id="edit-img-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:40px;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1)">
       </div>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">رفع صورة جديدة (اختياري)</label>
-      <input type="file" id="edit-file-input" accept="image/*" onchange="handleEditImageUpload(event)" style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box;cursor:pointer"/>
-      <button onclick="clearEditImage('${p.imageUrl || ''}')" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(255,80,80,0.3);color:#ff6b6b;font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;margin-bottom:24px">
-        🗑 إزالة الصورة الحالية
-      </button>
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">إضافة صور جديدة</label>
+      <input type="file" id="edit-file-input" accept="image/*" multiple onchange="handleEditImageUpload(event)" 
+        style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:24px;box-sizing:border-box;cursor:pointer"/>
 
-      <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:var(--dark,#0a0a0a);border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
+      <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:#000;border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
         حفظ التعديلات
       </button>
     </div>
   `;
   document.body.appendChild(modal);
+
+  // Render existing images
+  renderEditPreview();
 }
 function handleEditImageUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const preview = document.getElementById("edit-img-preview");
-    preview.innerHTML = `<img id="edit-current-img" src="${ev.target.result}" style="max-height:120px;max-width:100%;object-fit:contain" data-dataurl="${ev.target.result}"/>`;
-  };
-  reader.readAsDataURL(file);
+  Array.from(e.target.files).forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      editPendingImages.push(ev.target.result);
+      renderEditPreview();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function clearEditImage(originalUrl) {
@@ -945,15 +1073,11 @@ async function saveEditProduct(id) {
     return;
   }
 
-  // Get image: new upload takes priority, then existing, then null if cleared
-  const imgEl = document.querySelector("#edit-img-preview img");
-  const imageUrl = imgEl
-    ? (imgEl.dataset.dataurl || imgEl.getAttribute("src"))
-    : null;
-
   try {
     await updateDoc(doc(db, "Product", id), {
-      name, cat, price, quantity, imageUrl,
+      name, cat, price, quantity,
+      images: editPendingImages,
+      imageUrl: editPendingImages[0] || null,
     });
     showNotif("✦", "تم التعديل", `${name} تم تحديثه بنجاح 🔥`);
     document.getElementById("edit-modal").remove();
@@ -1033,3 +1157,11 @@ window.saveEditProduct = saveEditProduct;
 window.handleEditImageUpload = handleEditImageUpload;
 window.clearEditImage = clearEditImage;
 window.loadOrdersFromFirebase = loadOrdersFromFirebase;
+
+window.openProductGallery = openProductGallery;
+window.galleryGoTo = (i) => {};
+window.galleryNext = () => {};
+window.galleryPrev = () => {};
+window.removeImage = removeImage;
+window.removeEditImage = removeEditImage;
+window.handleEditImageUpload = handleEditImageUpload;
