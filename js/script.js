@@ -25,7 +25,7 @@ let firebaseProducts = [];
 //////////////////
 let cart = [],
   customProducts = [];
-  let orders = [];
+let orders = [];
 const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
@@ -61,14 +61,14 @@ function showPage(name) {
     }
   }
 
-  document.querySelectorAll(".page").forEach((p) =>
-    p.classList.remove("active")
-  );
+  document
+    .querySelectorAll(".page")
+    .forEach((p) => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
 
-  document.querySelectorAll(".nav-links a").forEach((a) =>
-    a.classList.remove("active-link")
-  );
+  document
+    .querySelectorAll(".nav-links a")
+    .forEach((a) => a.classList.remove("active-link"));
 
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
@@ -91,7 +91,7 @@ function showPage(name) {
   // firebaseProducts is populated when
   // renderAdminProductList() reads it.
   // =============================================
-if (name === "admin") {
+  if (name === "admin") {
     renderAdmin();
   }
 
@@ -119,7 +119,7 @@ function doLogin() {
     // Firebase before calling renderAdmin(),
     // same pattern as showPage("admin").
     // =============================================
-   renderAdmin();
+    renderAdmin();
   } else {
     document.getElementById("login-error").textContent =
       "اسم المستخدم أو كلمة المرور غير صحيحة";
@@ -137,40 +137,43 @@ function getAllProducts() {
 }
 
 function productHTML(p) {
-  const images = p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+  const images =
+    p.images && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
   const colors = p.colors && p.colors.length ? p.colors : [];
 
   return `<div class="product-card">
     ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ""}
-    <div class="product-img" style="position:relative;overflow:hidden">
-      ${images.length
-        ? `<img id="pimg-${p.id}" src="${images[0]}" style="width:100%;height:100%;object-fit:cover;transition:opacity 0.3s"/>
-           ${images.length > 1 ? `
-           <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px">
-             ${images.map((url, i) => `
-               <button onclick="switchProductImg('${p.id}','${url}',this)" 
-                 style="width:7px;height:7px;border-radius:50%;border:none;cursor:pointer;padding:0;background:${i===0?'var(--gold,#c9a84c)':'rgba(255,255,255,0.4)'}">
-               </button>`).join("")}
-           </div>` : ""}
-          `
-        : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`
+    <div class="product-img" style="position:relative;overflow:hidden;cursor:pointer" onclick="openProductGallery('${p.id}')">
+      ${
+        images.length
+          ? `<img id="pimg-${p.id}" src="${images[0]}" style="width:100%;height:100%;object-fit:cover;transition:opacity 0.3s"/>`
+          : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`
       }
+      ${images.length > 1 ? `<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:var(--gold,#c9a84c);font-size:11px;padding:3px 8px;letter-spacing:1px">+${images.length} صور</div>` : ""}
     </div>
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
       <div class="product-name">${p.name}</div>
-      ${colors.length ? `
-      <div style="margin-top:8px">
-        <div style="font-size:11px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اختر اللون:</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="colors-${p.id}">
-          ${colors.map((col, i) => `
-            <button onclick="selectColor('${p.id}',${i},this)" title="${col.name}"
-              style="width:22px;height:22px;border-radius:50%;background:${col.hex};border:${i===0?'2px solid var(--gold,#c9a84c)':'2px solid transparent'};cursor:pointer;outline:none;transition:border 0.2s">
-            </button>`).join("")}
+      ${
+        colors.length
+          ? `
+      <div style="margin-top:10px">
+        <div style="font-size:10px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اللون:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" id="colors-${p.id}">
+          ${colors
+            .map(
+              (col, i) => `
+            <button onclick="selectColor('${p.id}',${i},this,'${col.name}')" title="${col.name}"
+              style="width:24px;height:24px;border-radius:50%;background:${col.hex};border:${i === 0 ? "2px solid var(--gold,#c9a84c)" : "2px solid rgba(255,255,255,0.15)"};cursor:pointer;transition:border 0.2s;outline:none">
+            </button>`,
+            )
+            .join("")}
         </div>
-        <div id="color-label-${p.id}" style="font-size:11px;color:var(--gold,#c9a84c);margin-top:4px">${colors[0]?.name || ""}</div>
-      </div>` : ""}
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <div id="color-label-${p.id}" style="font-size:11px;color:var(--gold,#c9a84c);margin-top:5px">${colors[0]?.name || ""}</div>
+      </div>`
+          : ""
+      }
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
         ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
         <div class="product-price">${fmtP(p.price)}</div>
       </div>
@@ -178,18 +181,120 @@ function productHTML(p) {
     </div>
   </div>`;
 }
+function openProductGallery(id) {
+  const p = getAllProducts().find((x) => x.id === id);
+  if (!p) return;
+  const images =
+    p.images && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
+  if (!images.length) return;
+
+  const old = document.getElementById("product-gallery-modal");
+  if (old) old.remove();
+
+  let current = 0;
+
+  const modal = document.createElement("div");
+  modal.id = "product-gallery-modal";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px
+  `;
+
+  modal.innerHTML = `
+    <button onclick="document.getElementById('product-gallery-modal').remove()" 
+      style="position:absolute;top:20px;left:20px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;width:40px;height:40px;font-size:18px;cursor:pointer">✕</button>
+    
+    <div style="font-size:13px;color:var(--gold,#c9a84c);margin-bottom:16px;letter-spacing:2px">${p.name}</div>
+    
+    <div style="position:relative;width:100%;max-width:600px;display:flex;align-items:center;justify-content:center">
+      ${
+        images.length > 1
+          ? `
+        <button id="gallery-prev" onclick="galleryNav(-1)" style="position:absolute;right:-20px;z-index:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:40px;height:40px;font-size:20px;cursor:pointer">‹</button>
+        <button id="gallery-next" onclick="galleryNav(1)" style="position:absolute;left:-20px;z-index:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:40px;height:40px;font-size:20px;cursor:pointer">›</button>
+      `
+          : ""
+      }
+      <img id="gallery-main-img" src="${images[0]}" style="max-height:60vh;max-width:100%;object-fit:contain;transition:opacity 0.2s"/>
+    </div>
+
+    ${
+      images.length > 1
+        ? `
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center" id="gallery-thumbs">
+      ${images
+        .map(
+          (url, i) => `
+        <img src="${url}" onclick="galleryGoTo(${i})" 
+          style="width:60px;height:60px;object-fit:cover;cursor:pointer;border:2px solid ${i === 0 ? "var(--gold,#c9a84c)" : "rgba(255,255,255,0.15)"};opacity:${i === 0 ? 1 : 0.6};transition:all 0.2s"
+          id="gallery-thumb-${i}"/>
+      `,
+        )
+        .join("")}
+    </div>`
+        : ""
+    }
+
+    <div id="gallery-counter" style="margin-top:12px;font-size:12px;color:var(--gray,#888)">${images.length > 1 ? `1 / ${images.length}` : ""}</div>
+  `;
+
+  // Store images on window for nav functions
+  window._galleryImages = images;
+  window._galleryCurrent = 0;
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
+}
+
+function galleryNav(dir) {
+  const images = window._galleryImages || [];
+  window._galleryCurrent =
+    (window._galleryCurrent + dir + images.length) % images.length;
+  galleryGoTo(window._galleryCurrent);
+}
+
+function galleryGoTo(idx) {
+  const images = window._galleryImages || [];
+  window._galleryCurrent = idx;
+  const mainImg = document.getElementById("gallery-main-img");
+  if (mainImg) {
+    mainImg.style.opacity = "0";
+    setTimeout(() => {
+      mainImg.src = images[idx];
+      mainImg.style.opacity = "1";
+    }, 150);
+  }
+  const counter = document.getElementById("gallery-counter");
+  if (counter) counter.textContent = `${idx + 1} / ${images.length}`;
+  // Update thumbs
+  images.forEach((_, i) => {
+    const thumb = document.getElementById("gallery-thumb-" + i);
+    if (thumb) {
+      thumb.style.border =
+        i === idx
+          ? "2px solid var(--gold,#c9a84c)"
+          : "2px solid rgba(255,255,255,0.15)";
+      thumb.style.opacity = i === idx ? "1" : "0.6";
+    }
+  });
+}
 function switchProductImg(id, url, btn) {
   const img = document.getElementById("pimg-" + id);
   if (img) img.src = url;
   // update dots
   const dots = btn.parentElement.querySelectorAll("button");
-  dots.forEach((d) => d.style.background = "rgba(255,255,255,0.4)");
+  dots.forEach((d) => (d.style.background = "rgba(255,255,255,0.4)"));
   btn.style.background = "var(--gold,#c9a84c)";
 }
 
 function selectColor(productId, idx, btn) {
   const container = document.getElementById("colors-" + productId);
-  if (container) container.querySelectorAll("button").forEach((b) => b.style.border = "2px solid transparent");
+  if (container)
+    container
+      .querySelectorAll("button")
+      .forEach((b) => (b.style.border = "2px solid transparent"));
   btn.style.border = "2px solid var(--gold,#c9a84c)";
   const product = getAllProducts().find((p) => p.id === productId);
   if (product && product.colors && product.colors[idx]) {
@@ -200,10 +305,10 @@ function selectColor(productId, idx, btn) {
 function catLabel(c) {
   return (
     {
-     Magnetic_Track:"Magnetic Track",
-     Spot_light:"Spot light",
-     DoubleSpot_light:"Double Spot light",
-     Metal_Connector:"Metal Connector",
+      Magnetic_Track: "Magnetic Track",
+      Spot_light: "Spot light",
+      DoubleSpot_light: "Double Spot light",
+      Metal_Connector: "Metal Connector",
     }[c] || c
   );
 }
@@ -255,7 +360,9 @@ function addToCart(id) {
   if (!p) {
     // products not loaded yet, load then retry
     loadProductsFromFirebase().then(() => {
-      const p2 = getAllProducts().find((x) => x.id === id || x.id === String(id));
+      const p2 = getAllProducts().find(
+        (x) => x.id === id || x.id === String(id),
+      );
       if (!p2) return;
       const ex = cart.find((c) => c.id === p2.id);
       if (ex) ex.qty++;
@@ -321,7 +428,10 @@ function populateProductDropdown() {
       sel.innerHTML =
         '<option value="">اختر منتجاً للإضافة...</option>' +
         getAllProducts()
-          .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+          .map(
+            (p) =>
+              `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
+          )
           .join("");
     });
     return;
@@ -329,7 +439,10 @@ function populateProductDropdown() {
   sel.innerHTML =
     '<option value="">اختر منتجاً للإضافة...</option>' +
     all
-      .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+      .map(
+        (p) =>
+          `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
+      )
       .join("");
 }
 async function submitOrder() {
@@ -357,10 +470,17 @@ async function submitOrder() {
     email,
     phone: phone || "غير محدد",
     address: address || "غير محدد",
-    product: cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", "),
+    product: cart
+      .map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : ""))
+      .join(", "),
     value: totalValue,
     valueFormatted: fmtP(totalValue),
-    items: cart.map((c) => ({ id: c.id, name: c.name, price: c.price, qty: c.qty })),
+    items: cart.map((c) => ({
+      id: c.id,
+      name: c.name,
+      price: c.price,
+      qty: c.qty,
+    })),
     status: "new",
     date: new Date().toLocaleDateString("ar-EG", {
       day: "numeric",
@@ -373,7 +493,10 @@ async function submitOrder() {
 
   // Show loading state on button
   const btn = document.querySelector(".submit-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "جارٍ الإرسال..."; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "جارٍ الإرسال...";
+  }
 
   try {
     const docRef = await addDoc(collection(db, "Orders"), orderData);
@@ -396,21 +519,25 @@ async function submitOrder() {
     // Clear cart and form
     cart = [];
     updateCartUI();
-    ["fname", "lname", "email", "phone", "address", "description"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.value = "";
-    });
+    ["fname", "lname", "email", "phone", "address", "description"].forEach(
+      (id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      },
+    );
 
     // Show success
     document.getElementById("success-overlay").classList.add("show");
     showNotif("✦", "تم الإرسال!", "طلبك وصلنا وسنتواصل معك قريباً.");
-
   } catch (error) {
     console.error("❌ Firebase error:", error);
     showNotif("⚠", "خطأ", "فشل إرسال الطلب: " + error.message);
   } finally {
     // Restore button
-    if (btn) { btn.disabled = false; btn.textContent = "✦ إرسال طلب الاستفسار"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "✦ إرسال طلب الاستفسار";
+    }
   }
 }
 const STATUS_MAP = {
@@ -451,10 +578,13 @@ async function renderAdmin() {
   renderFullOrders();
   renderAdminProductList(firebaseProducts);
 
-
-  document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
-  document.getElementById("prod-list-count").textContent = getAllProducts().length;
+  document.getElementById("admin-prod-count").textContent =
+    getAllProducts().length;
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  document.getElementById("prod-list-count").textContent =
+    getAllProducts().length;
 
   // Update total orders count card
   const totalCard = document.querySelector(".admin-card .admin-card-val");
@@ -478,7 +608,7 @@ function renderDashboardOrders() {
     <td>${o.value}</td>
     <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
     <td style="color:var(--gray)">${o.date}</td>
-    </tr>`
+    </tr>`,
     )
     .join("");
 }
@@ -499,12 +629,12 @@ function renderFullOrders() {
     <td>${o.value}</td>
     <td>
       <select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
-        ${["new","proc","done","cancel"].map((s) => `<option value="${s}" ${o.status===s?"selected":""}>${STATUS_LABEL[s]}</option>`).join("")}
+        ${["new", "proc", "done", "cancel"].map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
       </select>
     </td>
     <td style="color:var(--gray)">${o.date}</td>
     <td><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
-  </tr>`
+  </tr>`,
     )
     .join("");
 }
@@ -522,8 +652,14 @@ async function updateOrderStatus(i, status) {
   renderDashboardOrders();
   renderFullOrders();
   renderMessages();
-  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
-  showNotif("✦", "تم التحديث", `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`);
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  showNotif(
+    "✦",
+    "تم التحديث",
+    `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`,
+  );
 }
 
 function viewDetail(i) {
@@ -602,11 +738,15 @@ function viewDetail(i) {
         </div>
 
         <!-- Notes -->
-        ${o.desc ? `
+        ${
+          o.desc
+            ? `
         <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
           <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:12px">ملاحظات</div>
           <div style="font-size:13px;color:#aaa;line-height:1.8">${o.desc}</div>
-        </div>` : ""}
+        </div>`
+            : ""
+        }
 
         <!-- Actions -->
         <div style="display:flex;gap:10px">
@@ -729,8 +869,18 @@ function renderAnalytics() {
     bars.appendChild(d);
   });
   const months = [
-    "يناير","فبراير","مارس","أبريل","مايو","يونيو",
-    "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
   ];
   const vals = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
   const max = Math.max(...vals);
@@ -767,19 +917,29 @@ function handleFileUpload(e) {
   });
 }
 
+function addNewColorPreset(name, hex) {
+  document.getElementById("new-color-hex").value = hex;
+  document.getElementById("new-color-name").value = name;
+  addNewColor();
+}
+
 function addNewColor() {
   const hex = document.getElementById("new-color-hex").value;
   const name = document.getElementById("new-color-name").value.trim();
-  if (!name) { showNotif("⚠", "أدخل اسم اللون", ""); return; }
+  if (!name) {
+    showNotif("⚠", "أدخل اسم اللون", "");
+    return;
+  }
   const list = document.getElementById("new-colors-list");
-  const idx = list.children.length;
+  const idx = Date.now();
   const div = document.createElement("div");
   div.id = "new-color-item-" + idx;
-  div.style.cssText = "display:flex;align-items:center;gap:4px;background:var(--dark3);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)";
+  div.style.cssText =
+    "display:flex;align-items:center;gap:6px;background:#111;padding:5px 10px;border:1px solid rgba(255,255,255,0.08)";
   div.innerHTML = `
-    <div style="width:16px;height:16px;background:${hex};border:1px solid rgba(255,255,255,0.2)"></div>
+    <div style="width:18px;height:18px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.2);flex-shrink:0"></div>
     <span style="font-size:12px;color:#ccc" data-name="${name}" data-hex="${hex}">${name}</span>
-    <button onclick="document.getElementById('new-color-item-${idx}').remove()" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:12px;margin-right:4px">✕</button>
+    <button onclick="document.getElementById('new-color-item-${idx}').remove()" style="background:transparent;border:none;color:#666;cursor:pointer;font-size:14px;margin-right:2px">✕</button>
   `;
   list.appendChild(div);
   document.getElementById("new-color-name").value = "";
@@ -788,7 +948,8 @@ async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
@@ -797,22 +958,39 @@ async function saveProduct() {
 
   // Collect all images
   const imgEls = document.querySelectorAll("#upload-preview img");
-  const images = Array.from(imgEls).map((img) => img.dataset.dataurl || img.src).filter(Boolean);
+  const images = Array.from(imgEls)
+    .map((img) => img.dataset.dataurl || img.src)
+    .filter(Boolean);
   const imageUrl = images[0] || null;
 
   // Collect colors
-  const colorSpans = document.querySelectorAll("#new-colors-list span[data-name]");
-  const colors = Array.from(colorSpans).map((s) => ({ name: s.dataset.name, hex: s.dataset.hex }));
+  const colorSpans = document.querySelectorAll(
+    "#new-colors-list span[data-name]",
+  );
+  const colors = Array.from(colorSpans).map((s) => ({
+    name: s.dataset.name,
+    hex: s.dataset.hex,
+  }));
 
   try {
-    await addDoc(collection(db, "Product"), { name, cat, price, quantity, imageUrl, images, colors });
+    await addDoc(collection(db, "Product"), {
+      name,
+      cat,
+      price,
+      quantity,
+      imageUrl,
+      images,
+      colors,
+    });
     showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
-    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ المنتج");
@@ -820,7 +998,7 @@ async function saveProduct() {
 }
 function clearProductForm() {
   ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
+    (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
@@ -833,7 +1011,8 @@ async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل البيانات");
@@ -883,8 +1062,10 @@ async function deleteProduct(id, name) {
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
@@ -912,15 +1093,15 @@ function openEditModal(id) {
       <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px;letter-spacing:1px">✏ تعديل المنتج</div>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اسم المنتج</label>
-      <input id="edit-prod-name" value="${p.name || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+      <input id="edit-prod-name" value="${p.name || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الفئة</label>
       <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
-        ${["Magnetic_Track","Spot_light","DoubleSpot_light","Metal_Connector"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
+        ${["Magnetic_Track", "Spot_light", "DoubleSpot_light", "Metal_Connector"].map((c) => `<option value="${c}" ${p.cat === c ? "selected" : ""}>${catLabel(c)}</option>`).join("")}
       </select>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">السعر (جنيه)</label>
-      <input id="edit-prod-price" type="number" value="${p.price || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+      <input id="edit-prod-price" type="number" value="${p.price || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الكمية</label>
       <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
@@ -928,29 +1109,52 @@ function openEditModal(id) {
       <!-- MULTIPLE PHOTOS -->
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:8px;letter-spacing:1px">الصور (يمكن رفع أكثر من صورة)</label>
       <div id="edit-photos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:40px">
-        ${(p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : [])).map((url, idx) => `
+        ${(p.images && p.images.length
+          ? p.images
+          : p.imageUrl
+            ? [p.imageUrl]
+            : []
+        )
+          .map(
+            (url, idx) => `
           <div style="position:relative;width:80px;height:80px" id="edit-photo-wrap-${idx}">
             <img src="${url}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)" data-dataurl="${url}"/>
             <button onclick="removeEditPhoto(${idx})" style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:#ef4444;border:none;color:#fff;font-size:11px;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center">✕</button>
-          </div>`).join("")}
+          </div>`,
+          )
+          .join("")}
       </div>
       <input type="file" id="edit-multi-file" accept="image/*" multiple onchange="handleEditMultiUpload(event)" style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:16px;box-sizing:border-box;cursor:pointer"/>
 
-      <!-- COLORS -->
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:8px;letter-spacing:1px">الألوان المتاحة (اختياري)</label>
-      <div id="edit-colors-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-        ${(p.colors || []).map((col, idx) => `
-          <div style="display:flex;align-items:center;gap:4px;background:var(--dark3,#111);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)">
-            <div style="width:16px;height:16px;background:${col.hex};border:1px solid rgba(255,255,255,0.2)"></div>
-            <span style="font-size:12px;color:#ccc">${col.name}</span>
-            <button onclick="removeEditColor(${idx})" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:12px;margin-right:4px">✕</button>
-          </div>`).join("")}
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:24px">
-        <input type="color" id="edit-color-hex" value="#ffffff" style="width:44px;height:38px;padding:2px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);cursor:pointer"/>
-        <input type="text" id="edit-color-name" placeholder="اسم اللون (مثل: أسود، أبيض...)" style="flex:1;padding:8px 12px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px"/>
-        <button onclick="addEditColor()" style="padding:8px 16px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold,#c9a84c);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">+ إضافة</button>
-      </div>
+     <!-- COLORS -->
+<div style="font-size:12px;color:var(--gray);margin-bottom:8px;letter-spacing:1px">الألوان المتاحة (اختياري)</div>
+<div id="new-colors-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding:14px;background:var(--dark3);border:1px solid rgba(255,255,255,0.06)">
+  <div style="width:100%;font-size:10px;color:var(--gray);letter-spacing:1px;margin-bottom:6px">اختر من الألوان الجاهزة أو أضف لوناً مخصصاً:</div>
+  ${[
+    { name: "أسود", hex: "#1a1a1a" },
+    { name: "أبيض", hex: "#f5f5f5" },
+    { name: "ذهبي", hex: "#c9a84c" },
+    { name: "فضي", hex: "#a8a8a8" },
+    { name: "برونزي", hex: "#8B6914" },
+    { name: "نحاسي", hex: "#b87333" },
+    { name: "رمادي", hex: "#666666" },
+    { name: "أبيض دافئ", hex: "#f0e6d3" },
+  ]
+    .map(
+      (col) => `
+    <button onclick="addNewColorPreset('${col.name}','${col.hex}')" title="${col.name}"
+      style="width:32px;height:32px;border-radius:50%;background:${col.hex};border:2px solid rgba(255,255,255,0.15);cursor:pointer;transition:transform 0.15s;position:relative"
+      onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+    </button>`,
+    )
+    .join("")}
+  <div style="display:flex;gap:6px;align-items:center;margin-top:6px;width:100%">
+    <input type="color" id="new-color-hex" value="#ffffff" style="width:32px;height:32px;padding:2px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);cursor:pointer"/>
+    <input type="text" id="new-color-name" placeholder="اسم مخصص..." style="flex:1;padding:7px 10px;background:#111;border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px"/>
+    <button onclick="addNewColor()" style="padding:7px 14px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">+ إضافة</button>
+  </div>
+</div>
 
       <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:#000;border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
         حفظ التعديلات
@@ -976,7 +1180,11 @@ function clearEditImage(originalUrl) {
   const fileInput = document.getElementById("edit-file-input");
   if (fileInput) fileInput.value = "";
 }
-
+window.openProductGallery = openProductGallery;
+window.galleryNav = galleryNav;
+window.galleryGoTo = galleryGoTo;
+window.addNewColorPreset = addNewColorPreset;
+window.addEditColorPreset = addEditColorPreset;
 async function loadOrdersFromFirebase() {
   try {
     const snapshot = await getDocs(collection(db, "Orders"));
@@ -988,7 +1196,8 @@ async function loadOrdersFromFirebase() {
         firestoreId: docSnap.id,
         client: data.client || "غير محدد",
         product: data.product || "غير محدد",
-        value: data.valueFormatted || (data.value ? fmtP(data.value) : "غير محدد"),
+        value:
+          data.valueFormatted || (data.value ? fmtP(data.value) : "غير محدد"),
         status: data.status || "new",
         date: data.date || "",
         email: data.email || "",
@@ -1008,7 +1217,8 @@ async function saveEditProduct(id) {
   const name = document.getElementById("edit-prod-name").value.trim();
   const cat = document.getElementById("edit-prod-cat").value;
   const price = parseFloat(document.getElementById("edit-prod-price").value);
-  const quantity = parseInt(document.getElementById("edit-prod-qty").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("edit-prod-qty").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل جميع البيانات");
@@ -1017,16 +1227,29 @@ async function saveEditProduct(id) {
 
   // Collect all photos
   const imgEls = document.querySelectorAll("#edit-photos-preview img");
-  const images = Array.from(imgEls).map((img) => img.dataset.dataurl || img.getAttribute("src")).filter(Boolean);
+  const images = Array.from(imgEls)
+    .map((img) => img.dataset.dataurl || img.getAttribute("src"))
+    .filter(Boolean);
   const imageUrl = images[0] || null;
 
   // Collect colors
-  const colorSpans = document.querySelectorAll("#edit-colors-list span[data-name]");
-  const colors = Array.from(colorSpans).map((s) => ({ name: s.dataset.name, hex: s.dataset.hex }));
+  const colorSpans = document.querySelectorAll(
+    "#edit-colors-list span[data-name]",
+  );
+  const colors = Array.from(colorSpans).map((s) => ({
+    name: s.dataset.name,
+    hex: s.dataset.hex,
+  }));
 
   try {
     await updateDoc(doc(db, "Product", id), {
-      name, cat, price, quantity, imageUrl, images, colors,
+      name,
+      cat,
+      price,
+      quantity,
+      imageUrl,
+      images,
+      colors,
     });
     showNotif("✦", "تم التعديل", `${name} تم تحديثه بنجاح 🔥`);
     document.getElementById("edit-modal").remove();
@@ -1087,12 +1310,16 @@ function removeEditPhoto(idx) {
 function addEditColor() {
   const hex = document.getElementById("edit-color-hex").value;
   const name = document.getElementById("edit-color-name").value.trim();
-  if (!name) { showNotif("⚠", "أدخل اسم اللون", ""); return; }
+  if (!name) {
+    showNotif("⚠", "أدخل اسم اللون", "");
+    return;
+  }
   const list = document.getElementById("edit-colors-list");
   const idx = list.children.length;
   const div = document.createElement("div");
   div.id = "edit-color-item-" + idx;
-  div.style.cssText = "display:flex;align-items:center;gap:4px;background:var(--dark3,#111);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)";
+  div.style.cssText =
+    "display:flex;align-items:center;gap:4px;background:var(--dark3,#111);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)";
   div.innerHTML = `
     <div style="width:16px;height:16px;background:${hex};border:1px solid rgba(255,255,255,0.2)"></div>
     <span style="font-size:12px;color:#ccc" data-name="${name}" data-hex="${hex}">${name}</span>
