@@ -25,7 +25,7 @@ let firebaseProducts = [];
 //////////////////
 let cart = [],
   customProducts = [];
-  let orders = [];
+let orders = [];
 const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
 let isLoggedIn = false;
@@ -61,14 +61,14 @@ function showPage(name) {
     }
   }
 
-  document.querySelectorAll(".page").forEach((p) =>
-    p.classList.remove("active")
-  );
+  document
+    .querySelectorAll(".page")
+    .forEach((p) => p.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
 
-  document.querySelectorAll(".nav-links a").forEach((a) =>
-    a.classList.remove("active-link")
-  );
+  document
+    .querySelectorAll(".nav-links a")
+    .forEach((a) => a.classList.remove("active-link"));
 
   const el = document.getElementById("nav-" + name);
   if (el) el.classList.add("active-link");
@@ -91,7 +91,7 @@ function showPage(name) {
   // firebaseProducts is populated when
   // renderAdminProductList() reads it.
   // =============================================
-if (name === "admin") {
+  if (name === "admin") {
     renderAdmin();
   }
 
@@ -119,7 +119,7 @@ function doLogin() {
     // Firebase before calling renderAdmin(),
     // same pattern as showPage("admin").
     // =============================================
-   renderAdmin();
+    renderAdmin();
   } else {
     document.getElementById("login-error").textContent =
       "اسم المستخدم أو كلمة المرور غير صحيحة";
@@ -136,10 +136,15 @@ function getAllProducts() {
   return [...firebaseProducts, ...customProducts];
 }
 function openProductGallery(id) {
-  const p = getAllProducts().find(x => x.id === id);
+  const p = getAllProducts().find((x) => x.id === id);
   if (!p) return;
 
-  const images = Array.isArray(p.images) && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
+  const images =
+    Array.isArray(p.images) && p.images.length
+      ? p.images
+      : p.imageUrl
+        ? [p.imageUrl]
+        : [];
 
   const old = document.getElementById("product-gallery-modal");
   if (old) old.remove();
@@ -163,28 +168,40 @@ function openProductGallery(id) {
 
       <!-- Main Image -->
       <div style="position:relative;background:#1a1a1a;height:360px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-        <img id="gallery-main-img" src="${images[currentIndex] || ''}" 
+        <img id="gallery-main-img" src="${images[currentIndex] || ""}" 
           style="max-height:100%;max-width:100%;object-fit:contain;transition:opacity 0.2s"/>
         
-        ${images.length > 1 ? `
+        ${
+          images.length > 1
+            ? `
         <button onclick="galleryPrev()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;height:38px;font-size:18px;cursor:pointer">›</button>
         <button onclick="galleryNext()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;font-size:18px;height:38px;cursor:pointer">‹</button>
-        ` : ''}
+        `
+            : ""
+        }
 
         <div id="gallery-counter" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:var(--gold,#c9a84c);font-size:12px;padding:3px 12px;letter-spacing:1px">
-          ${images.length > 1 ? `1 / ${images.length}` : ''}
+          ${images.length > 1 ? `1 / ${images.length}` : ""}
         </div>
       </div>
 
       <!-- Thumbnails -->
-      ${images.length > 1 ? `
+      ${
+        images.length > 1
+          ? `
       <div id="gallery-thumbs" style="display:flex;gap:6px;padding:12px;overflow-x:auto;background:#0a0a0a;border-top:1px solid rgba(201,168,76,0.1)">
-        ${images.map((src, i) => `
+        ${images
+          .map(
+            (src, i) => `
           <img src="${src}" onclick="galleryGoTo(${i})" id="thumb-${i}"
             style="width:64px;height:64px;object-fit:cover;cursor:pointer;flex-shrink:0;
-            border:2px solid ${i === 0 ? 'var(--gold,#c9a84c)' : 'transparent'};opacity:${i === 0 ? 1 : 0.5};transition:all 0.2s"/>
-        `).join("")}
-      </div>` : ''}
+            border:2px solid ${i === 0 ? "var(--gold,#c9a84c)" : "transparent"};opacity:${i === 0 ? 1 : 0.5};transition:all 0.2s"/>
+        `,
+          )
+          .join("")}
+      </div>`
+          : ""
+      }
 
       <!-- Info -->
       <div style="padding:20px 24px;border-top:1px solid rgba(255,255,255,0.05)">
@@ -204,29 +221,52 @@ function openProductGallery(id) {
   document.body.appendChild(modal);
 
   // Close on backdrop
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
 
   // Inject gallery nav functions into window temporarily
   const galleryImages = images;
   window._galleryIndex = 0;
 
-  window.galleryGoTo = function(i) {
+  window.galleryGoTo = function (i) {
     window._galleryIndex = i;
     const mainImg = document.getElementById("gallery-main-img");
-    if (mainImg) { mainImg.style.opacity = 0; setTimeout(() => { mainImg.src = galleryImages[i]; mainImg.style.opacity = 1; }, 150); }
+    if (mainImg) {
+      mainImg.style.opacity = 0;
+      setTimeout(() => {
+        mainImg.src = galleryImages[i];
+        mainImg.style.opacity = 1;
+      }, 150);
+    }
     const counter = document.getElementById("gallery-counter");
     if (counter) counter.textContent = `${i + 1} / ${galleryImages.length}`;
     galleryImages.forEach((_, j) => {
       const t = document.getElementById(`thumb-${j}`);
-      if (t) { t.style.border = j === i ? "2px solid var(--gold,#c9a84c)" : "2px solid transparent"; t.style.opacity = j === i ? "1" : "0.5"; }
+      if (t) {
+        t.style.border =
+          j === i ? "2px solid var(--gold,#c9a84c)" : "2px solid transparent";
+        t.style.opacity = j === i ? "1" : "0.5";
+      }
     });
   };
 
-  window.galleryNext = function() { window.galleryGoTo((window._galleryIndex + 1) % galleryImages.length); };
-  window.galleryPrev = function() { window.galleryGoTo((window._galleryIndex - 1 + galleryImages.length) % galleryImages.length); };
+  window.galleryNext = function () {
+    window.galleryGoTo((window._galleryIndex + 1) % galleryImages.length);
+  };
+  window.galleryPrev = function () {
+    window.galleryGoTo(
+      (window._galleryIndex - 1 + galleryImages.length) % galleryImages.length,
+    );
+  };
 }
 function productHTML(p) {
-  const images = Array.isArray(p.images) && p.images.length ? p.images : p.imageUrl ? [p.imageUrl] : [];
+  const images =
+    Array.isArray(p.images) && p.images.length
+      ? p.images
+      : p.imageUrl
+        ? [p.imageUrl]
+        : [];
   const hasMultiple = images.length > 1;
 
   return `<div class="product-card" onclick="openProductGallery('${p.id}')" style="cursor:pointer">
@@ -252,10 +292,11 @@ function productHTML(p) {
 function catLabel(c) {
   return (
     {
-     Magnetic_Track:"Magnetic Track",
-     Spot_light:"Spot light",
-     DoubleSpot_light:"Double Spot light",
-     Metal_Connector:"Metal Connector",
+      Magnetic_Track: "Magnetic Track",
+      Spot_light: "Spot light",
+      DoubleSpot_light: "Double Spot light",
+      Metal_Connector: "Metal Connector",
+      Magnetic_Power: "Magnetic Power",
     }[c] || c
   );
 }
@@ -307,7 +348,9 @@ function addToCart(id) {
   if (!p) {
     // products not loaded yet, load then retry
     loadProductsFromFirebase().then(() => {
-      const p2 = getAllProducts().find((x) => x.id === id || x.id === String(id));
+      const p2 = getAllProducts().find(
+        (x) => x.id === id || x.id === String(id),
+      );
       if (!p2) return;
       const ex = cart.find((c) => c.id === p2.id);
       if (ex) ex.qty++;
@@ -373,7 +416,10 @@ function populateProductDropdown() {
       sel.innerHTML =
         '<option value="">اختر منتجاً للإضافة...</option>' +
         getAllProducts()
-          .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+          .map(
+            (p) =>
+              `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
+          )
           .join("");
     });
     return;
@@ -381,7 +427,10 @@ function populateProductDropdown() {
   sel.innerHTML =
     '<option value="">اختر منتجاً للإضافة...</option>' +
     all
-      .map((p) => `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`)
+      .map(
+        (p) =>
+          `<option value="${p.name}">${p.name} — ${fmtP(p.price)}</option>`,
+      )
       .join("");
 }
 async function submitOrder() {
@@ -409,10 +458,17 @@ async function submitOrder() {
     email,
     phone: phone || "غير محدد",
     address: address || "غير محدد",
-    product: cart.map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : "")).join(", "),
+    product: cart
+      .map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : ""))
+      .join(", "),
     value: totalValue,
     valueFormatted: fmtP(totalValue),
-    items: cart.map((c) => ({ id: c.id, name: c.name, price: c.price, qty: c.qty })),
+    items: cart.map((c) => ({
+      id: c.id,
+      name: c.name,
+      price: c.price,
+      qty: c.qty,
+    })),
     status: "new",
     date: new Date().toLocaleDateString("ar-EG", {
       day: "numeric",
@@ -425,7 +481,10 @@ async function submitOrder() {
 
   // Show loading state on button
   const btn = document.querySelector(".submit-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "جارٍ الإرسال..."; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "جارٍ الإرسال...";
+  }
 
   try {
     const docRef = await addDoc(collection(db, "Orders"), orderData);
@@ -448,21 +507,25 @@ async function submitOrder() {
     // Clear cart and form
     cart = [];
     updateCartUI();
-    ["fname", "lname", "email", "phone", "address", "description"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.value = "";
-    });
+    ["fname", "lname", "email", "phone", "address", "description"].forEach(
+      (id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      },
+    );
 
     // Show success
     document.getElementById("success-overlay").classList.add("show");
     showNotif("✦", "تم الإرسال!", "طلبك وصلنا وسنتواصل معك قريباً.");
-
   } catch (error) {
     console.error("❌ Firebase error:", error);
     showNotif("⚠", "خطأ", "فشل إرسال الطلب: " + error.message);
   } finally {
     // Restore button
-    if (btn) { btn.disabled = false; btn.textContent = "✦ إرسال طلب الاستفسار"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "✦ إرسال طلب الاستفسار";
+    }
   }
 }
 const STATUS_MAP = {
@@ -503,10 +566,13 @@ async function renderAdmin() {
   renderFullOrders();
   renderAdminProductList(firebaseProducts);
 
-
-  document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
-  document.getElementById("prod-list-count").textContent = getAllProducts().length;
+  document.getElementById("admin-prod-count").textContent =
+    getAllProducts().length;
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  document.getElementById("prod-list-count").textContent =
+    getAllProducts().length;
 
   // Update total orders count card
   const totalCard = document.querySelector(".admin-card .admin-card-val");
@@ -530,7 +596,7 @@ function renderDashboardOrders() {
     <td>${o.value}</td>
     <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
     <td style="color:var(--gray)">${o.date}</td>
-    </tr>`
+    </tr>`,
     )
     .join("");
 }
@@ -551,12 +617,12 @@ function renderFullOrders() {
     <td>${o.value}</td>
     <td>
       <select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
-        ${["new","proc","done","cancel"].map((s) => `<option value="${s}" ${o.status===s?"selected":""}>${STATUS_LABEL[s]}</option>`).join("")}
+        ${["new", "proc", "done", "cancel"].map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
       </select>
     </td>
     <td style="color:var(--gray)">${o.date}</td>
     <td><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
-  </tr>`
+  </tr>`,
     )
     .join("");
 }
@@ -574,8 +640,14 @@ async function updateOrderStatus(i, status) {
   renderDashboardOrders();
   renderFullOrders();
   renderMessages();
-  document.getElementById("admin-msg-count").textContent = orders.filter((o) => o.status === "new").length;
-  showNotif("✦", "تم التحديث", `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`);
+  document.getElementById("admin-msg-count").textContent = orders.filter(
+    (o) => o.status === "new",
+  ).length;
+  showNotif(
+    "✦",
+    "تم التحديث",
+    `${orders[i].id} تم تحديثه إلى: ${STATUS_LABEL[status]}`,
+  );
 }
 
 function viewDetail(i) {
@@ -654,11 +726,15 @@ function viewDetail(i) {
         </div>
 
         <!-- Notes -->
-        ${o.desc ? `
+        ${
+          o.desc
+            ? `
         <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
           <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:12px">ملاحظات</div>
           <div style="font-size:13px;color:#aaa;line-height:1.8">${o.desc}</div>
-        </div>` : ""}
+        </div>`
+            : ""
+        }
 
         <!-- Actions -->
         <div style="display:flex;gap:10px">
@@ -781,8 +857,18 @@ function renderAnalytics() {
     bars.appendChild(d);
   });
   const months = [
-    "يناير","فبراير","مارس","أبريل","مايو","يونيو",
-    "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
   ];
   const vals = [62, 78, 85, 91, 105, 88, 96, 112, 134, 98, 118, 142];
   const max = Math.max(...vals);
@@ -801,20 +887,28 @@ function renderAnalytics() {
 }
 function removeImage(i) {
   pendingImages.splice(i, 1);
-  renderUploadPreview(document.getElementById("upload-preview"), pendingImages, false);
+  renderUploadPreview(
+    document.getElementById("upload-preview"),
+    pendingImages,
+    false,
+  );
 }
 function removeEditImage(i) {
   editPendingImages.splice(i, 1);
   renderEditPreview();
 }
 function renderUploadPreview(container, images, isEdit) {
-  container.innerHTML = images.map((src, i) => `
+  container.innerHTML = images
+    .map(
+      (src, i) => `
     <div style="position:relative;display:inline-block;margin:4px">
       <img src="${src}" style="width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)"/>
-      <button onclick="${isEdit ? 'removeEditImage' : 'removeImage'}(${i})" 
+      <button onclick="${isEdit ? "removeEditImage" : "removeImage"}(${i})" 
         style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.7);border:none;color:#ff6b6b;cursor:pointer;font-size:11px;padding:2px 5px">✕</button>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 let pendingImages = []; // stores base64 strings
 
@@ -834,7 +928,8 @@ async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
@@ -842,9 +937,12 @@ async function saveProduct() {
   }
 
   const productData = {
-    name, cat, price, quantity,
-    images: pendingImages,                        // array of base64
-    imageUrl: pendingImages[0] || null,           // keep first as thumbnail
+    name,
+    cat,
+    price,
+    quantity,
+    images: pendingImages, // array of base64
+    imageUrl: pendingImages[0] || null, // keep first as thumbnail
   };
 
   try {
@@ -855,8 +953,10 @@ async function saveProduct() {
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
-    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ المنتج");
@@ -865,7 +965,7 @@ async function saveProduct() {
 
 function clearProductForm() {
   ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
+    (id) => (document.getElementById(id).value = ""),
   );
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
@@ -887,7 +987,8 @@ async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
   const price = parseFloat(document.getElementById("prod-price").value);
-  const quantity = parseInt(document.getElementById("prod-quantity").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("prod-quantity").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل البيانات");
@@ -937,8 +1038,10 @@ async function deleteProduct(id, name) {
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
@@ -951,14 +1054,18 @@ function renderEditPreview() {
     container.innerHTML = `<span style="color:var(--gray,#888);font-size:13px;padding:8px">لا توجد صور</span>`;
     return;
   }
-  container.innerHTML = editPendingImages.map((src, i) => `
+  container.innerHTML = editPendingImages
+    .map(
+      (src, i) => `
     <div style="position:relative;display:inline-block">
       <img src="${src}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)"/>
       <button onclick="removeEditImage(${i})" 
         style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.75);border:none;color:#ff6b6b;cursor:pointer;font-size:11px;padding:2px 5px">✕</button>
-      ${i === 0 ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,76,0.8);color:#000;font-size:9px;text-align:center;padding:2px">رئيسية</div>` : ''}
+      ${i === 0 ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,76,0.8);color:#000;font-size:9px;text-align:center;padding:2px">رئيسية</div>` : ""}
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 // ===== OPEN EDIT MODAL =====
 let editPendingImages = [];
@@ -967,15 +1074,19 @@ function openEditModal(id) {
   const p = firebaseProducts.find((x) => x.id === id);
   if (!p) return;
 
-  editPendingImages = Array.isArray(p.images) && p.images.length
-    ? [...p.images]
-    : p.imageUrl ? [p.imageUrl] : [];
+  editPendingImages =
+    Array.isArray(p.images) && p.images.length
+      ? [...p.images]
+      : p.imageUrl
+        ? [p.imageUrl]
+        : [];
 
   const old = document.getElementById("edit-modal");
   if (old) old.remove();
 
   const modal = document.createElement("div");
-  modal.id = "edit-modal";handleEditImageUploadsaveEditProduct
+  modal.id = "edit-modal";
+  handleEditImageUploadsaveEditProduct;
   modal.style.cssText = `
     position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
     display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto
@@ -986,15 +1097,26 @@ function openEditModal(id) {
       <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px">✏ تعديل المنتج</div>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">اسم المنتج</label>
-      <input id="edit-prod-name" value="${p.name || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+      <input id="edit-prod-name" value="${p.name || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الفئة</label>
       <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
-        ${["Magnetic_Track","Spot_light","DoubleSpot_light","Metal_Connector"].map(c => `<option value="${c}" ${p.cat===c?"selected":""}>${catLabel(c)}</option>`).join("")}
+        ${[
+          "Magnetic_Track",
+          "Spot_light",
+          "DoubleSpot_light",
+          "Metal_Connector",
+          "Magnetic_Power",
+        ]
+          .map(
+            (c) =>
+              `<option value="${c}" ${p.cat === c ? "selected" : ""}>${catLabel(c)}</option>`,
+          )
+          .join("")}
       </select>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">السعر (جنيه)</label>
-      <input id="edit-prod-price" type="number" value="${p.price || ''}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+      <input id="edit-prod-price" type="number" value="${p.price || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الكمية</label>
       <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
@@ -1046,7 +1168,8 @@ async function loadOrdersFromFirebase() {
         firestoreId: docSnap.id,
         client: data.client || "غير محدد",
         product: data.product || "غير محدد",
-        value: data.valueFormatted || (data.value ? fmtP(data.value) : "غير محدد"),
+        value:
+          data.valueFormatted || (data.value ? fmtP(data.value) : "غير محدد"),
         status: data.status || "new",
         date: data.date || "",
         email: data.email || "",
@@ -1066,7 +1189,8 @@ async function saveEditProduct(id) {
   const name = document.getElementById("edit-prod-name").value.trim();
   const cat = document.getElementById("edit-prod-cat").value;
   const price = parseFloat(document.getElementById("edit-prod-price").value);
-  const quantity = parseInt(document.getElementById("edit-prod-qty").value) || 0;
+  const quantity =
+    parseInt(document.getElementById("edit-prod-qty").value) || 0;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل جميع البيانات");
@@ -1075,7 +1199,10 @@ async function saveEditProduct(id) {
 
   try {
     await updateDoc(doc(db, "Product", id), {
-      name, cat, price, quantity,
+      name,
+      cat,
+      price,
+      quantity,
       images: editPendingImages,
       imageUrl: editPendingImages[0] || null,
     });
