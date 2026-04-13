@@ -430,10 +430,10 @@
     .form-row { grid-template-columns:1fr; }
     .product-form-grid { grid-template-columns:1fr; }
   }
-.product-card {
+/* .product-card {
   display: flex;
   flex-direction: column;
-}
+} */
 
 .product-info {
   display: flex;
