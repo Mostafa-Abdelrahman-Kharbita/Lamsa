@@ -753,17 +753,37 @@ function handleFileUpload(e) {
   Array.from(e.target.files).forEach((file) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      img.style.cssText =
-        "width:90px;height:90px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)";
-      img.dataset.dataurl = ev.target.result;
-      preview.appendChild(img);
+      const idx = preview.children.length;
+      const wrap = document.createElement("div");
+      wrap.id = "new-photo-wrap-" + idx;
+      wrap.style.cssText = "position:relative;width:80px;height:80px";
+      wrap.innerHTML = `
+        <img src="${ev.target.result}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)" data-dataurl="${ev.target.result}"/>
+        <button onclick="document.getElementById('new-photo-wrap-${idx}').remove()" style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:#ef4444;border:none;color:#fff;font-size:11px;cursor:pointer;border-radius:50%">✕</button>
+      `;
+      preview.appendChild(wrap);
     };
     reader.readAsDataURL(file);
   });
 }
 
+function addNewColor() {
+  const hex = document.getElementById("new-color-hex").value;
+  const name = document.getElementById("new-color-name").value.trim();
+  if (!name) { showNotif("⚠", "أدخل اسم اللون", ""); return; }
+  const list = document.getElementById("new-colors-list");
+  const idx = list.children.length;
+  const div = document.createElement("div");
+  div.id = "new-color-item-" + idx;
+  div.style.cssText = "display:flex;align-items:center;gap:4px;background:var(--dark3);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)";
+  div.innerHTML = `
+    <div style="width:16px;height:16px;background:${hex};border:1px solid rgba(255,255,255,0.2)"></div>
+    <span style="font-size:12px;color:#ccc" data-name="${name}" data-hex="${hex}">${name}</span>
+    <button onclick="document.getElementById('new-color-item-${idx}').remove()" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:12px;margin-right:4px">✕</button>
+  `;
+  list.appendChild(div);
+  document.getElementById("new-color-name").value = "";
+}
 async function saveProduct() {
   const name = document.getElementById("prod-name").value.trim();
   const cat = document.getElementById("prod-category").value;
@@ -775,35 +795,29 @@ async function saveProduct() {
     return;
   }
 
-  const imgEl = document.querySelector("#upload-preview img");
+  // Collect all images
+  const imgEls = document.querySelectorAll("#upload-preview img");
+  const images = Array.from(imgEls).map((img) => img.dataset.dataurl || img.src).filter(Boolean);
+  const imageUrl = images[0] || null;
 
-  const productData = {
-    name,
-    cat,
-    price,
-    quantity,
-    imageUrl: imgEl ? imgEl.dataset.dataurl : null,
-  };
+  // Collect colors
+  const colorSpans = document.querySelectorAll("#new-colors-list span[data-name]");
+  const colors = Array.from(colorSpans).map((s) => ({ name: s.dataset.name, hex: s.dataset.hex }));
 
   try {
-    await addDoc(collection(db, "Product"), productData);
+    await addDoc(collection(db, "Product"), { name, cat, price, quantity, imageUrl, images, colors });
     showNotif("✦", "تم الحفظ!", name + " أُضيف إلى Firebase 🔥");
-
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
     clearProductForm();
-
-    document.getElementById("admin-prod-count").textContent =
-      getAllProducts().length;
-    document.getElementById("prod-list-count").textContent =
-      getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
+    document.getElementById("prod-list-count").textContent = getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حفظ المنتج");
   }
 }
-
 function clearProductForm() {
   ["prod-name", "prod-price", "prod-quantity"].forEach(
     (id) => (document.getElementById(id).value = "")
@@ -811,6 +825,8 @@ function clearProductForm() {
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
   document.getElementById("file-input").value = "";
+  const colorsList = document.getElementById("new-colors-list");
+  if (colorsList) colorsList.innerHTML = "";
 }
 
 async function updateProduct(id) {
@@ -1145,3 +1161,4 @@ window.handleEditMultiUpload = handleEditMultiUpload;
 window.removeEditPhoto = removeEditPhoto;
 window.addEditColor = addEditColor;
 window.removeEditColor = removeEditColor;
+window.addNewColor = addNewColor;

@@ -837,95 +837,45 @@
               <p>ارفع وأدر كتالوج الإضاءة الخاص بك.</p>
             </div>
             <div class="admin-panel">
-              <div class="admin-panel-title">رفع منتج جديد</div>
-              <div
-                class="upload-zone"
-                onclick="document.getElementById('file-input').click()"
-              >
-                <div class="upload-icon">📷</div>
-                <div class="upload-text">
-                  <strong>انقر لرفع صورة المنتج</strong><br />PNG، JPG، WEBP حتى
-                  10MB
-                </div>
-                <input
-                  type="file"
-                  id="file-input"
-                  accept="image/*"
-                  style="display: none"
-                  onchange="handleFileUpload(event)"
-                />
-              </div>
-              <div
-                id="upload-preview"
-                style="
-                  display: flex;
-                  gap: 10px;
-                  flex-wrap: wrap;
-                  margin-bottom: 20px;
-                "
-              ></div>
-              <div class="product-form-grid">
-                <div class="form-group">
-                  <label>اسم المنتج *</label
-                  ><input
-                    type="text"
-                    id="prod-name"
-                    placeholder="مثال: ثريا أورورا الكريستالية"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>الفئة *</label>
-                  <select id="prod-category">
-                    <option value="">اختر الفئة...</option>
-                    <option value="Magnetic_Track">Magnetic Track</option>
-                    <option value="Spot_light">Spot Light</option>
-                    <option value="DoubleSpot_light">Double Spot Light</option>
-                    <option value="Metal_Connector">Metal Connector</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>السعر (جنيه) *</label
-                  ><input
-                    type="number"
-                    id="prod-price"
-                    placeholder="25000"
-                    min="0"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>الكمية المتاحة *</label
-                  ><input
-                    type="number"
-                    id="prod-quantity"
-                    placeholder="10"
-                    min="0"
-                  />
-                </div>
-              </div>
-              <div style="display: flex; gap: 10px; margin-top: 6px">
-                <button
-                  class="panel-action"
-                  style="padding: 12px 36px"
-                  onclick="saveProduct()"
-                >
-                  حفظ المنتج
-                </button>
-                <button
-                  onclick="clearProductForm()"
-                  style="
-                    padding: 12px 36px;
-                    background: transparent;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    color: var(--gray);
-                    cursor: pointer;
-                    font-family: &quot;Tajawal&quot;, sans-serif;
-                    font-size: 13px;
-                  "
-                >
-                  مسح النموذج
-                </button>
-              </div>
-            </div>
+  <div class="admin-panel-title">رفع منتج جديد</div>
+  
+  <!-- PHOTOS -->
+  <div style="font-size:12px;color:var(--gray);margin-bottom:8px;letter-spacing:1px">الصور (يمكن رفع أكثر من صورة)</div>
+  <div style="border:2px dashed rgba(201,168,76,0.3);padding:24px;text-align:center;cursor:pointer;margin-bottom:12px" onclick="document.getElementById('file-input').click()">
+    <div style="font-size:28px;margin-bottom:8px">📷</div>
+    <div style="font-size:13px;color:var(--gray)"><strong style="color:var(--white2)">انقر لرفع صور المنتج</strong><br>يمكن اختيار أكثر من صورة</div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFileUpload(event)"/>
+  </div>
+  <div id="upload-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
+
+  <!-- COLORS -->
+  <div style="font-size:12px;color:var(--gray);margin-bottom:8px;letter-spacing:1px">الألوان المتاحة (اختياري)</div>
+  <div id="new-colors-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+  <div style="display:flex;gap:8px;margin-bottom:20px">
+    <input type="color" id="new-color-hex" value="#ffffff" style="width:44px;height:38px;padding:2px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);cursor:pointer"/>
+    <input type="text" id="new-color-name" placeholder="اسم اللون (مثل: أسود، أبيض...)" style="flex:1;padding:8px 12px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px"/>
+    <button onclick="addNewColor()" style="padding:8px 16px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">+ إضافة</button>
+  </div>
+
+  <div class="product-form-grid">
+    <div class="form-group"><label>اسم المنتج *</label><input type="text" id="prod-name" placeholder="مثال: Magnetic Track 6W"/></div>
+    <div class="form-group"><label>الفئة *</label>
+      <select id="prod-category">
+        <option value="">اختر الفئة...</option>
+        <option value="Magnetic_Track">Magnetic Track</option>
+        <option value="Spot_light">Spot Light</option>
+        <option value="DoubleSpot_light">Double Spot Light</option>
+        <option value="Metal_Connector">Metal Connector</option>
+      </select>
+    </div>
+    <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="prod-price" placeholder="25000" min="0"/></div>
+    <div class="form-group"><label>الكمية المتاحة *</label><input type="number" id="prod-quantity" placeholder="10" min="0"/></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:6px">
+    <button class="panel-action" style="padding:12px 36px" onclick="saveProduct()">حفظ المنتج</button>
+    <button onclick="clearProductForm()" style="padding:12px 36px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--gray);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">مسح النموذج</button>
+  </div>
+</div>
             <div class="admin-panel">
               <div class="admin-panel-title">
                 المنتجات الحالية (<span id="prod-list-count">0</span>)
