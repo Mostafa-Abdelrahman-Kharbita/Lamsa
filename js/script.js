@@ -1086,7 +1086,6 @@ function openEditModal(id) {
 
   const modal = document.createElement("div");
   modal.id = "edit-modal";
-  handleEditImageUploadsaveEditProduct;
   modal.style.cssText = `
     position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
     display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto
@@ -1292,3 +1291,4 @@ window.galleryPrev = () => {};
 window.removeImage = removeImage;
 window.removeEditImage = removeEditImage;
 window.handleEditImageUpload = handleEditImageUpload;
+
