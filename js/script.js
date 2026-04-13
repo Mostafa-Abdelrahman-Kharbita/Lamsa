@@ -873,15 +873,15 @@ function clearProductForm() {
   pendingImages = [];
 }
 
-function clearProductForm() {
-  ["prod-name", "prod-price", "prod-quantity"].forEach(
-    (id) => (document.getElementById(id).value = "")
-  );
-  document.getElementById("prod-category").value = "";
-  document.getElementById("upload-preview").innerHTML = "";
-  document.getElementById("file-input").value = "";
-  pendingImages = [];
-}
+// function clearProductForm() {
+//   ["prod-name", "prod-price", "prod-quantity"].forEach(
+//     (id) => (document.getElementById(id).value = "")
+//   );
+//   document.getElementById("prod-category").value = "";
+//   document.getElementById("upload-preview").innerHTML = "";
+//   document.getElementById("file-input").value = "";
+//   pendingImages = [];
+// }
 
 async function updateProduct(id) {
   const name = document.getElementById("prod-name").value.trim();
