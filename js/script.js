@@ -459,8 +459,13 @@ async function submitOrder() {
     phone: phone || "غير محدد",
     address: address || "غير محدد",
     product: cart
-      .map((c) => c.name + (c.qty > 1 ? ` × ${c.qty}` : ""))
-      .join(", "),
+      .map(
+        (c) =>
+          c.name +
+          (c.color ? ` - ${c.color}` : "") +
+          (c.qty > 1 ? ` × ${c.qty}` : ""),
+      )
+      .join(",,"),
     value: totalValue,
     valueFormatted: fmtP(totalValue),
     items: cart.map((c) => ({
@@ -718,7 +723,18 @@ function viewDetail(i) {
         <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
           <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:16px">تفاصيل الطلب</div>
           <div style="font-size:10px;color:#666;margin-bottom:6px;letter-spacing:1px">المنتجات</div>
-          <div style="font-size:14px;color:#e0e0e0;line-height:1.8;margin-bottom:16px;padding:12px;background:#111;border-right:2px solid var(--gold,#c9a84c)">${o.product}</div>
+<div style="margin-bottom:16px">
+            ${o.product
+              .split(", ,")
+              .map(
+                (item, i) => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#111;border-right:2px solid var(--gold,#c9a84c);margin-bottom:6px">
+                <span style="font-size:11px;color:var(--gold,#c9a84c);min-width:20px">${i + 1}</span>
+                <span style="font-size:14px;color:#e0e0e0">${item.trim()}</span>
+              </div>`,
+              )
+              .join("")}
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
             <span style="font-size:12px;color:#666;letter-spacing:1px">القيمة الإجمالية</span>
             <span style="font-size:22px;color:var(--gold,#c9a84c);font-weight:500">${o.value}</span>
@@ -1291,4 +1307,3 @@ window.galleryPrev = () => {};
 window.removeImage = removeImage;
 window.removeEditImage = removeEditImage;
 window.handleEditImageUpload = handleEditImageUpload;
-
