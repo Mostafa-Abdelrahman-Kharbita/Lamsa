@@ -1065,20 +1065,81 @@ function showNotif(icon, title, msg) {
 }
 // ===== DELETE PRODUCT =====
 async function deleteProduct(id, name) {
-  if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
+  const old = document.getElementById("delete-confirm-modal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "delete-confirm-modal";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px
+  `;
+
+  const p = firebaseProducts.find((x) => x.id === id);
+  const imgSrc = p?.imageUrl || p?.images?.[0] || null;
+
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid rgba(255,80,80,0.2);width:100%;max-width:400px;margin:auto;direction:rtl;font-family:'Tajawal',sans-serif;overflow:hidden">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1a0000,#0a0a0a);padding:24px 28px;border-bottom:1px solid rgba(255,80,80,0.15);display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🗑</div>
+        <div>
+          <div style="font-size:16px;color:#ff6b6b;font-weight:500">حذف المنتج</div>
+          <div style="font-size:12px;color:#666;margin-top:2px">هذا الإجراء لا يمكن التراجع عنه</div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px">
+          ${imgSrc
+            ? `<img src="${imgSrc}" style="width:56px;height:56px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"/>`
+            : `<div style="width:56px;height:56px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💡</div>`
+          }
+          <div>
+            <div style="font-size:15px;color:#fff;line-height:1.4">${name}</div>
+            <div style="font-size:11px;color:#666;margin-top:4px">${p ? catLabel(p.cat) + ' · ' + fmtP(p.price) : ''}</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#888;line-height:1.7;margin-bottom:24px">
+          هل أنت متأكد من حذف هذا المنتج نهائياً من قاعدة البيانات؟ لن تتمكن من استعادته بعد الحذف.
+        </div>
+        <div style="display:flex;gap:10px">
+          <button id="confirm-delete-btn" onclick="confirmDeleteProduct('${id}','${name.replace(/'/g, "\\'")}')"
+            style="flex:1;padding:12px;background:linear-gradient(135deg,#7f1d1d,#ef4444);color:#fff;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.5px">
+            نعم، احذف المنتج
+          </button>
+          <button onclick="document.getElementById('delete-confirm-modal').remove()"
+            style="flex:1;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:14px">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function confirmDeleteProduct(id, name) {
+  const btn = document.getElementById("confirm-delete-btn");
+  if (btn) { btn.disabled = true; btn.textContent = "جارٍ الحذف..."; }
+
   try {
     await deleteDoc(doc(db, "Product", id));
-    showNotif("🗑", "تم الحذف", `${name} تم حذفه من Firebase`);
+    document.getElementById("delete-confirm-modal").remove();
+    showNotif("🗑", "تم الحذف", `${name} تم حذفه نهائياً`);
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-    document.getElementById("admin-prod-count").textContent =
-      getAllProducts().length;
-    document.getElementById("prod-list-count").textContent =
-      getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
+    document.getElementById("prod-list-count").textContent = getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
+    if (btn) { btn.disabled = false; btn.textContent = "نعم، احذف المنتج"; }
   }
 }
 function renderEditPreview() {
@@ -1325,3 +1386,4 @@ window.galleryPrev = () => {};
 window.removeImage = removeImage;
 window.removeEditImage = removeEditImage;
 window.handleEditImageUpload = handleEditImageUpload;
+window.confirmDeleteProduct = confirmDeleteProduct;
