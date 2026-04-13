@@ -132,7 +132,13 @@
   .section-body { color:var(--gray); font-size:15px; line-height:1.9; max-width:500px; margin-top:16px; }
 
   /* PRODUCTS GRID */
-  .products-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:2px; }
+  /* AFTER - force at least 2 columns and full width */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2px;
+  width: 100%;
+}
   .product-card {
     background:var(--dark2); cursor:pointer; overflow:hidden;
     transition:transform var(--T); position:relative;
@@ -448,4 +454,17 @@
 .add-btn-card {
   margin-top: auto;
   width: 100%;
+}
+/* Add this */
+#page-catalog .section {
+  padding: 80px 48px;
+  width: 100%;
+}
+
+#page-catalog .products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2px;
+  width: 100%;
+  margin-top: 28px;
 }
