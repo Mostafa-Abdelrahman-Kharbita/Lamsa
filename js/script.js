@@ -725,14 +725,32 @@ function viewDetail(i) {
           <div style="font-size:10px;color:#666;margin-bottom:6px;letter-spacing:1px">المنتجات</div>
 <div style="margin-bottom:16px">
             ${o.product
-              .split(", ,")
-              .map(
-                (item, i) => `
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#111;border-right:2px solid var(--gold,#c9a84c);margin-bottom:6px">
-                <span style="font-size:11px;color:var(--gold,#c9a84c);min-width:20px">${i + 1}</span>
-                <span style="font-size:14px;color:#e0e0e0">${item.trim()}</span>
-              </div>`,
-              )
+              .split(",,")
+              .map((item, i) => {
+                const clean = item.trim();
+                // parse: "Name - Color × Qty" or "Name × Qty" or "Name - Color"
+                const qtyMatch = clean.match(/×\s*(\d+)$/);
+                const qty = qtyMatch ? qtyMatch[1] : "1";
+                const withoutQty = clean.replace(/×\s*\d+$/, "").trim();
+                const colorMatch = withoutQty.match(/ - ([^-]+)$/);
+                const color = colorMatch ? colorMatch[1].trim() : null;
+                const name = color
+                  ? withoutQty.replace(/ - [^-]+$/, "").trim()
+                  : withoutQty;
+                return `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;border-right:3px solid var(--gold,#c9a84c);margin-bottom:8px;gap:12px">
+                <div style="display:flex;align-items:center;gap:10px;flex:1">
+                  <span style="font-size:13px;color:var(--gold,#c9a84c);font-weight:700;min-width:20px">${i + 1}</span>
+                  <div>
+                    <div style="font-size:14px;color:#fff;line-height:1.4">${name}</div>
+                    ${color ? `<div style="font-size:11px;color:#aaa;margin-top:3px">اللون: <span style="color:var(--gold,#c9a84c)">${color}</span></div>` : ""}
+                  </div>
+                </div>
+                <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);padding:4px 12px;font-size:13px;color:var(--gold,#c9a84c);white-space:nowrap">
+                  × ${qty}
+                </div>
+              </div>`;
+              })
               .join("")}
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
