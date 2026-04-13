@@ -1180,11 +1180,12 @@ function clearEditImage(originalUrl) {
   const fileInput = document.getElementById("edit-file-input");
   if (fileInput) fileInput.value = "";
 }
-window.openProductGallery = openProductGallery;
-window.galleryNav = galleryNav;
-window.galleryGoTo = galleryGoTo;
-window.addNewColorPreset = addNewColorPreset;
-window.addEditColorPreset = addEditColorPreset;
+function addEditColorPreset(name, hex) {
+  document.getElementById("edit-color-hex").value = hex;
+  document.getElementById("edit-color-name").value = name;
+  addEditColor();
+}
+
 async function loadOrdersFromFirebase() {
   try {
     const snapshot = await getDocs(collection(db, "Orders"));
@@ -1389,3 +1390,8 @@ window.removeEditPhoto = removeEditPhoto;
 window.addEditColor = addEditColor;
 window.removeEditColor = removeEditColor;
 window.addNewColor = addNewColor;
+window.openProductGallery = openProductGallery;
+window.galleryNav = galleryNav;
+window.galleryGoTo = galleryGoTo;
+window.addNewColorPreset = addNewColorPreset;
+window.addEditColorPreset = addEditColorPreset;
