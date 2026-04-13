@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let firebaseProducts = [];
-
+//////////////////
 let cart = [],
   customProducts = [];
   let orders = [];
@@ -137,14 +137,39 @@ function getAllProducts() {
 }
 
 function productHTML(p) {
+  const images = p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+  const colors = p.colors && p.colors.length ? p.colors : [];
+
   return `<div class="product-card">
     ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ""}
-    <div class="product-img">
-      ${p.imageUrl ? `<img src="${p.imageUrl}"/>` : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`}
+    <div class="product-img" style="position:relative;overflow:hidden">
+      ${images.length
+        ? `<img id="pimg-${p.id}" src="${images[0]}" style="width:100%;height:100%;object-fit:cover;transition:opacity 0.3s"/>
+           ${images.length > 1 ? `
+           <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px">
+             ${images.map((url, i) => `
+               <button onclick="switchProductImg('${p.id}','${url}',this)" 
+                 style="width:7px;height:7px;border-radius:50%;border:none;cursor:pointer;padding:0;background:${i===0?'var(--gold,#c9a84c)':'rgba(255,255,255,0.4)'}">
+               </button>`).join("")}
+           </div>` : ""}
+          `
+        : `<span>${p.emoji || "💡"}</span><div class="glow-dot"></div>`
+      }
     </div>
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
       <div class="product-name">${p.name}</div>
+      ${colors.length ? `
+      <div style="margin-top:8px">
+        <div style="font-size:11px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">اختر اللون:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="colors-${p.id}">
+          ${colors.map((col, i) => `
+            <button onclick="selectColor('${p.id}',${i},this)" title="${col.name}"
+              style="width:22px;height:22px;border-radius:50%;background:${col.hex};border:${i===0?'2px solid var(--gold,#c9a84c)':'2px solid transparent'};cursor:pointer;outline:none;transition:border 0.2s">
+            </button>`).join("")}
+        </div>
+        <div id="color-label-${p.id}" style="font-size:11px;color:var(--gold,#c9a84c);margin-top:4px">${colors[0]?.name || ""}</div>
+      </div>` : ""}
       <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
         ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
         <div class="product-price">${fmtP(p.price)}</div>
@@ -153,7 +178,25 @@ function productHTML(p) {
     </div>
   </div>`;
 }
+function switchProductImg(id, url, btn) {
+  const img = document.getElementById("pimg-" + id);
+  if (img) img.src = url;
+  // update dots
+  const dots = btn.parentElement.querySelectorAll("button");
+  dots.forEach((d) => d.style.background = "rgba(255,255,255,0.4)");
+  btn.style.background = "var(--gold,#c9a84c)";
+}
 
+function selectColor(productId, idx, btn) {
+  const container = document.getElementById("colors-" + productId);
+  if (container) container.querySelectorAll("button").forEach((b) => b.style.border = "2px solid transparent");
+  btn.style.border = "2px solid var(--gold,#c9a84c)";
+  const product = getAllProducts().find((p) => p.id === productId);
+  if (product && product.colors && product.colors[idx]) {
+    const label = document.getElementById("color-label-" + productId);
+    if (label) label.textContent = product.colors[idx].name;
+  }
+}
 function catLabel(c) {
   return (
     {
@@ -848,7 +891,7 @@ function openEditModal(id) {
     overflow-y:auto
   `;
   modal.innerHTML = `
-    <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:480px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif;margin:auto">
+    <div style="background:var(--dark2,#1a1a1a);border:1px solid rgba(201,168,76,0.3);padding:32px;width:100%;max-width:560px;position:relative;direction:rtl;font-family:'Tajawal',sans-serif;margin:auto;max-height:90vh;overflow-y:auto">
       <button onclick="document.getElementById('edit-modal').remove()" style="position:absolute;top:14px;left:16px;background:transparent;border:none;color:var(--gray,#888);font-size:20px;cursor:pointer">✕</button>
       <div style="font-size:20px;color:var(--gold,#c9a84c);margin-bottom:24px;letter-spacing:1px">✏ تعديل المنتج</div>
 
@@ -866,21 +909,34 @@ function openEditModal(id) {
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الكمية</label>
       <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">الصورة الحالية</label>
-      <div id="edit-img-preview" style="width:100%;height:120px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden">
-        ${p.imageUrl
-          ? `<img id="edit-current-img" src="${p.imageUrl}" style="max-height:120px;max-width:100%;object-fit:contain"/>`
-          : `<span id="edit-current-img" style="color:var(--gray,#888);font-size:13px">لا توجد صورة</span>`
-        }
+      <!-- MULTIPLE PHOTOS -->
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:8px;letter-spacing:1px">الصور (يمكن رفع أكثر من صورة)</label>
+      <div id="edit-photos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:40px">
+        ${(p.images && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : [])).map((url, idx) => `
+          <div style="position:relative;width:80px;height:80px" id="edit-photo-wrap-${idx}">
+            <img src="${url}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)" data-dataurl="${url}"/>
+            <button onclick="removeEditPhoto(${idx})" style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:#ef4444;border:none;color:#fff;font-size:11px;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>`).join("")}
+      </div>
+      <input type="file" id="edit-multi-file" accept="image/*" multiple onchange="handleEditMultiUpload(event)" style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:16px;box-sizing:border-box;cursor:pointer"/>
+
+      <!-- COLORS -->
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:8px;letter-spacing:1px">الألوان المتاحة (اختياري)</label>
+      <div id="edit-colors-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        ${(p.colors || []).map((col, idx) => `
+          <div style="display:flex;align-items:center;gap:4px;background:var(--dark3,#111);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)">
+            <div style="width:16px;height:16px;background:${col.hex};border:1px solid rgba(255,255,255,0.2)"></div>
+            <span style="font-size:12px;color:#ccc">${col.name}</span>
+            <button onclick="removeEditColor(${idx})" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:12px;margin-right:4px">✕</button>
+          </div>`).join("")}
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:24px">
+        <input type="color" id="edit-color-hex" value="#ffffff" style="width:44px;height:38px;padding:2px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);cursor:pointer"/>
+        <input type="text" id="edit-color-name" placeholder="اسم اللون (مثل: أسود، أبيض...)" style="flex:1;padding:8px 12px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px"/>
+        <button onclick="addEditColor()" style="padding:8px 16px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold,#c9a84c);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">+ إضافة</button>
       </div>
 
-      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px;letter-spacing:1px">رفع صورة جديدة (اختياري)</label>
-      <input type="file" id="edit-file-input" accept="image/*" onchange="handleEditImageUpload(event)" style="width:100%;padding:8px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--gray,#888);font-family:'Tajawal',sans-serif;font-size:13px;margin-bottom:6px;box-sizing:border-box;cursor:pointer"/>
-      <button onclick="clearEditImage('${p.imageUrl || ''}')" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(255,80,80,0.3);color:#ff6b6b;font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;margin-bottom:24px">
-        🗑 إزالة الصورة الحالية
-      </button>
-
-      <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:var(--dark,#0a0a0a);border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
+      <button onclick="saveEditProduct('${id}')" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:#000;border:none;font-family:'Tajawal',sans-serif;font-size:15px;cursor:pointer;font-weight:700">
         حفظ التعديلات
       </button>
     </div>
@@ -943,15 +999,18 @@ async function saveEditProduct(id) {
     return;
   }
 
-  // Get image: new upload takes priority, then existing, then null if cleared
-  const imgEl = document.querySelector("#edit-img-preview img");
-  const imageUrl = imgEl
-    ? (imgEl.dataset.dataurl || imgEl.getAttribute("src"))
-    : null;
+  // Collect all photos
+  const imgEls = document.querySelectorAll("#edit-photos-preview img");
+  const images = Array.from(imgEls).map((img) => img.dataset.dataurl || img.getAttribute("src")).filter(Boolean);
+  const imageUrl = images[0] || null;
+
+  // Collect colors
+  const colorSpans = document.querySelectorAll("#edit-colors-list span[data-name]");
+  const colors = Array.from(colorSpans).map((s) => ({ name: s.dataset.name, hex: s.dataset.hex }));
 
   try {
     await updateDoc(doc(db, "Product", id), {
-      name, cat, price, quantity, imageUrl,
+      name, cat, price, quantity, imageUrl, images, colors,
     });
     showNotif("✦", "تم التعديل", `${name} تم تحديثه بنجاح 🔥`);
     document.getElementById("edit-modal").remove();
@@ -982,6 +1041,54 @@ function quickAddToCart() {
   else cart.push({ ...p, qty });
   updateCartUI();
   showNotif("✦", "أُضيف", `${qty}× ${p.name} أُضيفت`);
+}
+
+function handleEditMultiUpload(e) {
+  const files = Array.from(e.target.files);
+  const preview = document.getElementById("edit-photos-preview");
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const idx = preview.children.length;
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "position:relative;width:80px;height:80px";
+      wrap.id = "edit-photo-wrap-" + idx;
+      wrap.innerHTML = `
+        <img src="${ev.target.result}" style="width:80px;height:80px;object-fit:cover;border:1px solid rgba(201,168,76,0.3)" data-dataurl="${ev.target.result}"/>
+        <button onclick="removeEditPhoto(${idx})" style="position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:#ef4444;border:none;color:#fff;font-size:11px;cursor:pointer;border-radius:50%">✕</button>
+      `;
+      preview.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeEditPhoto(idx) {
+  const wrap = document.getElementById("edit-photo-wrap-" + idx);
+  if (wrap) wrap.remove();
+}
+
+function addEditColor() {
+  const hex = document.getElementById("edit-color-hex").value;
+  const name = document.getElementById("edit-color-name").value.trim();
+  if (!name) { showNotif("⚠", "أدخل اسم اللون", ""); return; }
+  const list = document.getElementById("edit-colors-list");
+  const idx = list.children.length;
+  const div = document.createElement("div");
+  div.id = "edit-color-item-" + idx;
+  div.style.cssText = "display:flex;align-items:center;gap:4px;background:var(--dark3,#111);padding:4px 10px;border:1px solid rgba(255,255,255,0.1)";
+  div.innerHTML = `
+    <div style="width:16px;height:16px;background:${hex};border:1px solid rgba(255,255,255,0.2)"></div>
+    <span style="font-size:12px;color:#ccc" data-name="${name}" data-hex="${hex}">${name}</span>
+    <button onclick="removeEditColor(${idx})" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:12px;margin-right:4px">✕</button>
+  `;
+  list.appendChild(div);
+  document.getElementById("edit-color-name").value = "";
+}
+
+function removeEditColor(idx) {
+  const item = document.getElementById("edit-color-item-" + idx);
+  if (item) item.remove();
 }
 // =============================================
 // FIX 7: Only call renderHomeFeatured() on
@@ -1031,3 +1138,10 @@ window.saveEditProduct = saveEditProduct;
 window.handleEditImageUpload = handleEditImageUpload;
 window.clearEditImage = clearEditImage;
 window.loadOrdersFromFirebase = loadOrdersFromFirebase;
+
+window.switchProductImg = switchProductImg;
+window.selectColor = selectColor;
+window.handleEditMultiUpload = handleEditMultiUpload;
+window.removeEditPhoto = removeEditPhoto;
+window.addEditColor = addEditColor;
+window.removeEditColor = removeEditColor;
