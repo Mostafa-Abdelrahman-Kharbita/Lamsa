@@ -145,12 +145,13 @@ function productHTML(p) {
     <div class="product-info">
       <div class="product-cat">${catLabel(p.cat)}</div>
       <div class="product-name">${p.name}</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-        ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
-        <div class="product-price">${fmtP(p.price)}</div>
+    <div style="margin-top:auto;padding-top:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
+          <div class="product-price">${fmtP(p.price)}</div>
+        </div>
+        <button class="add-btn-card" onclick="addToCart('${p.id}')">+ أضف للطلب</button>
       </div>
-      <button class="add-btn-card" onclick="addToCart('${p.id}')">+ أضف للطلب</button>
-    </div>
   </div>`;
 }
 

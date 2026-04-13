@@ -430,3 +430,22 @@
     .form-row { grid-template-columns:1fr; }
     .product-form-grid { grid-template-columns:1fr; }
   }
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-price {
+  margin-top: auto;
+}
+
+.add-btn-card {
+  margin-top: auto;
+  width: 100%;
+}
