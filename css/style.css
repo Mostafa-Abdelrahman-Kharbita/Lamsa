@@ -468,3 +468,21 @@
   width: 100%;
   margin-top: 28px;
 }
+/* Fix RTL grid layout */
+#page-catalog {
+  direction: rtl;
+  width: 100%;
+}
+
+#page-catalog .section {
+  width: 100%;
+  max-width: 100%;
+  padding: 80px 48px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2px;
+  width: 100%;  /* ← this is the key fix */
+}
