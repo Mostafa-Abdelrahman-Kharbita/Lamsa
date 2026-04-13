@@ -606,25 +606,25 @@ function renderAdminProductList(products) {
     ? list
         .map(
           (p) => `
-    <div style="background:var(--dark3);padding:18px;position:relative">
-      <div style="font-size:32px;text-align:center;margin-bottom:10px;height:72px;display:flex;align-items:center;justify-content:center">
-        ${
-          p.imageUrl
-            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
-            : p.emoji || "💡"
-        }
-      </div>
-      <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
-        ${p.name}
-      </div>
-      <div style="font-size:11px;color:var(--gold);margin-bottom:12px">
-        ${catLabel(p.cat)} · ${fmtP(p.price)}
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="openEditModal('${p.id}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">✏ تعديل</button>
-        <button onclick="deleteProduct('${p.id}','${p.name}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(255,80,80,0.4);color:#ff6b6b;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">🗑 حذف</button>
-      </div>
-    </div>
+   <div style="background:var(--dark3);padding:18px;position:relative;display:flex;flex-direction:column;min-height:220px">
+  <div style="height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+    ${
+      p.imageUrl
+        ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
+        : p.emoji || "💡"
+    }
+  </div>
+  <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
+    ${p.name}
+  </div>
+  <div style="font-size:11px;color:var(--gold);margin-bottom:12px">
+    ${catLabel(p.cat)} · ${fmtP(p.price)}
+  </div>
+  <div style="display:flex;gap:8px;margin-top:auto">
+    <button onclick="openEditModal('${p.id}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">✏ تعديل</button>
+    <button onclick="deleteProduct('${p.id}','${p.name}')" style="flex:1;padding:6px;background:transparent;border:1px solid rgba(255,80,80,0.4);color:#ff6b6b;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">🗑 حذف</button>
+  </div>
+</div>
   `,
         )
         .join("")
