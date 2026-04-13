@@ -486,3 +486,27 @@
   gap: 2px;
   width: 100%;  /* ← this is the key fix */
 }
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-name {
+  flex: 1; /* this pushes price + button to bottom */
+}
+
+.product-price {
+  margin-top: 0;
+}
+
+.add-btn-card {
+  margin-top: 14px;
+  width: 100%;
+}

@@ -153,7 +153,7 @@ function productHTML(p) {
         <button class="add-btn-card" onclick="addToCart('${p.id}')">+ أضف للطلب</button>
       </div>
     </div>
-  </div>`; // ← added closing </div> for product-info
+  </div>`;
 }
 
 function catLabel(c) {
