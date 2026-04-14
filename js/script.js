@@ -596,16 +596,19 @@ function renderDashboardOrders() {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:30px">لا توجد طلبات بعد</td></tr>`;
     return;
   }
-  tbody.innerHTML = orders.slice(0, 10).map(o => `
-    <tr>
-      <td data-label="رقم الطلب" style="color:var(--gold);font-weight:500">${o.id}</td>
-      <td data-label="العميل">${o.client}</td>
-      <td data-label="المنتج" style="color:var(--gray)">${o.product.length > 30 ? o.product.slice(0,30)+'...' : o.product}</td>
-      <td data-label="القيمة">${o.value}</td>
-      <td data-label="الحالة"><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
-      <td data-label="التاريخ" style="color:var(--gray)">${o.date}</td>
-    </tr>`
-  ).join("");
+  tbody.innerHTML = orders
+    .slice(0, 10)
+    .map(
+      (o) => `<tr>
+    <td style="color:var(--gold);font-weight:500">${o.id}</td>
+    <td>${o.client}</td>
+    <td style="color:var(--gray);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
+    <td>${o.value}</td>
+    <td><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
+    <td style="color:var(--gray)">${o.date}</td>
+    </tr>`,
+    )
+    .join("");
 }
 
 function renderFullOrders() {
@@ -615,32 +618,25 @@ function renderFullOrders() {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">لا توجد طلبات بعد</td></tr>`;
     return;
   }
-  tbody.innerHTML = orders.map((o, i) => `
-    <tr>
-      <td data-label="رقم الطلب" style="color:var(--gold)">${o.id}</td>
-      <td data-label="العميل">${o.client}</td>
-      <td data-label="المنتج" style="color:var(--gray)">${o.product.length > 25 ? o.product.slice(0,25)+'...' : o.product}</td>
-      <td data-label="القيمة">${o.value}</td>
-      <td data-label="الحالة">
-        <select onchange="updateOrderStatus(${i},this.value)" 
-          style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);
-                 padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;width:100%">
-          ${["new","proc","done","cancel"].map(s => 
-            `<option value="${s}" ${o.status===s?"selected":""}>${STATUS_LABEL[s]}</option>`
-          ).join("")}
-        </select>
-      </td>
-      <td data-label="التاريخ" style="color:var(--gray)">${o.date}</td>
-      <td data-label="إجراء">
-        <button onclick="viewDetail(${i})" 
-          style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);
-                 padding:6px 14px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px;width:100%">
-          عرض
-        </button>
-      </td>
-    </tr>`
-  ).join("");
+  tbody.innerHTML = orders
+    .map(
+      (o, i) => `<tr>
+    <td style="color:var(--gold)">${o.id}</td>
+    <td>${o.client}</td>
+    <td style="color:var(--gray);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
+    <td>${o.value}</td>
+    <td>
+      <select onchange="updateOrderStatus(${i},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
+        ${["new", "proc", "done", "cancel"].map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
+      </select>
+    </td>
+    <td style="color:var(--gray)">${o.date}</td>
+    <td><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
+  </tr>`,
+    )
+    .join("");
 }
+
 async function updateOrderStatus(i, status) {
   orders[i].status = status;
   // update in Firebase if it has a firestoreId
