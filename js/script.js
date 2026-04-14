@@ -18,7 +18,12 @@ const firebaseConfig = {
   messagingSenderId: "586887849221",
   appId: "1:5868...",
 };
-
+window.addEventListener("DOMContentLoaded", () => {
+  // لو اللينك فيه #Lamsa2026
+  if (window.location.hash === "#Lamsa2026") {
+    showPage("admin-login"); // يفتح صفحة الأدمن
+  }
+});
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let firebaseProducts = [];
