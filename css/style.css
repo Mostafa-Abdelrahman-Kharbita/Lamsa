@@ -135,7 +135,7 @@
   /* AFTER - force at least 2 columns and full width */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 2px;
   width: 100%;
 }
