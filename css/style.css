@@ -505,3 +505,141 @@
   margin-top: 14px;
   width: 100%;
 }
+
+@media(max-width:768px) {
+  /* Admin Layout - stack sidebar on top */
+  .admin-layout {
+    grid-template-columns: 1fr;
+    padding-top: 70px;
+  }
+
+  /* Sidebar becomes horizontal top bar */
+  .admin-sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    padding: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    border-left: none;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    overflow-x: auto;
+  }
+
+  .admin-sidebar-title {
+    width: 100%;
+    padding: 12px 20px;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .sidebar-link {
+    padding: 10px 16px;
+    font-size: 12px;
+    flex-shrink: 0;
+    border-right: none !important;
+    border-bottom: 2px solid transparent;
+  }
+
+  .sidebar-link.active {
+    border-right: none !important;
+    border-bottom: 2px solid var(--gold);
+  }
+
+  /* Sidebar bottom logout section */
+  .admin-sidebar > div:last-child {
+    width: 100%;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    margin-top: 0;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* Admin main content */
+  .admin-main {
+    padding: 20px 16px;
+  }
+
+  .admin-header h2 {
+    font-size: 24px;
+  }
+
+  /* Admin stat cards - 2 columns on mobile */
+  .admin-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .admin-card {
+    padding: 18px;
+  }
+
+  .admin-card-val {
+    font-size: 28px;
+  }
+
+  /* Admin panel */
+  .admin-panel {
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .admin-panel-title {
+    font-size: 17px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Product form grid - single column */
+  .product-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Product list grid */
+  #admin-product-list {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Orders table - scrollable */
+  .orders-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Quick actions grid */
+  .admin-panel > div[style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    padding: 28px 16px;
+  }
+
+  /* Login box */
+  .login-box {
+    padding: 32px 24px;
+    margin: 0 16px;
+  }
+}
+
+/* Extra small screens */
+@media(max-width:480px) {
+  .admin-cards {
+    grid-template-columns: 1fr;
+  }
+
+  #admin-product-list {
+    grid-template-columns: 1fr !important;
+  }
+}
