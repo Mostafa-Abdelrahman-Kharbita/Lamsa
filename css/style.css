@@ -432,7 +432,7 @@
     .admin-layout { grid-template-columns:1fr; }
     .admin-cards { grid-template-columns:1fr 1fr; }
     .footer-grid { grid-template-columns:1fr 1fr; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .products-grid { grid-template-columns:1fr; }
     .form-row { grid-template-columns:1fr; }
     .product-form-grid { grid-template-columns:1fr; }
   }
