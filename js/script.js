@@ -539,6 +539,9 @@ function updateCartUI() {
   if (countEl) {
     countEl.textContent = totalItems;
     countEl.style.display = totalItems ? "block" : "none";
+
+    countEl.classList.add("bump");
+  setTimeout(() => countEl.classList.remove("bump"), 300);
   }
 
   if (!el) return;
