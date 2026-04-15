@@ -23,9 +23,32 @@
         <li><a onclick="showPage('catalog')" id="nav-catalog">الكتالوج</a></li>
         <li><a onclick="showPage('order')" id="nav-order">الطلبات</a></li>
       </ul>
-      <button class="nav-cta" onclick="showPage('order')">اطلب الآن</button>
+
+      <div
+        id="cart-icon"
+        onclick="showPage('order')"
+        style="position: relative; cursor: pointer"
+      >
+        🛒
+        <span
+          id="cart-count"
+          style="
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #c9a84c;
+            color: #000;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 50%;
+            display: none;
+          "
+          >0</span
+        >
+      </div>
+      <button class="nav-cta" onclick="showPage('order')">تاكيد طلبك</button>
     </nav>
- 
+
     <!-- ===== HOME ===== -->
     <div class="page active" id="page-home">
       <div class="hero">
@@ -180,10 +203,7 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="logo">LAMSA</div>
-            <p>
-              نصنع تجارب إضاءة استثنائية. حيث تلتقي الفنون
-              بالإضاءة.
-            </p>
+            <p>نصنع تجارب إضاءة استثنائية. حيث تلتقي الفنون بالإضاءة.</p>
           </div>
           <div class="footer-col">
             <h4>التنقل</h4>
@@ -307,7 +327,6 @@
             >
             للحصول على المنتجات
           </div>
-          
 
           <!-- keep these hidden so submitOrder() doesn't break -->
           <input type="hidden" id="proj-type" />
@@ -315,7 +334,7 @@
           <textarea id="description" style="display: none"></textarea>
 
           <button class="submit-btn" onclick="submitOrder()">
-            ✦ إرسال الطلب 
+            ✦ إرسال الطلب
           </button>
           <p
             style="

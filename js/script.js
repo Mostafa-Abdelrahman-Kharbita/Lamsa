@@ -29,7 +29,7 @@ const db = getFirestore(app);
 let firebaseProducts = [];
 //////////////////
 window.cart = [];
-  let customProducts = [];
+let customProducts = [];
 let orders = [];
 const ADMIN_USER = "admin",
   ADMIN_PASS = "luminos2024";
@@ -102,8 +102,8 @@ function showPage(name) {
 
   if (name === "home") {
     loadProductsFromFirebase().then(() => {
-    renderHomeFeatured();
-  });
+      renderHomeFeatured();
+    });
   }
 }
 
@@ -302,7 +302,12 @@ function openAddToCartPopup(id) {
   const old = document.getElementById("add-to-cart-popup");
   if (old) old.remove();
 
-  const images = Array.isArray(p.images) && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+  const images =
+    Array.isArray(p.images) && p.images.length
+      ? p.images
+      : p.imageUrl
+        ? [p.imageUrl]
+        : [];
 
   const modal = document.createElement("div");
   modal.id = "add-to-cart-popup";
@@ -316,9 +321,10 @@ function openAddToCartPopup(id) {
       
       <!-- Header -->
       <div style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#1a1a1a;border-bottom:1px solid rgba(201,168,76,0.1)">
-        ${images.length
-          ? `<img src="${images[0]}" style="width:64px;height:64px;object-fit:cover;border:1px solid rgba(201,168,76,0.2);flex-shrink:0"/>`
-          : `<div style="width:64px;height:64px;background:#222;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💡</div>`
+        ${
+          images.length
+            ? `<img src="${images[0]}" style="width:64px;height:64px;object-fit:cover;border:1px solid rgba(201,168,76,0.2);flex-shrink:0"/>`
+            : `<div style="width:64px;height:64px;background:#222;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💡</div>`
         }
         <div style="flex:1">
           <div style="font-size:11px;letter-spacing:2px;color:var(--gold,#c9a84c);margin-bottom:4px">${catLabel(p.cat)}</div>
@@ -357,12 +363,16 @@ function openAddToCartPopup(id) {
 
         <!-- Quick select buttons -->
         <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px">
-          ${[1,2,3,5,10].map(n => `
+          ${[1, 2, 3, 5, 10]
+            .map(
+              (n) => `
             <button onclick="document.getElementById('popup-qty').value=${n};updatePopupTotal('${id}')"
               style="padding:6px 14px;background:transparent;border:1px solid rgba(201,168,76,0.2);color:var(--gold,#c9a84c);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;transition:all 0.2s"
               onmouseover="this.style.background='rgba(201,168,76,0.1)'"
               onmouseout="this.style.background='transparent'">${n}</button>
-          `).join("")}
+          `,
+            )
+            .join("")}
         </div>
 
         <!-- Total -->
@@ -396,7 +406,9 @@ function openAddToCartPopup(id) {
     </div>
   `;
 
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
   document.body.appendChild(modal);
 
   // Store price for total calculation
@@ -431,7 +443,9 @@ async function renderHomeFeatured() {
   if (!el) return;
 
   // Skeleton loading
-  el.innerHTML = Array(6).fill(`
+  el.innerHTML = Array(6)
+    .fill(
+      `
     <div style="background:var(--dark2);overflow:hidden">
       <div style="width:100%;height:260px;background:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite"></div>
       <div style="padding:22px">
@@ -440,7 +454,9 @@ async function renderHomeFeatured() {
         <div style="height:16px;width:40%;background:var(--dark3);border-radius:2px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%)"></div>
       </div>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 
   // ✅ أهم جزء: استخدم firebaseProducts
   if (!firebaseProducts.length) {
@@ -455,10 +471,7 @@ async function renderHomeFeatured() {
   }
 
   // عرض المنتجات
-  el.innerHTML = firebaseProducts
-    .slice(0, 6)
-    .map(productHTML)
-    .join("");
+  el.innerHTML = firebaseProducts.slice(0, 6).map(productHTML).join("");
 }
 
 function renderCatalog(prods) {
@@ -499,6 +512,9 @@ function addToCart(id) {
       else cart.push({ ...p2, qty: 1 });
       updateCartUI();
       showNotif("✦", "أُضيف للطلب", p2.name + " أُضيف إلى طلبك");
+      setTimeout(() => {
+        showPage("order");
+      }, 1000);
     });
     return;
   }
@@ -507,34 +523,64 @@ function addToCart(id) {
   else cart.push({ ...p, qty: 1 });
   updateCartUI();
   showNotif("✦", "أُضيف للطلب", p.name + " أُضيف إلى طلبك");
+  setTimeout(() => {
+    showPage("order");
+  }, 1000);
 }
 
 function updateCartUI() {
   const el = document.getElementById("cart-items");
   const tot = document.getElementById("order-total");
+
+  // 👇 إضافة عداد الكارت
+  const countEl = document.getElementById("cart-count");
+  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  if (countEl) {
+    countEl.textContent = totalItems;
+    countEl.style.display = totalItems ? "block" : "none";
+  }
+
   if (!el) return;
+
   if (!cart.length) {
     el.innerHTML =
       '<div class="cart-empty">سلتك فارغة.<br>أضف منتجات من الكتالوج.</div>';
     if (tot) tot.style.display = "none";
     return;
   }
+
   el.innerHTML = cart
     .map(
       (c, i) => `
     <div class="cart-item">
-      <div class="cart-img">${c.imageUrl ? `<img src="${c.imageUrl}"/>` : c.emoji || "💡"}</div>
+      <div class="cart-img">
+        ${c.imageUrl ? `<img src="${c.imageUrl}"/>` : c.emoji || "💡"}
+      </div>
       <div>
         <div class="cart-name">${c.name}</div>
-        <div class="cart-qty">الكمية: <input type="number" value="${c.qty}" min="1" onchange="updateQty(${i},this.value)" style="width:48px;padding:2px 4px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:12px"/> <span onclick="removeFromCart(${i})" style="cursor:pointer;color:var(--gray);margin-right:8px;font-size:12px">✕ حذف</span></div>
+        <div class="cart-qty">
+          الكمية: 
+          <input type="number" value="${c.qty}" min="1"
+            onchange="updateQty(${i},this.value)"
+            style="width:48px;padding:2px 4px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:12px"/>
+          
+          <span onclick="removeFromCart(${i})"
+            style="cursor:pointer;color:var(--gray);margin-right:8px;font-size:12px">
+            ✕ حذف
+          </span>
+        </div>
       </div>
       <div class="cart-price">${fmtP(c.price * c.qty)}</div>
-    </div>`,
+    </div>`
     )
     .join("");
+
   const sub = cart.reduce((a, c) => a + c.price * c.qty, 0);
+
   document.getElementById("subtotal-val").textContent = fmtP(sub);
   document.getElementById("total-val").textContent = fmtP(sub);
+
   if (tot) tot.style.display = "block";
 }
 
@@ -742,11 +788,11 @@ function renderDashboardOrders() {
     <td data-label="القيمة">${o.value}</td>
     <td data-label="الحالة"><span class="badge ${STATUS_MAP[o.status]}">${STATUS_LABEL[o.status]}</span></td>
     <td data-label="التاريخ" style="color:var(--gray)">${o.date}</td>
-    </tr>`
+    </tr>`,
     )
     .join("");
 }
- 
+
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
@@ -768,11 +814,10 @@ function renderFullOrders() {
     </td>
     <td data-label="التاريخ" style="color:var(--gray)">${o.date}</td>
     <td data-label="التفاصيل"><button onclick="viewDetail(${i})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
-  </tr>`
+  </tr>`,
     )
     .join("");
 }
- 
 
 async function updateOrderStatus(i, status) {
   orders[i].status = status;
@@ -1235,13 +1280,14 @@ async function deleteProduct(id, name) {
       <!-- Body -->
       <div style="padding:24px 28px">
         <div style="display:flex;align-items:center;gap:14px;padding:14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px">
-          ${imgSrc
-            ? `<img src="${imgSrc}" style="width:56px;height:56px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"/>`
-            : `<div style="width:56px;height:56px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💡</div>`
+          ${
+            imgSrc
+              ? `<img src="${imgSrc}" style="width:56px;height:56px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"/>`
+              : `<div style="width:56px;height:56px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💡</div>`
           }
           <div>
             <div style="font-size:15px;color:#fff;line-height:1.4">${name}</div>
-            <div style="font-size:11px;color:#666;margin-top:4px">${p ? catLabel(p.cat) + ' · ' + fmtP(p.price) : ''}</div>
+            <div style="font-size:11px;color:#666;margin-top:4px">${p ? catLabel(p.cat) + " · " + fmtP(p.price) : ""}</div>
           </div>
         </div>
         <div style="font-size:13px;color:#888;line-height:1.7;margin-bottom:24px">
@@ -1261,13 +1307,18 @@ async function deleteProduct(id, name) {
     </div>
   `;
 
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
   document.body.appendChild(modal);
 }
 
 async function confirmDeleteProduct(id, name) {
   const btn = document.getElementById("confirm-delete-btn");
-  if (btn) { btn.disabled = true; btn.textContent = "جارٍ الحذف..."; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "جارٍ الحذف...";
+  }
 
   try {
     await deleteDoc(doc(db, "Product", id));
@@ -1276,12 +1327,17 @@ async function confirmDeleteProduct(id, name) {
     await loadProductsFromFirebase();
     renderAdminProductList(firebaseProducts);
     renderHomeFeatured();
-    document.getElementById("admin-prod-count").textContent = getAllProducts().length;
-    document.getElementById("prod-list-count").textContent = getAllProducts().length;
+    document.getElementById("admin-prod-count").textContent =
+      getAllProducts().length;
+    document.getElementById("prod-list-count").textContent =
+      getAllProducts().length;
   } catch (error) {
     console.error(error);
     showNotif("⚠", "خطأ", "فشل حذف المنتج");
-    if (btn) { btn.disabled = false; btn.textContent = "نعم، احذف المنتج"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "نعم، احذف المنتج";
+    }
   }
 }
 function renderEditPreview() {
