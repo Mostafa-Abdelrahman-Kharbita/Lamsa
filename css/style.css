@@ -240,7 +240,9 @@
   .page-hero h1 { font-size:clamp(44px,7vw,88px); font-weight:300; color:var(--white); position:relative; line-height:0.9; }
   .page-hero h1 em { font-style:normal; color:var(--gold); }
   .page-hero p { position:relative; color:var(--gray); font-size:15px; margin-top:14px; }
-
+#menu-toggle {
+  display: none;
+}
   /* ORDER */
   .order-layout { display:grid; grid-template-columns:1fr 400px; min-height:calc(100vh - 80px); padding-top:80px; }
   .order-left { padding:60px 48px; background:var(--dark2); }
@@ -952,6 +954,37 @@
 
   .nav-links a:last-child {
     border-bottom: none;
+  }
+
+}
+@media(max-width:768px) {
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  /* 👇 نخلي العناصر جنب بعض */
+  #menu-toggle {
+    display: block;
+    font-size: 24px;
+    color: var(--gold);
+    cursor: pointer;
+    order: 1;
+  }
+
+  #cart-icon {
+    order: 2;
+  }
+
+  .nav-logo {
+    order: 3;
+  }
+
+  .nav-cta {
+    display: none; /* 👈 نشيله عشان مزنق الدنيا */
   }
 
 }
