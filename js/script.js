@@ -288,12 +288,126 @@ function productHTML(p) {
           ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
           <div class="product-price">${fmtP(p.price)}</div>
         </div>
-        <button class="add-btn-card" onclick="event.stopPropagation();addToCart('${p.id}')">+ أضف للطلب</button>
+        <button class="add-btn-card" onclick="event.stopPropagation();openAddToCartPopup('${p.id}')">+ أضف للطلب</button>
       </div>
     </div>
   </div>`;
 }
+function openAddToCartPopup(id) {
+  const p = getAllProducts().find((x) => x.id === id);
+  if (!p) return;
 
+  const old = document.getElementById("add-to-cart-popup");
+  if (old) old.remove();
+
+  const images = Array.isArray(p.images) && p.images.length ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+
+  const modal = document.createElement("div");
+  modal.id = "add-to-cart-popup";
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px
+  `;
+
+  modal.innerHTML = `
+    <div style="background:#111;border:1px solid rgba(201,168,76,0.25);width:100%;max-width:420px;margin:auto;direction:rtl;font-family:'Tajawal',sans-serif;overflow:hidden">
+      
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#1a1a1a;border-bottom:1px solid rgba(201,168,76,0.1)">
+        ${images.length
+          ? `<img src="${images[0]}" style="width:64px;height:64px;object-fit:cover;border:1px solid rgba(201,168,76,0.2);flex-shrink:0"/>`
+          : `<div style="width:64px;height:64px;background:#222;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💡</div>`
+        }
+        <div style="flex:1">
+          <div style="font-size:11px;letter-spacing:2px;color:var(--gold,#c9a84c);margin-bottom:4px">${catLabel(p.cat)}</div>
+          <div style="font-size:15px;color:#fff;line-height:1.3">${p.name}</div>
+          <div style="font-size:16px;color:var(--gold,#c9a84c);font-weight:500;margin-top:4px">${fmtP(p.price)}</div>
+        </div>
+        <button onclick="document.getElementById('add-to-cart-popup').remove()"
+          style="background:transparent;border:none;color:#666;font-size:20px;cursor:pointer;align-self:flex-start">✕</button>
+      </div>
+
+      <!-- Quantity Selector -->
+      <div style="padding:28px 24px">
+        <div style="font-size:12px;color:#888;letter-spacing:1px;margin-bottom:14px">الكمية المطلوبة</div>
+        
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px">
+          <button onclick="
+            const inp = document.getElementById('popup-qty');
+            const v = parseInt(inp.value)||1;
+            if(v > 1) { inp.value = v-1; updatePopupTotal('${id}'); }
+          " style="width:48px;height:48px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:22px;cursor:pointer;transition:all 0.2s"
+            onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" 
+            onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">−</button>
+          
+          <input id="popup-qty" type="number" value="1" min="1" max="999"
+            oninput="updatePopupTotal('${id}')"
+            style="width:80px;height:48px;text-align:center;background:#0a0a0a;border-top:1px solid rgba(255,255,255,0.1);border-bottom:1px solid rgba(255,255,255,0.1);border-left:none;border-right:none;color:#fff;font-family:'Tajawal',sans-serif;font-size:20px;font-weight:500;outline:none"/>
+          
+          <button onclick="
+            const inp = document.getElementById('popup-qty');
+            inp.value = (parseInt(inp.value)||1) + 1;
+            updatePopupTotal('${id}');
+          " style="width:48px;height:48px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:22px;cursor:pointer;transition:all 0.2s"
+            onmouseover="this.style.borderColor='var(--gold,#c9a84c)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">+</button>
+        </div>
+
+        <!-- Quick select buttons -->
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px">
+          ${[1,2,3,5,10].map(n => `
+            <button onclick="document.getElementById('popup-qty').value=${n};updatePopupTotal('${id}')"
+              style="padding:6px 14px;background:transparent;border:1px solid rgba(201,168,76,0.2);color:var(--gold,#c9a84c);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;transition:all 0.2s"
+              onmouseover="this.style.background='rgba(201,168,76,0.1)'"
+              onmouseout="this.style.background='transparent'">${n}</button>
+          `).join("")}
+        </div>
+
+        <!-- Total -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1a1a1a;border:1px solid rgba(201,168,76,0.1);margin-bottom:20px">
+          <span style="font-size:13px;color:#888">الإجمالي</span>
+          <span id="popup-total" style="font-size:20px;color:var(--gold,#c9a84c);font-weight:500">${fmtP(p.price)}</span>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:10px">
+          <button onclick="
+            const qty = parseInt(document.getElementById('popup-qty').value)||1;
+            const all = getAllProducts();
+            const prod = all.find(x => x.id === '${id}');
+            if(!prod) return;
+            const ex = cart.find(c => c.id === prod.id);
+            if(ex) ex.qty += qty;
+            else cart.push({...prod, qty});
+            updateCartUI();
+            document.getElementById('add-to-cart-popup').remove();
+            showNotif('✦', 'أُضيف للطلب', qty + '× ' + prod.name + ' أُضيف إلى طلبك');
+          " style="flex:1;padding:13px;background:linear-gradient(135deg,var(--gold-dark,#a07830),var(--gold,#c9a84c));color:#000;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700">
+            + أضف للطلب
+          </button>
+          <button onclick="document.getElementById('add-to-cart-popup').remove()"
+            style="padding:13px 20px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+
+  // Store price for total calculation
+  window._popupPrice = p.price;
+}
+
+function updatePopupTotal(id) {
+  const qty = parseInt(document.getElementById("popup-qty")?.value) || 1;
+  const total = document.getElementById("popup-total");
+  if (total && window._popupPrice) {
+    total.textContent = fmtP(window._popupPrice * qty);
+  }
+}
 function catLabel(c) {
   return (
     {
@@ -1408,3 +1522,5 @@ window.removeImage = removeImage;
 window.removeEditImage = removeEditImage;
 window.handleEditImageUpload = handleEditImageUpload;
 window.confirmDeleteProduct = confirmDeleteProduct;
+window.openAddToCartPopup = openAddToCartPopup;
+window.updatePopupTotal = updatePopupTotal;
