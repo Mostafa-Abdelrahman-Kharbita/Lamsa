@@ -1525,3 +1525,4 @@ window.confirmDeleteProduct = confirmDeleteProduct;
 window.openAddToCartPopup = openAddToCartPopup;
 window.updatePopupTotal = updatePopupTotal;
 window.getAllProducts = getAllProducts;
+window.updateCartUI = updateCartUI;
