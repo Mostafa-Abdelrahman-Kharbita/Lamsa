@@ -423,7 +423,7 @@
 
   @media(max-width:768px) {
     nav { padding:16px 20px; }
-    .nav-links { display:none; }
+   
     .section { padding:48px 20px; }
     .stats-strip { grid-template-columns:1fr 1fr; padding:28px 20px; }
     .why-grid, .testimonials-grid, .team-grid { grid-template-columns:1fr; }
@@ -436,6 +436,29 @@
     .form-row { grid-template-columns:1fr; }
     .product-form-grid { grid-template-columns:1fr; }
   }
+  @media(max-width:768px) {
+
+  #menu-toggle {
+    display:block;
+  }
+
+  .nav-links {
+    position:absolute;
+    top:60px;
+    right:0;
+    left:0;
+    background:#111;
+    flex-direction:column;
+    text-align:center;
+    display:none;
+    padding:20px;
+    gap:20px;
+  }
+
+  .nav-links.show {
+    display:flex;
+  }
+}
 /* .product-card {
   display: flex;
   flex-direction: column;

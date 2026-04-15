@@ -583,7 +583,10 @@ function updateCartUI() {
 
   if (tot) tot.style.display = "block";
 }
-
+function toggleMenu() {
+  const nav = document.getElementById("nav-links");
+  nav.classList.toggle("show");
+}
 function updateQty(i, val) {
   cart[i].qty = Math.max(1, parseInt(val) || 1);
   updateCartUI();
@@ -1589,3 +1592,11 @@ window.openAddToCartPopup = openAddToCartPopup;
 window.updatePopupTotal = updatePopupTotal;
 window.getAllProducts = getAllProducts;
 window.updateCartUI = updateCartUI;
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".nav-links a").forEach(link => {
+    link.addEventListener("click", () => {
+      document.getElementById("nav-links").classList.remove("show");
+    });
+  });
+});
+window.toggleMenu = toggleMenu;
