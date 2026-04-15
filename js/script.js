@@ -314,12 +314,28 @@ async function renderHomeFeatured() {
   const el = document.getElementById("home-products-grid");
   if (!el) return;
 
+  // Show skeleton cards while loading
+  el.innerHTML = Array(6).fill(`
+    <div style="background:var(--dark2);overflow:hidden">
+      <div style="width:100%;height:260px;background:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite"></div>
+      <div style="padding:22px">
+        <div style="height:10px;width:60px;background:var(--dark3);border-radius:2px;margin-bottom:12px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%)"></div>
+        <div style="height:20px;width:80%;background:var(--dark3);border-radius:2px;margin-bottom:10px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%)"></div>
+        <div style="height:16px;width:40%;background:var(--dark3);border-radius:2px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--dark2) 25%,var(--dark3) 50%,var(--dark2) 75%)"></div>
+      </div>
+    </div>
+  `).join("");
+
   const snapshot = await getDocs(collection(db, "Product"));
   const products = [];
-
   snapshot.forEach((docSnap) => {
     products.push({ id: docSnap.id, ...docSnap.data() });
   });
+
+  if (!products.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gray);font-size:16px">لا توجد منتجات متاحة حالياً.</div>`;
+    return;
+  }
 
   el.innerHTML = products.slice(0, 6).map(productHTML).join("");
 }
