@@ -307,22 +307,9 @@
               style="color: var(--gold); cursor: pointer"
               >الكتالوج</a
             >
-            وأضف المنتجات، أو اختر من القائمة أدناه.
+            للحصول على المنتجات
           </div>
-          <div class="add-to-cart-bar">
-            <select id="quick-product" style="flex: 1">
-              <option value="">اختر منتجاً للإضافة...</option>
-            </select>
-            <input
-              type="number"
-              class="qty-input"
-              id="quick-qty"
-              value="1"
-              min="1"
-              max="99"
-            />
-            <button class="add-btn" onclick="quickAddToCart()">+ إضافة</button>
-          </div>
+          
 
           <!-- keep these hidden so submitOrder() doesn't break -->
           <input type="hidden" id="proj-type" />
@@ -330,7 +317,7 @@
           <textarea id="description" style="display: none"></textarea>
 
           <button class="submit-btn" onclick="submitOrder()">
-            ✦ إرسال طلب الاستفسار
+            ✦ إرسال الطلب 
           </button>
           <p
             style="
