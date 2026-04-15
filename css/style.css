@@ -517,12 +517,7 @@
   flex-direction: column;
   flex: 1;
 }
-@media(max-width:768px) {
-  #cart-icon {
-    font-size: 24px;
-    padding: 6px 10px;
-  }
-}
+
 .product-price {
   margin-top: auto;
 }
@@ -598,7 +593,6 @@
 
   /* ── Global page fixes ── */
   nav { padding: 14px 16px; }
-  .nav-links { display: none; }
   .section   { padding: 40px 16px; }
 
   .stats-strip {
