@@ -957,34 +957,3 @@
   }
 
 }
-@media(max-width:768px) {
-
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-  }
-
-  /* 👇 نخلي العناصر جنب بعض */
-  #menu-toggle {
-    display: block;
-    font-size: 24px;
-    color: var(--gold);
-    cursor: pointer;
-    order: 1;
-  }
-
-  #cart-icon {
-    order: 2;
-  }
-
-  .nav-logo {
-    order: 3;
-  }
-
-  .nav-cta {
-    display: none; /* 👈 نشيله عشان مزنق الدنيا */
-  }
-
-}
