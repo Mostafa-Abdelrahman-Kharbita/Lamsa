@@ -101,7 +101,9 @@ function showPage(name) {
   }
 
   if (name === "home") {
+    loadProductsFromFirebase().then(() => {
     renderHomeFeatured();
+  });
   }
 }
 
