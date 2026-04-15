@@ -505,143 +505,319 @@
   margin-top: 14px;
   width: 100%;
 }
+/* ============================================================
+   ADMIN RESPONSIVE — ALL PHONES (320px → 768px)
+   Replace your existing mobile admin @media blocks with this.
+   ============================================================ */
 
-@media(max-width:768px) {
-  /* Admin Layout - stack sidebar on top */
-  .admin-layout {
-    grid-template-columns: 1fr;
-    padding-top: 70px;
-  }
+/* ─── TABLET (≤ 1024px) ─── */
+@media (max-width: 1024px) {
+  .admin-layout { grid-template-columns: 200px 1fr; }
+  .admin-cards  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .admin-main   { padding: 28px 24px; }
+}
 
-  /* Sidebar becomes horizontal top bar */
-  .admin-sidebar {
-    position: relative;
-    top: 0;
-    height: auto;
-    padding: 16px 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+/* ─── MOBILE (≤ 768px) — base mobile rules ─── */
+@media (max-width: 768px) {
+
+  /* ── Global page fixes ── */
+  nav { padding: 14px 16px; }
+  .nav-links { display: none; }
+  .section   { padding: 40px 16px; }
+
+  .stats-strip {
+    grid-template-columns: 1fr 1fr;
+    padding: 20px 16px;
     gap: 0;
-    border-left: none;
-    border-bottom: 1px solid rgba(201,168,76,0.1);
-    overflow-x: auto;
+  }
+  .stat-item { padding: 14px 8px; }
+  .stat-num  { font-size: 32px; }
+
+  .why-grid,
+  .testimonials-grid,
+  .team-grid  { grid-template-columns: 1fr; }
+  .about-story { grid-template-columns: 1fr; }
+  .order-layout { grid-template-columns: 1fr; }
+  .footer-grid  { grid-template-columns: 1fr 1fr; }
+  .products-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .form-row     { grid-template-columns: 1fr; }
+  .product-form-grid { grid-template-columns: 1fr; }
+
+  /* ── Admin layout: sidebar on top, content below ── */
+  .admin-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top: 64px;
   }
 
-  .admin-sidebar-title {
-    width: 100%;
-    padding: 12px 20px;
-    margin-bottom: 0;
-    border-bottom: none;
+  /* ── Sidebar → horizontal scrollable tab strip ── */
+  .admin-sidebar {
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: auto;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    border-left: none;
+    border-bottom: 1px solid rgba(201,168,76,0.18);
+    background: var(--dark2);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+
+  /* Hide the big "ADMIN" title label in the sidebar on mobile */
+  .admin-sidebar-title { display: none; }
 
   .sidebar-link {
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     padding: 10px 16px;
-    font-size: 12px;
-    flex-shrink: 0;
+    font-size: 11px;
+    letter-spacing: 0.3px;
     border-right: none !important;
     border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    min-width: 72px;
+    text-align: center;
   }
-
+  .sidebar-link .sidebar-icon { font-size: 16px; }
+  .sidebar-link:hover,
   .sidebar-link.active {
     border-right: none !important;
     border-bottom: 2px solid var(--gold);
+    background: rgba(201,168,76,0.06);
+    color: var(--gold);
   }
 
-  /* Sidebar bottom logout section */
+  /* Logout row at the end of the sidebar */
   .admin-sidebar > div:last-child {
-    width: 100%;
-    border-top: 1px solid rgba(201,168,76,0.1);
-    margin-top: 0;
-    padding: 12px 20px;
+    flex: 0 0 auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    padding: 10px 14px;
+    border-top: none;
+    border-right: none;
+    margin-top: 0;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
   }
 
-  /* Admin main content */
+  /* ── Admin main content area ── */
   .admin-main {
-    padding: 20px 16px;
+    flex: 1;
+    padding: 16px 12px 32px;
+    background: var(--black);
+    min-width: 0;
   }
 
-  .admin-header h2 {
-    font-size: 24px;
-  }
+  .admin-header { margin-bottom: 16px; }
+  .admin-header h2 { font-size: 22px; font-weight: 400; }
+  .admin-header p  { font-size: 12px; margin-top: 4px; }
 
-  /* Admin stat cards - 2 columns on mobile */
+  /* ── Stat cards: 2×2 grid ── */
   .admin-cards {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-
-  .admin-card {
-    padding: 18px;
-  }
-
-  .admin-card-val {
-    font-size: 28px;
-  }
-
-  /* Admin panel */
-  .admin-panel {
-    padding: 20px 16px;
+    gap: 6px;
     margin-bottom: 16px;
   }
+  .admin-card        { padding: 14px 12px; border-radius: 2px; }
+  .admin-card-val    { font-size: 26px; }
+  .admin-card-label  { font-size: 9px; margin-top: 4px; }
+  .admin-card-trend  { font-size: 10px; margin-top: 4px; }
 
+  /* ── Panels ── */
+  .admin-panel       { padding: 14px 12px; margin-bottom: 12px; }
   .admin-panel-title {
-    font-size: 17px;
+    font-size: 15px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .panel-action {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
   }
 
-  /* Product form grid - single column */
-  .product-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Product list grid */
-  #admin-product-list {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* Orders table - scrollable */
-  .orders-table {
+  /* ── ORDERS TABLE → card list ── */
+  /* Hide the traditional table on mobile */
+  .orders-table thead { display: none; }
+  .orders-table,
+  .orders-table tbody,
+  .orders-table tr,
+  .orders-table td {
     display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  .orders-table tr {
+    background: var(--dark3);
+    border: 1px solid rgba(201,168,76,0.08);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    padding: 14px 14px 12px;
+    position: relative;
+  }
+  .orders-table tr:hover td { background: transparent; }
+
+  /* Each cell gets a label from data-label */
+  .orders-table td {
+    padding: 3px 0;
+    font-size: 13px;
+    text-align: right;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .orders-table td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    flex-shrink: 0;
+    text-align: left;
+  }
+  /* Order ID row: bold & gold */
+  .orders-table td:first-child {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+  /* Status select — full width */
+  .orders-table td select {
+    flex: 1;
+    max-width: 160px;
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  /* Action button */
+  .orders-table td button {
+    font-size: 12px;
+    padding: 5px 14px;
   }
 
-  /* Quick actions grid */
-  .admin-panel > div[style*="grid-template-columns: repeat(3"] {
+  /* ── Upload zone ── */
+  .upload-zone { padding: 28px 14px; }
+  .upload-icon { font-size: 30px; }
+  .upload-text { font-size: 13px; }
+
+  /* ── Product list grid ── */
+  #admin-product-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* ── Quick actions (if 3-column inline grid) ── */
+  [style*="repeat(3,1fr)"],
+  [style*="repeat(3, 1fr)"] {
     grid-template-columns: 1fr !important;
   }
 
-  /* Upload zone */
-  .upload-zone {
-    padding: 28px 16px;
+  /* ── Login box ── */
+  .admin-login { padding: 80px 12px 32px; }
+  .login-box   { padding: 28px 20px; margin: 0; max-width: 100%; }
+
+  /* ── Messages list ── */
+  #messages-list .admin-panel {
+    padding: 14px 12px;
+  }
+  #messages-list .admin-panel > div:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  #messages-list .admin-panel > div:first-child > div:last-child {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
-  /* Login box */
-  .login-box {
-    padding: 32px 24px;
-    margin: 0 16px;
+  /* ── Analytics bars ── */
+  #revenue-chart {
+    height: 140px !important;
+  }
+
+  /* ── Modal fixes (order detail, edit, delete) ── */
+  #order-detail-modal > div,
+  #edit-modal > div,
+  #delete-confirm-modal > div {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    min-height: 100vh;
+  }
+  #order-detail-modal,
+  #edit-modal,
+  #delete-confirm-modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  #order-detail-modal > div > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 }
 
-/* Extra small screens */
-@media(max-width:480px) {
-  .admin-cards {
-    grid-template-columns: 1fr;
-  }
+/* ─── SMALL PHONES (≤ 480px) ─── */
+@media (max-width: 480px) {
 
+  .products-grid { grid-template-columns: 1fr; }
+
+  /* Stat cards → single column */
+  .admin-cards { grid-template-columns: 1fr; }
+  .admin-card-val { font-size: 32px; }
+
+  /* Product list → single column */
   #admin-product-list {
     grid-template-columns: 1fr !important;
   }
+
+  .sidebar-link { padding: 10px 12px; min-width: 60px; font-size: 10px; }
+
+  /* Hero text shrink */
+  .hero-title { font-size: 48px !important; }
+  .hero-sub   { font-size: 14px; }
+  .hero-btns .btn-primary,
+  .hero-btns .btn-secondary { padding: 12px 24px; font-size: 12px; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr; }
+  footer { padding: 40px 16px 24px; }
+
+  /* Stats strip → stacked */
+  .stats-strip { grid-template-columns: 1fr; }
+  .stat-item   { border-left: none; border-bottom: 1px solid rgba(201,168,76,0.08); }
+  .stat-item:last-child { border-bottom: none; }
+}
+
+/* ─── VERY SMALL (≤ 360px — Galaxy A series, old Xiaomi) ─── */
+@media (max-width: 360px) {
+  .admin-main { padding: 12px 8px 28px; }
+  .admin-card { padding: 12px 10px; }
+  .admin-card-val { font-size: 24px; }
+  .sidebar-link { padding: 8px 10px; min-width: 54px; font-size: 10px; }
+  .orders-table td { font-size: 12px; }
 }
 
 
