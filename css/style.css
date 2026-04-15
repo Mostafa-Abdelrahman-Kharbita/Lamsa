@@ -957,3 +957,41 @@
   }
 
 }
+@media(max-width:768px) {
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* نخلي الكارت + المينيو جنب بعض */
+  #menu-toggle {
+    display: block;
+    font-size: 22px;
+    color: var(--gold);
+    cursor: pointer;
+    order: 2;
+    margin-left: 6px;
+  }
+
+  #cart-icon {
+    order: 1;
+  }
+
+  /* نخليهم في نفس الجنب */
+  #cart-icon, #menu-toggle {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-logo {
+    order: 3;
+  }
+
+  /* نشيل الزرار الكبير */
+  .nav-cta {
+    display: none;
+  }
+
+}
