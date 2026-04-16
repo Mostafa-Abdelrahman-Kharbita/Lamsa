@@ -178,14 +178,13 @@ function openProductGallery(id) {
         <img id="gallery-main-img" src="${images[currentIndex] || ""}" 
           style="max-height:100%;max-width:100%;object-fit:contain;transition:opacity 0.2s"/>
         
-        ${
-          images.length > 1
-            ? `
+        ${images.length > 1
+      ? `
         <button onclick="galleryPrev()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;height:38px;font-size:18px;cursor:pointer">›</button>
         <button onclick="galleryNext()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);color:var(--gold,#c9a84c);width:38px;font-size:18px;height:38px;cursor:pointer">‹</button>
         `
-            : ""
-        }
+      : ""
+    }
 
         <div id="gallery-counter" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:var(--gold,#c9a84c);font-size:12px;padding:3px 12px;letter-spacing:1px">
           ${images.length > 1 ? `1 / ${images.length}` : ""}
@@ -193,22 +192,21 @@ function openProductGallery(id) {
       </div>
 
       <!-- Thumbnails -->
-      ${
-        images.length > 1
-          ? `
+      ${images.length > 1
+      ? `
       <div id="gallery-thumbs" style="display:flex;gap:6px;padding:12px;overflow-x:auto;background:#0a0a0a;border-top:1px solid rgba(201,168,76,0.1)">
         ${images
-          .map(
-            (src, i) => `
+        .map(
+          (src, i) => `
           <img src="${src}" onclick="galleryGoTo(${i})" id="thumb-${i}"
             style="width:64px;height:64px;object-fit:cover;cursor:pointer;flex-shrink:0;
             border:2px solid ${i === 0 ? "var(--gold,#c9a84c)" : "transparent"};opacity:${i === 0 ? 1 : 0.5};transition:all 0.2s"/>
         `,
-          )
-          .join("")}
+        )
+        .join("")}
       </div>`
-          : ""
-      }
+      : ""
+    }
 
       <!-- Info -->
       <div style="padding:20px 24px;border-top:1px solid rgba(255,255,255,0.05)">
@@ -321,11 +319,10 @@ function openAddToCartPopup(id) {
       
       <!-- Header -->
       <div style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#1a1a1a;border-bottom:1px solid rgba(201,168,76,0.1)">
-        ${
-          images.length
-            ? `<img src="${images[0]}" style="width:64px;height:64px;object-fit:cover;border:1px solid rgba(201,168,76,0.2);flex-shrink:0"/>`
-            : `<div style="width:64px;height:64px;background:#222;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💡</div>`
-        }
+        ${images.length
+      ? `<img src="${images[0]}" style="width:64px;height:64px;object-fit:cover;border:1px solid rgba(201,168,76,0.2);flex-shrink:0"/>`
+      : `<div style="width:64px;height:64px;background:#222;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💡</div>`
+    }
         <div style="flex:1">
           <div style="font-size:11px;letter-spacing:2px;color:var(--gold,#c9a84c);margin-bottom:4px">${catLabel(p.cat)}</div>
           <div style="font-size:15px;color:#fff;line-height:1.3">${p.name}</div>
@@ -364,15 +361,15 @@ function openAddToCartPopup(id) {
         <!-- Quick select buttons -->
         <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px">
           ${[1, 2, 3, 5, 10]
-            .map(
-              (n) => `
+      .map(
+        (n) => `
             <button onclick="document.getElementById('popup-qty').value=${n};updatePopupTotal('${id}')"
               style="padding:6px 14px;background:transparent;border:1px solid rgba(201,168,76,0.2);color:var(--gold,#c9a84c);cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;transition:all 0.2s"
               onmouseover="this.style.background='rgba(201,168,76,0.1)'"
               onmouseout="this.style.background='transparent'">${n}</button>
           `,
-            )
-            .join("")}
+      )
+      .join("")}
         </div>
 
         <!-- Total -->
@@ -541,7 +538,7 @@ function updateCartUI() {
     countEl.style.display = totalItems ? "block" : "none";
 
     countEl.classList.add("bump");
-  setTimeout(() => countEl.classList.remove("bump"), 300);
+    setTimeout(() => countEl.classList.remove("bump"), 300);
   }
 
   if (!el) return;
@@ -575,7 +572,7 @@ function updateCartUI() {
         </div>
       </div>
       <div class="cart-price">${fmtP(c.price * c.qty)}</div>
-    </div>`
+    </div>`,
     )
     .join("");
 
@@ -700,6 +697,7 @@ async function submitOrder() {
       date: orderData.date,
       email: orderData.email,
       phone: orderData.phone,
+      address: orderData.address,
       desc: orderData.desc,
     });
 
@@ -798,7 +796,33 @@ function renderDashboardOrders() {
     )
     .join("");
 }
-
+function filterOrdersByName(query) {
+  const filtered = query.trim()
+    ? orders.filter(o => o.client.includes(query.trim()))
+    : orders;
+  const tbody = document.getElementById("full-orders-body");
+  if (!tbody) return;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">لا توجد نتائج</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map((o, i) => {
+    const realIndex = orders.indexOf(o);
+    return `<tr>
+    <td data-label="رقم الطلب" style="color:var(--gold)">${o.id}</td>
+    <td data-label="العميل">${o.client}</td>
+    <td data-label="المنتج" style="color:var(--gray);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.product}</td>
+    <td data-label="القيمة">${o.value}</td>
+    <td data-label="الحالة">
+      <select onchange="updateOrderStatus(${realIndex},this.value)" style="background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:4px 8px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer">
+        ${["new","proc","done","cancel"].map(s => `<option value="${s}" ${o.status===s?"selected":""}>${STATUS_LABEL[s]}</option>`).join("")}
+      </select>
+    </td>
+    <td data-label="التاريخ" style="color:var(--gray)">${o.date}</td>
+    <td data-label="التفاصيل"><button onclick="viewDetail(${realIndex})" style="background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:4px 12px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:12px">عرض</button></td>
+  </tr>`;
+  }).join("");
+}
 function renderFullOrders() {
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
@@ -909,6 +933,10 @@ function viewDetail(i) {
               <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">الهاتف</div>
               <div style="font-size:14px;color:#fff">${o.phone || "غير محدد"}</div>
             </div>
+            <div>
+  <div style="font-size:10px;color:#666;margin-bottom:4px;letter-spacing:1px">العنوان</div>
+  <div style="font-size:14px;color:#fff">${o.address || "غير محدد"}</div>
+</div>
           </div>
         </div>
 
@@ -918,19 +946,19 @@ function viewDetail(i) {
           <div style="font-size:10px;color:#666;margin-bottom:6px;letter-spacing:1px">المنتجات</div>
 <div style="margin-bottom:16px">
             ${o.product
-              .split(",,")
-              .map((item, i) => {
-                const clean = item.trim();
-                // parse: "Name - Color × Qty" or "Name × Qty" or "Name - Color"
-                const qtyMatch = clean.match(/×\s*(\d+)$/);
-                const qty = qtyMatch ? qtyMatch[1] : "1";
-                const withoutQty = clean.replace(/×\s*\d+$/, "").trim();
-                const colorMatch = withoutQty.match(/ - ([^-]+)$/);
-                const color = colorMatch ? colorMatch[1].trim() : null;
-                const name = color
-                  ? withoutQty.replace(/ - [^-]+$/, "").trim()
-                  : withoutQty;
-                return `
+      .split(",,")
+      .map((item, i) => {
+        const clean = item.trim();
+        // parse: "Name - Color × Qty" or "Name × Qty" or "Name - Color"
+        const qtyMatch = clean.match(/×\s*(\d+)$/);
+        const qty = qtyMatch ? qtyMatch[1] : "1";
+        const withoutQty = clean.replace(/×\s*\d+$/, "").trim();
+        const colorMatch = withoutQty.match(/ - ([^-]+)$/);
+        const color = colorMatch ? colorMatch[1].trim() : null;
+        const name = color
+          ? withoutQty.replace(/ - [^-]+$/, "").trim()
+          : withoutQty;
+        return `
               <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;border-right:3px solid var(--gold,#c9a84c);margin-bottom:8px;gap:12px">
                 <div style="display:flex;align-items:center;gap:10px;flex:1">
                   <span style="font-size:13px;color:var(--gold,#c9a84c);font-weight:700;min-width:20px">${i + 1}</span>
@@ -943,8 +971,8 @@ function viewDetail(i) {
                   × ${qty}
                 </div>
               </div>`;
-              })
-              .join("")}
+      })
+      .join("")}
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
             <span style="font-size:12px;color:#666;letter-spacing:1px">القيمة الإجمالية</span>
@@ -953,15 +981,14 @@ function viewDetail(i) {
         </div>
 
         <!-- Notes -->
-        ${
-          o.desc
-            ? `
+        ${o.desc
+      ? `
         <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);padding:20px">
           <div style="font-size:10px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:12px">ملاحظات</div>
           <div style="font-size:13px;color:#aaa;line-height:1.8">${o.desc}</div>
         </div>`
-            : ""
-        }
+      : ""
+    }
 
         <!-- Actions -->
         <div style="display:flex;gap:10px">
@@ -1000,15 +1027,14 @@ function renderAdminProductList(products) {
 
   el.innerHTML = list.length
     ? list
-        .map(
-          (p) => `
+      .map(
+        (p) => `
    <div style="background:var(--dark3);padding:18px;position:relative;display:flex;flex-direction:column;min-height:220px">
   <div style="height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-    ${
-      p.imageUrl
-        ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
-        : p.emoji || "💡"
-    }
+    ${p.imageUrl
+            ? `<img src="${p.imageUrl}" style="max-height:72px;max-width:100%;object-fit:contain"/>`
+            : p.emoji || "💡"
+          }
   </div>
   <div style="font-size:15px;color:var(--white);margin-bottom:4px;font-weight:400">
     ${p.name}
@@ -1022,8 +1048,8 @@ function renderAdminProductList(products) {
   </div>
 </div>
   `,
-        )
-        .join("")
+      )
+      .join("")
     : `<div style="text-align:center;color:gray;padding:40px">لا يوجد منتجات</div>`;
 }
 
@@ -1157,7 +1183,7 @@ async function saveProduct() {
   const price = parseFloat(document.getElementById("prod-price").value);
   const quantity =
     parseInt(document.getElementById("prod-quantity").value) || 0;
-
+const oldPrice = parseFloat(document.getElementById("prod-old-price").value) || null;
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل الاسم والفئة والسعر.");
     return;
@@ -1167,6 +1193,7 @@ async function saveProduct() {
     name,
     cat,
     price,
+    oldPrice,
     quantity,
     images: pendingImages, // array of base64
     imageUrl: pendingImages[0] || null, // keep first as thumbnail
@@ -1191,9 +1218,9 @@ async function saveProduct() {
 }
 
 function clearProductForm() {
-  ["prod-name", "prod-price", "prod-quantity"].forEach(
+  ["prod-name", "prod-price", "prod-old-price", "prod-quantity"].forEach(
     (id) => (document.getElementById(id).value = ""),
-  );
+);
   document.getElementById("prod-category").value = "";
   document.getElementById("upload-preview").innerHTML = "";
   document.getElementById("file-input").value = "";
@@ -1286,11 +1313,10 @@ async function deleteProduct(id, name) {
       <!-- Body -->
       <div style="padding:24px 28px">
         <div style="display:flex;align-items:center;gap:14px;padding:14px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px">
-          ${
-            imgSrc
-              ? `<img src="${imgSrc}" style="width:56px;height:56px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"/>`
-              : `<div style="width:56px;height:56px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💡</div>`
-          }
+          ${imgSrc
+      ? `<img src="${imgSrc}" style="width:56px;height:56px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"/>`
+      : `<div style="width:56px;height:56px;background:#222;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💡</div>`
+    }
           <div>
             <div style="font-size:15px;color:#fff;line-height:1.4">${name}</div>
             <div style="font-size:11px;color:#666;margin-top:4px">${p ? catLabel(p.cat) + " · " + fmtP(p.price) : ""}</div>
@@ -1400,21 +1426,24 @@ function openEditModal(id) {
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الفئة</label>
       <select id="edit-prod-cat" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box">
         ${[
-          "Magnetic_Track",
-          "Spot_light",
-          "DoubleSpot_light",
-          "Metal_Connector",
-          "Magnetic_Power",
-        ]
-          .map(
-            (c) =>
-              `<option value="${c}" ${p.cat === c ? "selected" : ""}>${catLabel(c)}</option>`,
-          )
-          .join("")}
+      "Magnetic_Track",
+      "Spot_light",
+      "DoubleSpot_light",
+      "Metal_Connector",
+      "Magnetic_Power",
+    ]
+      .map(
+        (c) =>
+          `<option value="${c}" ${p.cat === c ? "selected" : ""}>${catLabel(c)}</option>`,
+      )
+      .join("")}
       </select>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">السعر (جنيه)</label>
       <input id="edit-prod-price" type="number" value="${p.price || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
+
+      <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">السعر قبل الخصم (اختياري)</label>
+<input id="edit-prod-old-price" type="number" value="${p.oldPrice || ""}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
 
       <label style="display:block;font-size:12px;color:var(--gray,#888);margin-bottom:6px">الكمية</label>
       <input id="edit-prod-qty" type="number" value="${p.quantity || 0}" style="width:100%;padding:10px 14px;background:var(--dark3,#111);border:1px solid rgba(255,255,255,0.1);color:var(--white,#fff);font-family:'Tajawal',sans-serif;font-size:14px;margin-bottom:16px;box-sizing:border-box"/>
@@ -1472,6 +1501,7 @@ async function loadOrdersFromFirebase() {
         date: data.date || "",
         email: data.email || "",
         phone: data.phone || "غير محدد",
+        address: data.address || "غير محدد",
         desc: data.desc || "",
       });
     });
@@ -1488,7 +1518,8 @@ async function saveEditProduct(id) {
   const cat = document.getElementById("edit-prod-cat").value;
   const price = parseFloat(document.getElementById("edit-prod-price").value);
   const quantity =
-    parseInt(document.getElementById("edit-prod-qty").value) || 0;
+  parseInt(document.getElementById("edit-prod-qty").value) || 0;
+  const oldPrice = parseFloat(document.getElementById("edit-prod-old-price").value) || null;
 
   if (!name || !cat || !price) {
     showNotif("⚠", "حقول ناقصة", "من فضلك أدخل جميع البيانات");
@@ -1500,6 +1531,7 @@ async function saveEditProduct(id) {
       name,
       cat,
       price,
+      oldPrice,
       quantity,
       images: editPendingImages,
       imageUrl: editPendingImages[0] || null,
@@ -1584,9 +1616,9 @@ window.clearEditImage = clearEditImage;
 window.loadOrdersFromFirebase = loadOrdersFromFirebase;
 
 window.openProductGallery = openProductGallery;
-window.galleryGoTo = (i) => {};
-window.galleryNext = () => {};
-window.galleryPrev = () => {};
+window.galleryGoTo = (i) => { };
+window.galleryNext = () => { };
+window.galleryPrev = () => { };
 window.removeImage = removeImage;
 window.removeEditImage = removeEditImage;
 window.handleEditImageUpload = handleEditImageUpload;
@@ -1596,10 +1628,11 @@ window.updatePopupTotal = updatePopupTotal;
 window.getAllProducts = getAllProducts;
 window.updateCartUI = updateCartUI;
 window.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".nav-links a").forEach(link => {
+  document.querySelectorAll(".nav-links a").forEach((link) => {
     link.addEventListener("click", () => {
       document.getElementById("nav-links").classList.remove("show");
     });
   });
 });
 window.toggleMenu = toggleMenu;
+window.filterOrdersByName = filterOrdersByName;

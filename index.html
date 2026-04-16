@@ -708,6 +708,15 @@
                   />
                 </div>
                 <div class="form-group">
+                  <label>السعر قبل الخصم (اختياري)</label>
+                  <input
+                    type="number"
+                    id="prod-old-price"
+                    placeholder="30000"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
                   <label>الكمية المتاحة *</label
                   ><input
                     type="number"
@@ -764,6 +773,23 @@
             </div>
             <div class="admin-panel">
               <div class="admin-panel-title">جميع الطلبات</div>
+              <input
+                id="orders-search"
+                type="text"
+                placeholder="ابحث باسم العميل..."
+                oninput="filterOrdersByName(this.value)"
+                style="
+                  width: 100%;
+                  padding: 10px 14px;
+                  background: var(--dark3);
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  color: #fff;
+                  font-family: &quot;Tajawal&quot;, sans-serif;
+                  font-size: 14px;
+                  margin-bottom: 16px;
+                  box-sizing: border-box;
+                "
+              />
               <table class="orders-table">
                 <thead>
                   <tr>
