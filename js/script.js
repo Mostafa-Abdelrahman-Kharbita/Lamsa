@@ -1505,6 +1505,7 @@ async function loadOrdersFromFirebase() {
       firebaseOrders.push({
         id: "#LM-" + docSnap.id.slice(0, 6).toUpperCase(),
         firestoreId: docSnap.id,
+        createdAt: data.createdAt || null,
         client: data.client || "غير محدد",
         product: data.product || "غير محدد",
         value:
@@ -1518,8 +1519,12 @@ async function loadOrdersFromFirebase() {
       });
     });
     if (firebaseOrders.length > 0) {
-      orders = firebaseOrders;
-    }
+  orders = firebaseOrders.sort((a, b) => {
+    const aTime = a.createdAt?.seconds ?? 0;
+    const bTime = b.createdAt?.seconds ?? 0;
+    return bTime - aTime;
+  });
+}
   } catch (error) {
     console.error("فشل تحميل الطلبات:", error);
   }
