@@ -810,7 +810,7 @@ function renderDashboardOrders() {
 }
 function filterOrdersByName(query) {
   const filtered = query.trim()
-    ? orders.filter(o => o.client.includes(query.trim()))
+    ? orders.filter(o => o.client.toLowerCase().includes(query.trim().toLowerCase()))
     : orders;
   const tbody = document.getElementById("full-orders-body");
   if (!tbody) return;
