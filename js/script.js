@@ -289,12 +289,12 @@ function productHTML(p) {
       <div class="product-name">${p.name}</div>
       <div style="margin-top:auto;padding-top:12px">
        ${p.oldPrice ? `
-<div style="position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;letter-spacing:1px;z-index:3;font-family:'Tajawal',sans-serif">
+<div style="position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#c0392b,#e74c3c);...font-size:13px;font-weight:700;padding:6px 12px;box-shadow:0 2px 8px rgba(231,76,60,0.5);letter-spacing:1px;z-index:3;font-family:'Tajawal',sans-serif">
   خصم ${Math.round((1 - p.price / p.oldPrice) * 100)}٪
 </div>` : ""}
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
   ${p.oldPrice ? `<div class="product-old" style="text-decoration:line-through;color:#888;font-size:13px">${fmtP(p.oldPrice)}</div>` : ""}
-  <div class="product-price" style="${p.oldPrice ? 'color:#e74c3c' : ''}">${fmtP(p.price)}</div>
+  <div class="product-price">${fmtP(p.price)}</div>
 </div>
 ${p.oldPrice ? `
 <div style="font-size:12px;color:#2ecc71;margin-bottom:8px;font-family:'Tajawal',sans-serif">
