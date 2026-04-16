@@ -754,6 +754,25 @@
               <div class="admin-panel-title">
                 المنتجات الحالية (<span id="prod-list-count">0</span>)
               </div>
+              <div style="margin-bottom: 20px; display: flex; gap: 10px">
+                <input
+                  id="product-search-input"
+                  type="text"
+                  placeholder="🔍 ابحث باسم المنتج..."
+                  oninput="filterAdminProducts(this.value)"
+                  style="
+                    flex: 1;
+                    padding: 10px 16px;
+                    background: var(--dark3);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    color: var(--white);
+                    font-family: &quot;Tajawal&quot;, sans-serif;
+                    font-size: 14px;
+                    outline: none;
+                    direction: rtl;
+                  "
+                />
+              </div>
               <div
                 id="admin-product-list"
                 style="

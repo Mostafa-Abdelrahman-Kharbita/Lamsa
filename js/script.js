@@ -1653,3 +1653,16 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 window.toggleMenu = toggleMenu;
 window.filterOrdersByName = filterOrdersByName;
+
+function filterAdminProducts(query) {
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? firebaseProducts.filter(p =>
+        p.name.toLowerCase().includes(q)
+      )
+    : firebaseProducts;
+  renderAdminProductList(filtered);
+}
+
+// at the bottom with the other window.* exports
+window.filterAdminProducts = filterAdminProducts;
