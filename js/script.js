@@ -213,7 +213,11 @@ function openProductGallery(id) {
         <div style="font-size:11px;letter-spacing:3px;color:var(--gold,#c9a84c);margin-bottom:6px">${catLabel(p.cat)}</div>
         <div style="font-size:20px;color:#fff;margin-bottom:10px">${p.name}</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:20px;color:var(--gold,#c9a84c);font-weight:500">${fmtP(p.price)}</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+  ${p.oldPrice ? `<div style="text-decoration:line-through;color:#888;font-size:13px">${fmtP(p.oldPrice)}</div>` : ""}
+  <div style="font-size:20px;color:var(--gold,#c9a84c);font-weight:500">${fmtP(p.price)}</div>
+  ${p.oldPrice ? `<div style="font-size:11px;color:#2ecc71">وفّر ${fmtP(p.oldPrice - p.price)}</div>` : ""}
+</div>
           <button onclick="addToCart('${p.id}');document.getElementById('product-gallery-modal').remove()"
             style="padding:10px 28px;background:var(--gold,#c9a84c);border:none;color:#000;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px">
             + أضف للطلب
@@ -284,10 +288,18 @@ function productHTML(p) {
       <div class="product-cat">${catLabel(p.cat)}</div>
       <div class="product-name">${p.name}</div>
       <div style="margin-top:auto;padding-top:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          ${p.oldPrice ? `<div class="product-old">${fmtP(p.oldPrice)}</div>` : ""}
-          <div class="product-price">${fmtP(p.price)}</div>
-        </div>
+       ${p.oldPrice ? `
+<div style="position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;letter-spacing:1px;z-index:3;font-family:'Tajawal',sans-serif">
+  خصم ${Math.round((1 - p.price / p.oldPrice) * 100)}٪
+</div>` : ""}
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  ${p.oldPrice ? `<div class="product-old" style="text-decoration:line-through;color:#888;font-size:13px">${fmtP(p.oldPrice)}</div>` : ""}
+  <div class="product-price" style="${p.oldPrice ? 'color:#e74c3c' : ''}">${fmtP(p.price)}</div>
+</div>
+${p.oldPrice ? `
+<div style="font-size:12px;color:#2ecc71;margin-bottom:8px;font-family:'Tajawal',sans-serif">
+  ✓ وفّر ${fmtP(p.oldPrice - p.price)}
+</div>` : ""}
         <button class="add-btn-card" onclick="event.stopPropagation();openAddToCartPopup('${p.id}')">+ أضف للطلب</button>
       </div>
     </div>
