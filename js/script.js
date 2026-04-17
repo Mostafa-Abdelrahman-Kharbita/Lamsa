@@ -747,6 +747,8 @@ async function submitOrder() {
       phone: orderData.phone,
       address: orderData.address,
       desc: orderData.desc,
+      coupon: orderData.coupon,
+  couponDiscount: orderData.couponDiscount,
     });
 
     // Clear cart and form
