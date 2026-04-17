@@ -679,7 +679,7 @@ async function submitOrder() {
   const sub = cart.reduce((a, c) => a + c.price * c.qty, 0);
   const discount = appliedCoupon ? (sub * appliedCoupon.discount) / 100 : 0;
   const totalValue = sub - discount;
-
+console.log("Coupon:", appliedCoupon);
   const orderData = {
     client: (fname + " " + lname).trim(),
     email,
