@@ -1613,6 +1613,8 @@ async function loadOrdersFromFirebase() {
         phone: data.phone || "غير محدد",
         address: data.address || "غير محدد",
         desc: data.desc || "",
+        coupon: data.coupon || null,
+couponDiscount: data.couponDiscount || null,
       });
     });
     if (firebaseOrders.length > 0) {
