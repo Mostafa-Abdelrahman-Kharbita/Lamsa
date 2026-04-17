@@ -1030,6 +1030,17 @@ function viewDetail(i) {
             <span style="font-size:12px;color:#666;letter-spacing:1px">القيمة الإجمالية</span>
             <span style="font-size:22px;color:var(--gold,#c9a84c);font-weight:500">${o.value}</span>
           </div>
+          ${o.coupon ? `
+  <div style="margin-top:16px;background:#1a1a1a;border:1px solid rgba(46,204,113,0.2);padding:16px">
+    <div style="font-size:10px;letter-spacing:3px;color:#2ecc71;margin-bottom:10px">
+      كود الخصم المستخدم
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;color:#fff">${o.coupon}</span>
+      <span style="font-size:13px;color:#2ecc71">-${o.couponDiscount}%</span>
+    </div>
+  </div>
+` : ""}
         </div>
 
         <!-- Notes -->
