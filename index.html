@@ -333,6 +333,34 @@
           <input type="hidden" id="proj-type" />
           <input type="hidden" id="budget" />
           <textarea id="description" style="display: none"></textarea>
+          <div class="form-group" style="margin-bottom: 16px">
+            <label>كود الخصم (اختياري)</label>
+            <div style="display: flex; gap: 10px">
+              <input
+                type="text"
+                id="coupon-code"
+                placeholder="أدخل كود الخصم"
+                style="flex: 1"
+              />
+              <button
+                onclick="applyCoupon()"
+                type="button"
+                style="
+                  padding: 10px 20px;
+                  background: transparent;
+                  border: 1px solid rgba(201, 168, 76, 0.4);
+                  color: var(--gold);
+                  cursor: pointer;
+                  font-family: &quot;Tajawal&quot;, sans-serif;
+                  font-size: 13px;
+                  white-space: nowrap;
+                "
+              >
+                تطبيق
+              </button>
+            </div>
+            <div id="coupon-msg" style="font-size: 13px; margin-top: 8px"></div>
+          </div>
 
           <button class="submit-btn" onclick="submitOrder()">
             ✦ إرسال الطلب
@@ -360,6 +388,13 @@
           <div class="order-total" id="order-total" style="display: none">
             <div class="total-row">
               <span>المجموع الفرعي</span><span id="subtotal-val">٠ جنيه</span>
+            </div>
+            <div
+              class="total-row"
+              id="discount-row"
+              style="display: none; color: #2ecc71"
+            >
+              <span>الخصم</span><span></span>
             </div>
             <div class="total-row">
               <span>الشحن</span><span>يُحسب عند التأكيد</span>
@@ -790,6 +825,19 @@
               <h2>الطلبات</h2>
               <p>إدارة الطلبات وتحديث حالاتها.</p>
             </div>
+            <div class="admin-panel" style="margin-bottom:20px">
+  <div class="admin-panel-title">إنشاء كود خصم</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <input id="new-coupon-code" type="text" placeholder="الكود (مثال: LAMSA20)" 
+      style="flex:1;padding:10px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif"/>
+    <input id="new-coupon-discount" type="number" placeholder="نسبة الخصم %" min="1" max="100"
+      style="width:120px;padding:10px;background:var(--dark3);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Tajawal',sans-serif"/>
+    <button onclick="createCoupon()"
+      style="padding:10px 24px;background:linear-gradient(135deg,#a07830,#c9a84c);color:#000;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;font-weight:700">
+      إنشاء
+    </button>
+  </div>
+</div>
             <div class="admin-panel">
               <div class="admin-panel-title">جميع الطلبات</div>
               <input
